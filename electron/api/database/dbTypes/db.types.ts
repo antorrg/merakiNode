@@ -79,3 +79,13 @@ export interface Sessions {
   rolling?: boolean
 }
 
+export interface PatientRelations {
+  relation_id?: string
+  guardian_id: string
+  dependent_id: string
+  relationship_type?: string
+  is_primary_contact?: boolean
+  created_at: Date
+  updated_at: Date
+}
+

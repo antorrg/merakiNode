@@ -1,4 +1,4 @@
-import { User } from './User.js';
+import { User, UserProps } from './User.js';
 import { UserRepository } from './UserRepository.js';
 import { Hasher } from '../../Shared/Utils/Hasher.js';
 import { BooleanConverter } from '../../Shared/Utils/BooleanConverter.js';
@@ -11,26 +11,28 @@ export class UserService {
   private parser(data:any){
     return {
       userId: data.userId || data.user_id,
-      userEmail: data.user_email || data.email,
+      userEmail: data.userEmail || data.user_email || data.email,
       password:  data.password,
       nickname: data.nickname,
       userName: data.userName || data.user_name || data.name,
       role: data.role,
-      enabled: BooleanConverter.intToBool(data.enabled)
+      enabled: typeof data.enabled === 'boolean' ? data.enabled : BooleanConverter.intToBool(data.enabled),
+      createdAt: data.createdAt || data.created_at,
+      updatedAt: data.updatedAt || data.updated_at
     }
   }
 
 
-  async createUser(userData: { userEmail: string; password: string, role?:string }) {
+  async createUser(userData: { userEmail: string; password?: string, role?:string }) {
     try {
       const record = await this.userRepository.findByEmail(userData.userEmail);
       if(record) throwError('Email is already registered',ErrorCode.DATA_CONFLICT);
       
-      const hashedPassword = await Hasher.hash(userData.password);
+      const hashedPassword = userData.password ? await Hasher.hash(userData.password) : undefined;
       
       const user = User.register({
         userEmail: userData.userEmail,
-        hashedPassword: hashedPassword,
+        password: hashedPassword,
         role: userData.role? userData.role : 'USER'
       });
 
@@ -52,7 +54,7 @@ export class UserService {
   async getAll() {
     try {
       const records = await this.userRepository.getAll();
-      return records!.map((r: any) => {
+      return records!.map((r: UserProps) => {
         const parsed = this.parser(r);
         const { password, ...safeUser } = parsed;
         return safeUser;
@@ -148,7 +150,7 @@ export class UserService {
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
       // Verificamos el password actual con Hasher
-      const isMatch = await Hasher.compare(currentPassword, record.data.password as string);
+      const isMatch = await Hasher.compare(currentPassword, record!.password as string);
       if (!isMatch) throwError('Invalid current password', ErrorCode.ACCESS_DENIED);
 
       // Hasheamos el nuevo password
@@ -172,7 +174,7 @@ export class UserService {
       // Mensaje ambiguo intencional por seguridad (OWASP)
       if (!record) throwError('Invalid email or password', ErrorCode.ACCESS_DENIED);
 
-      const isMatch = await Hasher.compare(plainPassword, record.password as string);
+      const isMatch = await Hasher.compare(plainPassword, record!.password as string);
       if (!isMatch) throwError('Invalid email or password', ErrorCode.ACCESS_DENIED);
 
       const user = new User(this.parser(record));

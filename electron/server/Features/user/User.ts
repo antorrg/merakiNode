@@ -1,36 +1,43 @@
 import { UuidHandler } from "../../Shared/Utils/UuidHandler.js";
 import { UserApplications } from "./applications/UserApplictions.js";
+import { BooleanConverter } from "../../Shared/Utils/BooleanConverter.js";
 
 export interface UserProps {
   userId: string;
   userEmail: string;
-  password: string;
+  password?: string;
   role: string;
-  userName: string;
-  nickname: string;
-  enabled: boolean;
+  userName: string | null;
+  nickname: string | null;
+  enabled: boolean | number;
+  createdAt?: string;
+  updatedAt?: string;
 }
-export type UserCreate = {userEmail:string, hashedPassword:string, role:string}
-export type UserUpdate = Omit<UserProps, 'userId'|'password'| 'role'| 'enabled'>
+
+export type UserCreate = {userEmail:string, password?:string, role:string}
+export type UserUpdate = Omit<UserProps, 'userId'|'password'| 'role'| 'enabled'|'createdAt'|'updatedAt'>
 
 export class User {
     protected readonly userId: string
     protected userEmail: string
-    protected password: string
+    protected password?: string
     protected role: string
-    protected userName: string
-    protected nickname: string
+    protected userName: string | null
+    protected nickname: string | null
     protected enabled: boolean
-  
+    public readonly createdAt?: string
+    public readonly updatedAt?: string
 
-  constructor({ userId, userEmail, password, role, userName, nickname, enabled }: UserProps) {
+  constructor({ userId, userEmail, password, role, userName, nickname, enabled, createdAt, updatedAt }: UserProps) {
     this.userId = UserApplications.Id(userId)
     this.userEmail = UserApplications.Email(userEmail)
-    this.password = User.validatePasswordHash(password)
+    this.password = password ? User.validatePasswordHash(password) : undefined
     this.role = UserApplications.Role(role)
-    this.userName = User.validateName(userName)
-    this.nickname = User.validateNickname(nickname)
-    this.enabled = User.validateEnabled(enabled)
+    this.userName = userName ? User.validateName(userName) : null
+    this.nickname = nickname ? User.validateNickname(nickname) : null
+    this.enabled = typeof enabled === 'number' ? BooleanConverter.intToBool(enabled) : User.validateEnabled(enabled as boolean)
+    this.createdAt = createdAt
+    this.updatedAt = updatedAt
   }
   static validatePasswordHash(prop:string):string{
     if(typeof prop !== 'string' || prop.length < 20) throw new Error('Invalid password hash')
@@ -48,12 +55,12 @@ export class User {
        if(typeof prop !== 'boolean') throw new Error('Invalid enabled')
         return prop
   }
-  static register({userEmail, hashedPassword, role}:UserCreate){
-   if(!userEmail || !hashedPassword || !role) throw new Error('Missing parameters')
+  static register({userEmail, password, role}:UserCreate){
+   if(!userEmail || !password || !role) throw new Error('Missing parameters')
    return new User({
         userId: UuidHandler.idCreator(),
         userEmail: userEmail,
-        password: hashedPassword,
+        password: password,
         userName: 'No name',
         nickname: userEmail?.split('@')[0] ?? 'user',
         role: role,
@@ -91,7 +98,7 @@ changeEmail(email:string) {
       user_id: this.userId,
       user_email: this.userEmail,
       password: this.password,
-      role: this.role as any,
+      role: this.role,
       user_name: this.userName,
       nickname: this.nickname,
       enabled: this.enabled ? 1 : 0
@@ -101,11 +108,13 @@ changeEmail(email:string) {
   toDTO() {
     return {
       userId: this.userId,
-      user_email: this.userEmail,
+      userEmail: this.userEmail,
       role: this.role,
-      user_name: this.userName,
+      userName: this.userName,
       nickname: this.nickname,
-      enabled: this.enabled
+      enabled: this.enabled,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt
     }
   }
 }

@@ -25,6 +25,8 @@ export const patients: Table = {
     last_name TEXT,
     type_doc TEXT,
     identity_code TEXT,
+    birth_date TEXT NOT NULL,
+    age INTEGER,
     phone TEXT,
     address TEXT,
     city TEXT,
@@ -57,6 +59,7 @@ export const history_entry: Table = {
   sql: `CREATE TABLE IF NOT EXISTS history_entry (
     history_id TEXT PRIMARY KEY,
     patient_id TEXT NOT NULL,
+    userId TEXT NOT NULL,
     visit_date TEXT,
     reason TEXT,
     diagnosis TEXT,

@@ -1,7 +1,17 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
-import { db } from '../../Configs/database.js'
+import { db, startUp, closeDatabase } from '../../Configs/database.js'
 import { SessionRepository } from './SessionRepository.js'
 import { Session, SessionProp } from '../../Shared/Auth/Session.js'
+
+type SessionRow = {
+  session_id: string;
+  user_id: string;
+  username: string;
+  role: string;
+  created_at: number;
+  expires_at: number;
+  rolling: number;
+}
 
 vi.mock('../../Configs/envConfig.js', () => ({
   default: {
@@ -16,19 +26,15 @@ vi.mock('../../Configs/envConfig.js', () => ({
 describe('SessionRepository', () => {
   let repository: SessionRepository;
 
-  beforeAll(() => {
-    // Creamos la tabla síncronamente antes de arrancar los tests
-    db.db.exec(`
-      CREATE TABLE IF NOT EXISTS sessions (
-        sessionId TEXT PRIMARY KEY,
-        userId TEXT NOT NULL,
-        username TEXT NOT NULL,
-        role TEXT NOT NULL,
-        createdAt INTEGER NOT NULL,
-        expiresAt INTEGER NOT NULL,
-        rolling INTEGER NOT NULL
-      );
-    `)
+  beforeAll(async () => {
+    // Creamos la tabla síncronamente antes de arrancar los tests usando el schema real
+    await startUp(true, true);
+    
+    // Insertar un usuario dummy para cumplir con el FOREIGN KEY de sessions
+    db.db.prepare(`
+      INSERT INTO users (user_id, user_email, password, role)
+      VALUES ('f47ac10b-58cc-4372-a567-0e02b2c3d470', 'test@test.com', 'password1234567890123', 'ADMIN')
+    `).run();
   })
 
   beforeEach(() => {
@@ -38,9 +44,9 @@ describe('SessionRepository', () => {
     db.db.exec(`DELETE FROM sessions;`);
   })
 
-  afterAll(() => {
+  afterAll(async () => {
     // Borramos la tabla para no dejar basura en la base de memoria
-    db.db.exec(`DROP TABLE IF EXISTS sessions;`)
+    await closeDatabase();
   })
 
   const createDummySession = (id: string, expiresAt: number) => {
@@ -64,9 +70,9 @@ describe('SessionRepository', () => {
     expect(result).toBe(true);
 
     // Verificar en la DB directamente
-    const row = db.db.prepare('SELECT * FROM sessions WHERE sessionId = ?').get(id) as any;
+    const row = db.db.prepare('SELECT * FROM sessions WHERE session_id = ?').get(id) as SessionRow;
     expect(row).toBeDefined();
-    expect(row.sessionId).toBe(id);
+    expect(row.session_id).toBe(id);
     expect(row.rolling).toBe(1); // SQLite guarda booleanos como 1/0
     
     // Verificar que también lo encuentra por su método, y que viene de la caché.
@@ -81,7 +87,7 @@ describe('SessionRepository', () => {
     repository.saveSession(session);
     
     // Borramos de la DB directamente para forzar que solo responda la memoria caché
-    db.db.exec(`DELETE FROM sessions WHERE sessionId = '${id}';`);
+    db.db.exec(`DELETE FROM sessions WHERE session_id = '${id}';`);
     
     // Debería seguir encontrándolo ya que saveSession lo puso en el Map de memoria
     const foundSession = repository.findSession(id);
@@ -96,7 +102,7 @@ describe('SessionRepository', () => {
     
     // Lo guardamos directamente en DB, esquivando la memoria caché de nuestro repo
     db.db.prepare(`
-      INSERT INTO sessions (sessionId, userId, username, role, createdAt, expiresAt, rolling) 
+      INSERT INTO sessions (session_id, user_id, username, role, created_at, expires_at, rolling) 
       VALUES (?, ?, ?, ?, ?, ?, ?)
     `).run(
       session.toJSON().sessionId, 
@@ -114,7 +120,7 @@ describe('SessionRepository', () => {
     expect(foundSession?.toJSON().sessionId).toBe(id);
 
     // Ahora borramos de DB. Como ya lo buscó, debería estar en la memoria caché.
-    db.db.exec(`DELETE FROM sessions WHERE sessionId = '${id}';`);
+    db.db.exec(`DELETE FROM sessions WHERE session_id = '${id}';`);
 
     const cachedSession = repository.findSession(id);
     expect(cachedSession).not.toBeNull();
@@ -141,8 +147,8 @@ describe('SessionRepository', () => {
     expect(updateResult).toBe(true);
 
     // Verificar en la DB
-    const row = db.db.prepare('SELECT * FROM sessions WHERE sessionId = ?').get(id) as any;
-    expect(row.expiresAt).toBe(newExpiresAt);
+    const row = db.db.prepare('SELECT * FROM sessions WHERE session_id = ?').get(id) as SessionRow;
+    expect(row.expires_at).toBe(newExpiresAt);
 
     // Verificar en la memoria caché
     const foundSession = repository.findSession(id);
@@ -158,7 +164,7 @@ describe('SessionRepository', () => {
     expect(deleteResult).toBe(true);
 
     // Verificar en la DB
-    const row = db.db.prepare('SELECT * FROM sessions WHERE sessionId = ?').get(id) as any;
+    const row = db.db.prepare('SELECT * FROM sessions WHERE session_id = ?').get(id) as SessionRow | undefined;
     expect(row).toBeUndefined();
 
     // Verificar en la memoria caché
@@ -187,8 +193,8 @@ describe('SessionRepository', () => {
     expect(deletedCount).toBe(1);
 
     // Validar en DB
-    const expiredRow = db.db.prepare('SELECT * FROM sessions WHERE sessionId = ?').get(expiredId);
-    const validRow = db.db.prepare('SELECT * FROM sessions WHERE sessionId = ?').get(validId);
+    const expiredRow = db.db.prepare('SELECT * FROM sessions WHERE session_id = ?').get(expiredId) as SessionRow | undefined;
+    const validRow = db.db.prepare('SELECT * FROM sessions WHERE session_id = ?').get(validId) as SessionRow | undefined;
     
     expect(expiredRow).toBeUndefined();
     expect(validRow).toBeDefined();

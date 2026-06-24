@@ -8,12 +8,13 @@ const nameOfDb = (): string => {
   return parts[parts.length - 1] || 'unknown'
 }
 
-import { users, patients, history_entry,  diagnosis, treatment, sessions } from '../Schema/schema.js'
+import { users, patients, patient_relations, history_entry,  diagnosis, treatment, sessions } from '../Schema/schema.js'
 
 // Aquí puedes definir tus esquemas de tabla para auto-crearse si no existen
 const initialTables: Table[] = [
   users,
   patients,
+  patient_relations,
   history_entry,
   diagnosis,
   treatment,

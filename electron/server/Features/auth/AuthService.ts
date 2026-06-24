@@ -19,7 +19,7 @@ export class AuthService {
 
     const sessionData: SessionData = {
       userId: user!.userId,
-      username: user!.nickname || user!.name || user!.email.split('@')[0],
+      username: user!.nickname || user!.userName || user!.userEmail.split('@')[0],
       role: user!.role
     };
 

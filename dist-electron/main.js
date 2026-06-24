@@ -8,7 +8,7 @@ var __accessCheck = (obj, member, msg) => member.has(obj) || __typeError("Cannot
 var __privateGet = (obj, member, getter) => (__accessCheck(obj, member, "read from private field"), getter ? getter.call(obj) : member.get(obj));
 var __privateAdd = (obj, member, value) => member.has(obj) ? __typeError("Cannot add the same private member more than once") : member instanceof WeakSet ? member.add(obj) : member.set(obj, value);
 var __privateMethod = (obj, member, method) => (__accessCheck(obj, member, "access private method"), method);
-var _UserService_instances, parser_fn, _allowedRoles, _AuthApplications_static, uuidValidator_fn, _Session_static, convertRole_fn, _sessionStore, _AuxValid_static, getDefaultValue_fn, validateBoolean_fn, validateInt_fn, validateFloat_fn, escapeHTML_fn, trimString_fn, _ValidateSchema_static, validateField_fn;
+var _allowedRoles, _AuthApplications_static, uuidValidator_fn, _Session_static, convertRole_fn, _sessionStore, _AuxValid_static, getDefaultValue_fn, validateBoolean_fn, validateInt_fn, validateFloat_fn, escapeHTML_fn, trimString_fn, _ValidateSchema_static, validateField_fn;
 import { app, ipcMain, BrowserWindow } from "electron";
 import { createRequire } from "node:module";
 import { fileURLToPath } from "node:url";
@@ -16,8 +16,8 @@ import path$1 from "node:path";
 import path from "path";
 import Database from "better-sqlite3";
 import fs from "fs";
-import crypto from "crypto";
 import argon2 from "argon2";
+import crypto$1 from "crypto";
 const isTest = process.env.NODE_ENV === "test";
 const isDev = process.env.NODE_ENV === "development";
 const databaseName = isTest ? "database.test.sqlite" : isDev ? "database.dev.sqlite" : "database.sqlite";
@@ -91,16 +91,12 @@ class SqliteDb {
     this.db.pragma("journal_mode = WAL");
   }
   authenticate() {
-    try {
-      const stmt = this.db.prepare("SELECT 1 as status");
-      const result = stmt.get();
-      if (result) {
-        return true;
-      } else {
-        throw new Error("Database file could not be read properly");
-      }
-    } catch (error) {
-      throw error;
+    const stmt = this.db.prepare("SELECT 1 as status");
+    const result = stmt.get();
+    if (result) {
+      return true;
+    } else {
+      throw new Error("Database file could not be read properly");
     }
   }
   sync(options = {}) {
@@ -160,6 +156,8 @@ const patients = {
     last_name TEXT,
     type_doc TEXT,
     identity_code TEXT,
+    birth_date TEXT NOT NULL,
+    age INTEGER,
     phone TEXT,
     address TEXT,
     city TEXT,
@@ -170,11 +168,27 @@ const patients = {
   );`,
   deps: []
 };
+const patient_relations = {
+  name: "patient_relations",
+  sql: `CREATE TABLE IF NOT EXISTS patient_relations (
+    relation_id TEXT PRIMARY KEY,
+    guardian_id TEXT NOT NULL,
+    dependent_id TEXT NOT NULL,
+    relationship_type TEXT,
+    is_primary_contact BOOLEAN DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(guardian_id) REFERENCES patients(patient_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(dependent_id) REFERENCES patients(patient_id) ON DELETE CASCADE ON UPDATE CASCADE
+  );`,
+  deps: ["patients"]
+};
 const history_entry = {
   name: "history_entry",
   sql: `CREATE TABLE IF NOT EXISTS history_entry (
     history_id TEXT PRIMARY KEY,
     patient_id TEXT NOT NULL,
+    userId TEXT NOT NULL,
     visit_date TEXT,
     reason TEXT,
     diagnosis TEXT,
@@ -246,6 +260,7 @@ const nameOfDb = () => {
 const initialTables = [
   users,
   patients,
+  patient_relations,
   history_entry,
   diagnosis,
   treatment,
@@ -462,11 +477,13 @@ class CaseConverter {
   }
 }
 class BaseRepository {
-  constructor(modelName, pkColumn = "id") {
+  constructor(modelName, pkColumn = "id", useSoftDelete = false) {
     __publicField(this, "modelName");
     __publicField(this, "pkColumn");
+    __publicField(this, "useSoftDelete");
     this.modelName = modelName;
     this.pkColumn = pkColumn;
+    this.useSoftDelete = useSoftDelete;
   }
   /* CREATE */
   create(data) {
@@ -486,11 +503,8 @@ class BaseRepository {
   }
   /* READ by id */
   getById(id) {
-    const dbData = db.db.prepare(`
-      SELECT *
-      FROM ${this.modelName}
-      WHERE ${this.pkColumn} = ?
-    `).get(id);
+    const query = this.useSoftDelete ? `SELECT * FROM ${this.modelName} WHERE ${this.pkColumn} = ? AND deleted_at IS NULL` : `SELECT * FROM ${this.modelName} WHERE ${this.pkColumn} = ?`;
+    const dbData = db.db.prepare(query).get(id);
     return {
       message: `Get by ID ${id} from ${this.modelName}`,
       results: dbData ? CaseConverter.mapKeysToCamelCase(dbData) : null
@@ -516,21 +530,30 @@ class BaseRepository {
   }
   /* DELETE */
   delete(id) {
-    const result = db.db.prepare(`
-      DELETE FROM ${this.modelName}
-      WHERE ${this.pkColumn} = ?
-    `).run(id);
-    return {
-      message: `Deleted ID ${id} from ${this.modelName}`,
-      results: result.changes.toString()
-    };
+    if (this.useSoftDelete) {
+      const result = db.db.prepare(`
+        UPDATE ${this.modelName}
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE ${this.pkColumn} = ?
+      `).run(id);
+      return {
+        message: `Soft deleted ID ${id} in ${this.modelName}`,
+        results: result.changes.toString()
+      };
+    } else {
+      const result = db.db.prepare(`
+        DELETE FROM ${this.modelName}
+        WHERE ${this.pkColumn} = ?
+      `).run(id);
+      return {
+        message: `Deleted ID ${id} from ${this.modelName}`,
+        results: result.changes.toString()
+      };
+    }
   }
   /* GET ALL */
   getAll() {
-    const dataSql = `
-      SELECT *
-      FROM ${this.modelName}
-    `;
+    const dataSql = this.useSoftDelete ? `SELECT * FROM ${this.modelName} WHERE deleted_at IS NULL` : `SELECT * FROM ${this.modelName}`;
     const results = db.db.prepare(dataSql).all();
     return {
       message: `Get all from ${this.modelName}`,
@@ -547,29 +570,97 @@ class UserRepository {
   }
   async create(data) {
     const response = this.base.create(data);
-    return { data: response.results };
+    return response.results;
   }
   async update(id, data) {
     const response = this.base.update(id, data);
-    return { data: response.results };
+    return response.results;
   }
   async delete(id) {
     const response = this.base.delete(id);
-    return { data: response.results };
+    return response.results;
   }
   async getById(id) {
     const response = this.base.getById(id);
-    return { data: response.results };
+    return response.results;
   }
   async getAll() {
     const response = this.base.getAll();
     return response.results;
   }
   async findByEmail(email) {
-    const sql = ` SELECT * FROM users WHERE email = ? LIMIT 1 `;
+    const sql = ` SELECT * FROM users WHERE user_email = ? LIMIT 1 `;
     const result = this.db.db.prepare(sql).get(email);
     return result ? CaseConverter.mapKeysToCamelCase(result) : null;
   }
+}
+const byteToHex = [];
+for (let i = 0; i < 256; ++i) {
+  byteToHex.push((i + 256).toString(16).slice(1));
+}
+function unsafeStringify(arr, offset = 0) {
+  return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
+}
+const rnds8 = new Uint8Array(16);
+function rng() {
+  return crypto.getRandomValues(rnds8);
+}
+const _state = {};
+function v7(options, buf, offset) {
+  let bytes;
+  {
+    const now = Date.now();
+    const rnds = rng();
+    updateV7State(_state, now, rnds);
+    bytes = v7Bytes(rnds, _state.msecs, _state.seq, buf, offset);
+  }
+  return buf ?? unsafeStringify(bytes);
+}
+function updateV7State(state, now, rnds) {
+  state.msecs ?? (state.msecs = -Infinity);
+  state.seq ?? (state.seq = 0);
+  if (now > state.msecs) {
+    state.seq = rnds[6] << 23 | rnds[7] << 16 | rnds[8] << 8 | rnds[9];
+    state.msecs = now;
+  } else {
+    state.seq = state.seq + 1 | 0;
+    if (state.seq === 0) {
+      state.msecs++;
+    }
+  }
+  return state;
+}
+function v7Bytes(rnds, msecs, seq, buf, offset = 0) {
+  if (rnds.length < 16) {
+    throw new Error("Random bytes length must be >= 16");
+  }
+  if (!buf) {
+    buf = new Uint8Array(16);
+    offset = 0;
+  } else {
+    if (offset < 0 || offset + 16 > buf.length) {
+      throw new RangeError(`UUID byte range ${offset}:${offset + 15} is out of buffer bounds`);
+    }
+  }
+  msecs ?? (msecs = Date.now());
+  seq ?? (seq = rnds[6] * 127 << 24 | rnds[7] << 16 | rnds[8] << 8 | rnds[9]);
+  buf[offset++] = msecs / 1099511627776 & 255;
+  buf[offset++] = msecs / 4294967296 & 255;
+  buf[offset++] = msecs / 16777216 & 255;
+  buf[offset++] = msecs / 65536 & 255;
+  buf[offset++] = msecs / 256 & 255;
+  buf[offset++] = msecs & 255;
+  buf[offset++] = 112 | seq >>> 28 & 15;
+  buf[offset++] = seq >>> 20 & 255;
+  buf[offset++] = 128 | seq >>> 14 & 63;
+  buf[offset++] = seq >>> 6 & 255;
+  buf[offset++] = seq << 2 & 255 | rnds[10] & 3;
+  buf[offset++] = rnds[11];
+  buf[offset++] = rnds[12];
+  buf[offset++] = rnds[13];
+  buf[offset++] = rnds[14];
+  buf[offset++] = rnds[15];
+  return buf;
 }
 class UuidHandler {
 }
@@ -579,7 +670,7 @@ __publicField(UuidHandler, "idValidator", (value) => {
   return value;
 });
 __publicField(UuidHandler, "idCreator", () => {
-  return crypto.randomUUID();
+  return v7();
 });
 class UserApplications {
   static Id(prop) {
@@ -598,7 +689,7 @@ class UserApplications {
   static Role(prop) {
     if (!prop || typeof prop !== "string") throw new Error("Missing or invalid role");
     const role = prop.trim().toUpperCase();
-    const allowed = ["ADMIN", "MECANICO", "EMPLOYEE", "USER"];
+    const allowed = ["PROPIETARIO", "ADMIN", "USER"];
     if (!allowed.includes(role)) {
       throw new Error("Invalid role");
     }
@@ -606,19 +697,19 @@ class UserApplications {
   }
 }
 class User {
-  constructor({ userId, email, password, role, name, nickname, enabled }) {
+  constructor({ userId, userEmail, password, role, userName, nickname, enabled }) {
     __publicField(this, "userId");
-    __publicField(this, "email");
+    __publicField(this, "userEmail");
     __publicField(this, "password");
     __publicField(this, "role");
-    __publicField(this, "name");
+    __publicField(this, "userName");
     __publicField(this, "nickname");
     __publicField(this, "enabled");
     this.userId = UserApplications.Id(userId);
-    this.email = UserApplications.Email(email);
+    this.userEmail = UserApplications.Email(userEmail);
     this.password = User.validatePasswordHash(password);
     this.role = UserApplications.Role(role);
-    this.name = User.validateName(name);
+    this.userName = User.validateName(userName);
     this.nickname = User.validateNickname(nickname);
     this.enabled = User.validateEnabled(enabled);
   }
@@ -627,7 +718,7 @@ class User {
     return prop;
   }
   static validateName(prop) {
-    if (typeof prop !== "string") throw new Error("Invalid name");
+    if (typeof prop !== "string" || prop.length < 5) throw new Error("Invalid userName");
     return prop;
   }
   static validateNickname(prop) {
@@ -638,15 +729,15 @@ class User {
     if (typeof prop !== "boolean") throw new Error("Invalid enabled");
     return prop;
   }
-  static register({ email, hashedPassword }) {
-    if (!email || !hashedPassword) throw new Error("Missing parameters");
+  static register({ userEmail, hashedPassword, role }) {
+    if (!userEmail || !hashedPassword || !role) throw new Error("Missing parameters");
     return new User({
       userId: UuidHandler.idCreator(),
-      email,
+      userEmail,
       password: hashedPassword,
-      name: "No name",
-      nickname: (email == null ? void 0 : email.split("@")[0]) ?? "user",
-      role: "USER",
+      userName: "No name",
+      nickname: (userEmail == null ? void 0 : userEmail.split("@")[0]) ?? "user",
+      role,
       enabled: true
     });
   }
@@ -664,21 +755,21 @@ class User {
     this.role = UserApplications.Role(role);
   }
   updateProfile(user2) {
-    this.email = user2.email;
-    this.name = user2.name;
+    this.userEmail = user2.userEmail;
+    this.userName = user2.userName;
     this.nickname = user2.nickname;
   }
   changeEmail(email) {
-    this.email = UserApplications.Email(email);
+    this.userEmail = UserApplications.Email(email);
   }
   // Mapeos para Infraestructura (DB) y Cliente (DTO)
   toPersistence() {
     return {
       user_id: this.userId,
-      email: this.email,
+      user_email: this.userEmail,
       password: this.password,
       role: this.role,
-      user_name: this.name,
+      user_name: this.userName,
       nickname: this.nickname,
       enabled: this.enabled ? 1 : 0
     };
@@ -686,9 +777,9 @@ class User {
   toDTO() {
     return {
       userId: this.userId,
-      email: this.email,
+      user_email: this.userEmail,
       role: this.role,
-      name: this.name,
+      user_name: this.userName,
       nickname: this.nickname,
       enabled: this.enabled
     };
@@ -704,19 +795,50 @@ class Hasher {
     return argon2.verify(hash, password);
   }
 }
+class BooleanConverter {
+  static boolToInt(value) {
+    if (typeof value !== "boolean") throw new TypeError(`${value} is not a boolean`);
+    if (value === true) {
+      return 1;
+    } else {
+      return 0;
+    }
+  }
+  static intToBool(value) {
+    if (!Number.isInteger(value)) throw new TypeError(`${value} is not an integer number`);
+    if (Number(value) === 1) {
+      return true;
+    } else if (Number(value) === 0) {
+      return false;
+    } else {
+      throw new TypeError(`${value} must be a number 0 or 1`);
+    }
+  }
+}
 class UserService {
   constructor(userRepository2) {
-    __privateAdd(this, _UserService_instances);
     this.userRepository = userRepository2;
+  }
+  parser(data) {
+    return {
+      userId: data.userId || data.user_id,
+      userEmail: data.user_email || data.email,
+      password: data.password,
+      nickname: data.nickname,
+      userName: data.userName || data.user_name || data.name,
+      role: data.role,
+      enabled: BooleanConverter.intToBool(data.enabled)
+    };
   }
   async createUser(userData) {
     try {
-      const record = await this.userRepository.findByEmail(userData.email);
+      const record = await this.userRepository.findByEmail(userData.userEmail);
       if (record) throwError("Email is already registered", ErrorCode$1.DATA_CONFLICT);
       const hashedPassword = await Hasher.hash(userData.password);
       const user2 = User.register({
-        email: userData.email,
-        hashedPassword
+        userEmail: userData.userEmail,
+        hashedPassword,
+        role: userData.role ? userData.role : "USER"
       });
       await this.userRepository.create(user2.toPersistence());
       return user2.toDTO();
@@ -732,7 +854,7 @@ class UserService {
     try {
       const records = await this.userRepository.getAll();
       return records.map((r) => {
-        const parsed = __privateMethod(this, _UserService_instances, parser_fn).call(this, r);
+        const parsed = this.parser(r);
         const { password, ...safeUser } = parsed;
         return safeUser;
       });
@@ -743,8 +865,8 @@ class UserService {
   async getById(userId) {
     try {
       const record = await this.userRepository.getById(userId);
-      if (!record.data) throwError("User not found", ErrorCode$1.NOT_FOUND);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record.data));
+      if (!record) throwError("User not found", ErrorCode$1.NOT_FOUND);
+      const user2 = new User(this.parser(record));
       return user2.toDTO();
     } catch (error) {
       throw error;
@@ -753,8 +875,8 @@ class UserService {
   async changeStatus(userId, enabled) {
     try {
       const record = await this.userRepository.getById(userId);
-      if (!record.data) throwError("User not found", ErrorCode$1.NOT_FOUND);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record.data));
+      if (!record) throwError("User not found", ErrorCode$1.NOT_FOUND);
+      const user2 = new User(this.parser(record));
       if (enabled === true) {
         user2.enabledUser();
       } else {
@@ -771,8 +893,8 @@ class UserService {
       const exists = await this.userRepository.findByEmail(email);
       if (exists) throwError("Email is already registered", ErrorCode$1.DATA_CONFLICT);
       const record = await this.userRepository.getById(userId);
-      if (!record.data) throwError("User not found", ErrorCode$1.NOT_FOUND);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record.data));
+      if (!record) throwError("User not found", ErrorCode$1.NOT_FOUND);
+      const user2 = new User(this.parser(record));
       user2.changeEmail(email);
       await this.userRepository.update(userId, user2.toPersistence());
       return user2.toDTO();
@@ -783,8 +905,8 @@ class UserService {
   async updateProfile(userId, updateData) {
     try {
       const record = await this.userRepository.getById(userId);
-      if (!record.data) throwError("User not found", ErrorCode$1.NOT_FOUND);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record.data));
+      if (!record) throwError("User not found", ErrorCode$1.NOT_FOUND);
+      const user2 = new User(this.parser(record));
       user2.updateProfile(updateData);
       await this.userRepository.update(userId, user2.toPersistence());
       return user2.toDTO();
@@ -795,8 +917,8 @@ class UserService {
   async changeRole(userId, newRole) {
     try {
       const record = await this.userRepository.getById(userId);
-      if (!record.data) throwError("User not found", ErrorCode$1.NOT_FOUND);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record.data));
+      if (!record) throwError("User not found", ErrorCode$1.NOT_FOUND);
+      const user2 = new User(this.parser(record));
       user2.changeRole(newRole);
       await this.userRepository.update(userId, user2.toPersistence());
       return user2.toDTO();
@@ -807,11 +929,11 @@ class UserService {
   async changePassword(userId, currentPassword, newPassword) {
     try {
       const record = await this.userRepository.getById(userId);
-      if (!record.data) throwError("User not found", ErrorCode$1.NOT_FOUND);
-      const isMatch = await Hasher.compare(currentPassword, record.data.password);
+      if (!record) throwError("User not found", ErrorCode$1.NOT_FOUND);
+      const isMatch = await Hasher.compare(currentPassword, record.password);
       if (!isMatch) throwError("Invalid current password", ErrorCode$1.ACCESS_DENIED);
       const hashedNewPassword = await Hasher.hash(newPassword);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record.data));
+      const user2 = new User(this.parser(record));
       user2.changePassword(hashedNewPassword);
       await this.userRepository.update(userId, user2.toPersistence());
       return user2.toDTO();
@@ -825,25 +947,13 @@ class UserService {
       if (!record) throwError("Invalid email or password", ErrorCode$1.ACCESS_DENIED);
       const isMatch = await Hasher.compare(plainPassword, record.password);
       if (!isMatch) throwError("Invalid email or password", ErrorCode$1.ACCESS_DENIED);
-      const user2 = new User(__privateMethod(this, _UserService_instances, parser_fn).call(this, record));
+      const user2 = new User(this.parser(record));
       return user2.toDTO();
     } catch (error) {
       throw error;
     }
   }
 }
-_UserService_instances = new WeakSet();
-parser_fn = function(data) {
-  return {
-    userId: data.userId || data.user_id,
-    email: data.email,
-    password: data.password,
-    nickname: data.nickname,
-    name: data.userName || data.user_name,
-    role: data.role,
-    enabled: data.enabled === 1 || data.enabled === true ? true : false
-  };
-};
 const _AuthApplications = class _AuthApplications {
   static sessionIdVALID(sessionId) {
     var _a;
@@ -939,7 +1049,7 @@ const _Session = class _Session {
   }
   static createSession(sessionData, rolling = false, maxAge) {
     const maxTimeToExpire = maxAge ? maxAge : 18e5;
-    const id = crypto.randomUUID();
+    const id = crypto$1.randomUUID();
     const created_at = Date.now();
     const timeToExpire = created_at + maxTimeToExpire;
     return new _Session({
@@ -1673,7 +1783,7 @@ const withAuth = (handler, requiredRole) => {
   };
 };
 const updateProfileSchema = {
-  id: {
+  userId: {
     type: "string"
   },
   email: {
@@ -1711,7 +1821,7 @@ const createUserSchema = {
   }
 };
 const changeStatusSchema = {
-  id: {
+  userId: {
     type: "string"
   },
   enabled: {
@@ -1720,7 +1830,7 @@ const changeStatusSchema = {
   }
 };
 const changeRoleSchema = {
-  id: {
+  userId: {
     type: "string"
   },
   role: {
@@ -1728,7 +1838,7 @@ const changeRoleSchema = {
   }
 };
 const changePasswordSchema = {
-  id: {
+  userId: {
     type: "string"
   },
   password: {
@@ -1747,32 +1857,32 @@ const user = {
   getUsers: () => {
     return userService.getAll();
   },
-  getUserById: (id) => {
-    const validId = NodeValidator.paramId("id", id, NodeValidator.ValidReg.UUIDv4);
+  getUserById: (userId) => {
+    const validId = NodeValidator.paramId("userId", userId, NodeValidator.ValidReg.UUIDv4);
     return userService.getById(validId);
   },
   updateUserProfile: (data) => {
     const validData = NodeValidator.validateBody(data, updateProfileSchema);
-    const { id, rest } = NodeValidator.splitObjectProps(validData, ["id"]);
-    const validId = NodeValidator.paramId("id", id, NodeValidator.ValidReg.UUIDv4);
+    const { userId, rest } = NodeValidator.splitObjectProps(validData, ["userId"]);
+    const validId = NodeValidator.paramId("userId", userId, NodeValidator.ValidReg.UUIDv4);
     return userService.updateProfile(validId, rest);
   },
   updateStatusUser: (data) => {
     const validData = NodeValidator.validateBody(data, changeStatusSchema);
-    const { id, enabled } = NodeValidator.splitObjectProps(validData, ["id"]);
-    const validId = NodeValidator.paramId("id", id, NodeValidator.ValidReg.UUIDv4);
+    const { userId, enabled } = NodeValidator.splitObjectProps(validData, ["userId"]);
+    const validId = NodeValidator.paramId("userId", userId, NodeValidator.ValidReg.UUIDv4);
     return userService.changeStatus(validId, enabled);
   },
   updateRoleUser: (data) => {
     const validData = NodeValidator.validateBody(data, changeRoleSchema);
-    const { id, role } = NodeValidator.splitObjectProps(validData, ["id"]);
-    const validId = NodeValidator.paramId("id", id, NodeValidator.ValidReg.UUIDv4);
+    const { userId, role } = NodeValidator.splitObjectProps(validData, ["userId"]);
+    const validId = NodeValidator.paramId("userId", userId, NodeValidator.ValidReg.UUIDv4);
     return userService.changeRole(validId, role);
   },
   updatePasswordUser: (data) => {
     const validData = NodeValidator.validateBody(data, changePasswordSchema);
-    const { id, password, newPassword } = NodeValidator.splitObjectProps(validData, ["id"]);
-    const validId = NodeValidator.paramId("id", id, NodeValidator.ValidReg.UUIDv4);
+    const { userId, password, newPassword } = NodeValidator.splitObjectProps(validData, ["userId"]);
+    const validId = NodeValidator.paramId("userId", userId, NodeValidator.ValidReg.UUIDv4);
     return userService.changePassword(validId, password, newPassword);
   }
 };
@@ -1803,44 +1913,37 @@ const modules = [
 function registerAllIpc() {
   modules.forEach((register) => register());
 }
-const clientSeed = [{
-  "client_id": "019d881b-8dcc-75b9-a539-a130286cfcdb",
-  "email": "josecliente@gmail.com",
-  "name": "jose cliente",
-  "type_doc": "DNI",
-  "identity_code": "44577891",
-  "address": "calle no se SN",
-  "phone": "sin phone"
-}];
 const usersSeed = [
   {
     "user_id": "019d60b0-8fcd-7339-b8ea-9f16df713fb1",
-    "email": "pericodelospalotes@gmail.com",
+    "user_email": "pericodelospalotes@gmail.com",
     "password": "L1234567",
     "role": "ADMIN",
     "user_name": "Pedro del madero",
-    "nickname": "pericodelospalotes"
+    "nickname": "pericodelospalotes",
+    "enabled": 1
   },
   {
     "user_id": "019d63fc-c2a9-745f-b742-ef36545d98a8",
-    "email": "antoniorodrigueztkds@gmail.com",
+    "user_email": "antoniorodrigueztkds@gmail.com",
     "password": "L1234567",
     "role": "USER",
     "user_name": "No name",
-    "nickname": "antoniorodrigueztkds"
+    "nickname": "antoniorodrigueztkds",
+    "enabled": 1
   },
   {
     "user_id": "019d63fd-5d67-774a-b8ea-b97f571a99dc",
-    "email": "josenomeacuerdo@gmail.com",
+    "user_email": "josenomeacuerdo@gmail.com",
     "password": "L1234567",
     "role": "USER",
     "user_name": "No name",
-    "nickname": "josenomeacuerdo"
+    "nickname": "josenomeacuerdo",
+    "enabled": 1
   }
 ];
 const userseed = userService;
 const userRepo = new BaseRepository("users", "user_id");
-const clientseed = new BaseRepository("clients", "client_id");
 const dataSeedUsers = async (seeds) => {
   const users2 = await userseed.getAll();
   if (users2.length > 0) {
@@ -1858,20 +1961,10 @@ const dataSeedUsers = async (seeds) => {
     console.log(`la tabla usuarios fue poblada con datos`);
   }
 };
-const dataSeedclient = async (seeds) => {
-  const users2 = clientseed.getAll();
-  if (users2.results.length > 0) {
-    console.dir(users2.results);
-    console.log(`La db ya contiene clientes`);
-  } else {
-    seeds.forEach((s) => clientseed.create(s));
-    console.log(`la tabla clientes fue poblada con datos`);
-  }
-};
 const fillDbWithSeeds = async () => {
   await Promise.all([
-    dataSeedUsers(usersSeed),
-    dataSeedclient(clientSeed)
+    dataSeedUsers(usersSeed)
+    //dataSeedclient (clientSeed)
   ]);
 };
 createRequire(import.meta.url);

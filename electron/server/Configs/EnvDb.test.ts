@@ -22,7 +22,7 @@ describe('EnvDb test', () => {
   })
   describe('Database existence', () => {
     it('should query tables and return an empty array', async() => { 
-      const models = [  'users', 'clients', 'vehicles',  'work_orders', 'services', 'order_services']
+      const models = ['users', 'patients', 'patient_relations', 'history_entry', 'diagnosis', 'treatment', 'sessions']
       for (const model of models) {
             const dataSql = `
                     SELECT *

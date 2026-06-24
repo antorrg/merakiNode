@@ -16,6 +16,8 @@ export interface PatientProps {
   lastName: string;
   typeDoc: string;
   identityCode: string;
+  birthDate: string;   
+  age: number; 
   phone: string | null;
   address: string;
   city: string;
@@ -24,7 +26,7 @@ export interface PatientProps {
   guardians?: GuardianRelation[];
 }
 
-export type PatientCreate = Omit<PatientProps, 'patientId' | 'deletedAt'>;
+export type PatientCreate = Omit<PatientProps, 'patientId' | 'deletedAt' | 'age'>;
 
 export class Patient {
   protected readonly patientId: string;
@@ -33,6 +35,8 @@ export class Patient {
   protected lastName: string;
   protected typeDoc: string;
   protected identityCode: string;
+  protected birthDate: string;  
+  protected age: number; 
   protected phone: string | null;
   protected address: string;
   protected city: string;
@@ -46,6 +50,9 @@ export class Patient {
     this.lastName = Patient.validateName(props.lastName);
     this.typeDoc = props.typeDoc;
     this.identityCode = props.identityCode;
+    this.birthDate = props.birthDate;
+    // Calculamos la edad dinámicamente siempre (para detectar si el paciente creció)
+    this.age = Patient.calculateAge(props.birthDate);
     this.phone = PatientApplications.Phone(props.phone);
     this.address = props.address;
     this.city = props.city;
@@ -59,11 +66,51 @@ export class Patient {
   }
 
   static register(props: PatientCreate): Patient {
+    const currentAge = Patient.calculateAge(props.birthDate);
+    Patient.validateAgeRequirements(currentAge, props.phone, props.guardians || []);
+
     return new Patient({
         patientId: UuidHandler.idCreator(),
         ...props,
+        age: currentAge,
         guardians: props.guardians || []
-    })
+    });
+  }
+
+  static calculateAge(birthDateStr: string): number {
+    const [day, month, year] = birthDateStr.split('/').map(Number);
+    const today = new Date();
+    let age = today.getFullYear() - year;
+    const m = (today.getMonth() + 1) - month;
+    if (m < 0 || (m === 0 && today.getDate() < day)) {
+      age--;
+    }
+    return age;
+  }
+
+  static validateAgeRequirements(age: number, phone: string | null | undefined, guardians: GuardianRelation[]) {
+    if (age < 18) {
+      if (!guardians || guardians.length === 0) {
+        throw new Error('Un paciente menor de edad debe tener al menos un tutor asignado.');
+      }
+      const hasPrimary = guardians.some(g => g.isPrimaryContact);
+      if (!hasPrimary) {
+        throw new Error('Un paciente menor de edad debe tener al menos un tutor marcado como contacto principal.');
+      }
+    } else {
+      if (!phone || phone.trim() === '') {
+        throw new Error('Un paciente mayor de edad debe tener su propio teléfono de contacto.');
+      }
+    }
+  }
+
+  updateContactData(phone: string, email: string | null) {
+    const currentAge = Patient.calculateAge(this.birthDate);
+    Patient.validateAgeRequirements(currentAge, phone, this.guardians);
+    
+    this.phone = PatientApplications.Phone(phone);
+    this.email = email ? PatientApplications.Email(email) : null;
+    this.age = currentAge;
   }
 
   // GETTERS INTELIGENTES para contacto
@@ -96,6 +143,8 @@ export class Patient {
       last_name: this.lastName,
       type_doc: this.typeDoc,
       identity_code: this.identityCode,
+      birth_date: this.birthDate,
+      age: this.age,
       phone: this.phone,
       address: this.address,
       city: this.city,
@@ -111,6 +160,8 @@ export class Patient {
       lastName: this.lastName,
       typeDoc: this.typeDoc,
       identityCode: this.identityCode,
+      birthDate: this.birthDate,
+      age: this.age,
       address: this.address,
       city: this.city,
       

@@ -1,5 +1,4 @@
-import crypto from 'crypto'
-
+import { v7 as uuidv7 } from 'uuid';
 
 export class UuidHandler{
   static idValidator = (value: string) => {
@@ -9,7 +8,7 @@ export class UuidHandler{
     return value;
   }
   static idCreator = () => {
-  return crypto.randomUUID()
-}
+    return uuidv7();
+  }
 }
 

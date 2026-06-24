@@ -6,17 +6,21 @@ import { CaseConverter } from "../Utils/CaseConverter.js";
 export class BaseRepository<TEntity, TCreate extends Record<string, any>, TUpdate extends Record<string, any>> implements IBaseRepository<TEntity, TCreate, TUpdate> {
   private readonly modelName: string;
   private readonly pkColumn: string;
+  private readonly useSoftDelete: boolean;
+  private readonly useCaseConversion: boolean;
 
-  constructor(modelName: string, pkColumn: string = 'id') {
+  constructor(modelName: string, pkColumn: string = 'id', useSoftDelete: boolean = false, useCaseConversion: boolean = true) {
     this.modelName = modelName;
     this.pkColumn = pkColumn;
+    this.useSoftDelete = useSoftDelete;
+    this.useCaseConversion = useCaseConversion;
   }
    
   /* CREATE */
   create(data: TCreate): IResponse<string> {
-    const snakeCaseData = CaseConverter.mapKeysToSnakeCase(data);
-    const columns = Object.keys(snakeCaseData);
-    const values = Object.values(snakeCaseData);
+    const processedData = this.useCaseConversion ? CaseConverter.mapKeysToSnakeCase(data) : data;
+    const columns = Object.keys(processedData);
+    const values = Object.values(processedData);
     const placeholders = columns.map(() => "?").join(", ");
     
     const stmt = db.db.prepare(`
@@ -33,23 +37,23 @@ export class BaseRepository<TEntity, TCreate extends Record<string, any>, TUpdat
 
   /* READ by id */
   getById(id: string | number): IResponse<TEntity | null> {
-    const dbData = db.db.prepare(`
-      SELECT *
-      FROM ${this.modelName}
-      WHERE ${this.pkColumn} = ?
-    `).get(id) as TEntity | undefined;
+    const query = this.useSoftDelete
+      ? `SELECT * FROM ${this.modelName} WHERE ${this.pkColumn} = ? AND deleted_at IS NULL`
+      : `SELECT * FROM ${this.modelName} WHERE ${this.pkColumn} = ?`;
+
+    const dbData = db.db.prepare(query).get(id) as TEntity | undefined;
     
     return {
       message: `Get by ID ${id} from ${this.modelName}`,
-      results: dbData ? CaseConverter.mapKeysToCamelCase<TEntity>(dbData) : null
+      results: dbData ? (this.useCaseConversion ? CaseConverter.mapKeysToCamelCase<TEntity>(dbData) : dbData as unknown as TEntity) : null
     };
   }
 
   /* UPDATE */
   update(id: string | number, data: TUpdate): IResponse<TEntity | null> {
-    const snakeCaseData = CaseConverter.mapKeysToSnakeCase(data);
-    const columns = Object.keys(snakeCaseData);
-    const values = Object.values(snakeCaseData);
+    const processedData = this.useCaseConversion ? CaseConverter.mapKeysToSnakeCase(data) : data;
+    const columns = Object.keys(processedData);
+    const values = Object.values(processedData);
     const setClause = columns.map(col => `${col} = ?`).join(", ");
     
     // Using RETURNING * to return the updated entity
@@ -64,35 +68,47 @@ export class BaseRepository<TEntity, TCreate extends Record<string, any>, TUpdat
 
     return {
       message: `Updated ID ${id} in ${this.modelName}`,
-      results: updatedData ? CaseConverter.mapKeysToCamelCase<TEntity>(updatedData) : null
+      results: updatedData ? (this.useCaseConversion ? CaseConverter.mapKeysToCamelCase<TEntity>(updatedData) : updatedData as unknown as TEntity) : null
     };
   }
 
   /* DELETE */
   delete(id: string | number): IResponse<string> {
-    const result = db.db.prepare(`
-      DELETE FROM ${this.modelName}
-      WHERE ${this.pkColumn} = ?
-    `).run(id);
-    
-    return {
-      message: `Deleted ID ${id} from ${this.modelName}`,
-      results: result.changes.toString()
-    };
+    if (this.useSoftDelete) {
+      const result = db.db.prepare(`
+        UPDATE ${this.modelName}
+        SET deleted_at = CURRENT_TIMESTAMP
+        WHERE ${this.pkColumn} = ?
+      `).run(id);
+      
+      return {
+        message: `Soft deleted ID ${id} in ${this.modelName}`,
+        results: result.changes.toString()
+      };
+    } else {
+      const result = db.db.prepare(`
+        DELETE FROM ${this.modelName}
+        WHERE ${this.pkColumn} = ?
+      `).run(id);
+      
+      return {
+        message: `Deleted ID ${id} from ${this.modelName}`,
+        results: result.changes.toString()
+      };
+    }
   }
 
   /* GET ALL */
   getAll(): IResponse<TEntity[] | []> {
-    const dataSql = `
-      SELECT *
-      FROM ${this.modelName}
-    `;
+    const dataSql = this.useSoftDelete
+      ? `SELECT * FROM ${this.modelName} WHERE deleted_at IS NULL`
+      : `SELECT * FROM ${this.modelName}`;
 
     const results = db.db.prepare(dataSql).all() as TEntity[];
     
     return {
       message: `Get all from ${this.modelName}`,
-      results: results.map(row => CaseConverter.mapKeysToCamelCase<TEntity>(row))
+      results: this.useCaseConversion ? results.map(row => CaseConverter.mapKeysToCamelCase<TEntity>(row)) : results
     };
   }
 }

@@ -44,12 +44,12 @@ export class SessionRepository {
    */
   findSession(sessionId: string): Session | null {
     // Buscar primero localmente
-    let result = this.#sessionStore.get(sessionId) as any;
+    let result: SessionProp | undefined | null = this.#sessionStore.get(sessionId);
 
     // Si no está localmente, buscar en la base de datos
     if (!result) {
       const response = this.base.getById(sessionId);
-      result = response.results as any;
+      result = response.results as SessionProp | null;
 
       // Si se encuentra en la base de datos, la guardamos en la memoria local (caché)
       if (result) {

@@ -1,36 +1,30 @@
-export const clientSeed = [{
-      "client_id": "019d881b-8dcc-75b9-a539-a130286cfcdb",
-      "email": "josecliente@gmail.com",
-      "name": "jose cliente",
-      "type_doc": "DNI",
-      "identity_code": "44577891",
-      "address": "calle no se SN",
-      "phone": "sin phone"
-    }]
-
-export const usersSeed =[
+import { UserProps } from '../electron/server/Features/user/User.js';
+export const usersSeed: UserProps[] = [
     {
-      "user_id": "019d60b0-8fcd-7339-b8ea-9f16df713fb1",
-      "email": "pericodelospalotes@gmail.com",
-      "password": 'L1234567',
-      "role": "ADMIN",
-      "user_name": "Pedro del madero",
-      "nickname": "pericodelospalotes"
+      userId: "019d60b0-8fcd-7339-b8ea-9f16df713fb1",
+      userEmail: "pericodelospalotes@gmail.com",
+      password: 'L1234567',
+      role: "ADMIN",
+      userName: "Pedro del madero",
+      nickname: "pericodelospalotes",
+      enabled: true
     },
     {
-      "user_id": "019d63fc-c2a9-745f-b742-ef36545d98a8",
-      "email": "antoniorodrigueztkds@gmail.com",
-      "password": 'L1234567',
-      "role": "USER",
-      "user_name": "No name",
-      "nickname": "antoniorodrigueztkds"
+      userId: "019d63fc-c2a9-745f-b742-ef36545d98a8",
+      userEmail: "antoniorodrigueztkds@gmail.com",
+      password: 'L1234567',
+      role: "USER",
+      userName: "No name",
+      nickname: "antoniorodrigueztkds",
+      enabled: true
     },
     {
-      "user_id": "019d63fd-5d67-774a-b8ea-b97f571a99dc",
-      "email": "josenomeacuerdo@gmail.com",
-      "password": 'L1234567',
-      "role": "USER",
-      "user_name": "No name",
-      "nickname": "josenomeacuerdo"
+      userId: "019d63fd-5d67-774a-b8ea-b97f571a99dc",
+      userEmail: "josenomeacuerdo@gmail.com",
+      password: 'L1234567',
+      role: "USER",
+      userName: "No name",
+      nickname: "josenomeacuerdo",
+      enabled: true
     }
-  ]
+]

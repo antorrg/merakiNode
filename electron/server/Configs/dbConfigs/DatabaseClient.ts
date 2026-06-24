@@ -37,7 +37,6 @@ export class SqliteDb implements ISqliteDb {
     }
 
     authenticate(): boolean {
-        try {
             const stmt = this.db.prepare('SELECT 1 as status')
             const result = stmt.get()
             if (result) {
@@ -45,9 +44,6 @@ export class SqliteDb implements ISqliteDb {
             } else {
                 throw new Error('Database file could not be read properly')
             }
-        } catch (error) {
-            throw error
-        }
     }
 
     sync(options: SyncOptions = {}): void {
