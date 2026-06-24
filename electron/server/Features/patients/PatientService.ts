@@ -1,5 +1,6 @@
 import { Patient, PatientCreate, PatientProps } from './Patient.js';
-import { PatientRepository, PatientPersistence } from './PatientRepository.js';
+import { PatientRepository } from './PatientRepository.js';
+import { Patients } from '../../dbTypes/db.types.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
 
 export class PatientService {
@@ -20,7 +21,7 @@ export class PatientService {
 
     // 2. Instanciar y validar con el Modelo de Dominio
     const patient = Patient.register(data);
-    const persistenceData = patient.toPersistence() as PatientPersistence;
+    const persistenceData = patient.toPersistence() as Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>;
     
     // 3. Persistir en la base de datos (con transacciones)
     this.repository.create(persistenceData, data.guardians || []);
@@ -55,7 +56,7 @@ export class PatientService {
     // Esta función del dominio verifica la mayoría de edad y asigna los datos
     patient.updateContactData(phone, email);
     
-    const updatedProps = patient.toPersistence() as Partial<PatientPersistence>;
+    const updatedProps = patient.toPersistence() as Partial<Patients>;
     
     // Actualizamos solo los campos que cambiaron
     this.repository.update(id, {

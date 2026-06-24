@@ -97,11 +97,11 @@ changeEmail(email:string) {
     return {
       user_id: this.userId,
       user_email: this.userEmail,
-      password: this.password,
+      password: this.password as string,
       role: this.role,
-      user_name: this.userName,
-      nickname: this.nickname,
-      enabled: this.enabled ? 1 : 0
+      user_name: this.userName ?? undefined,
+      nickname: this.nickname ?? undefined,
+      enabled: this.enabled
     }
   }
 

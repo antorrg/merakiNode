@@ -1,4 +1,6 @@
-Sí, exactamente: **algo conceptualmente parecido a `express-session`, pero sin cookies y controlado por el proceso principal de Electron**.
+# Clase **Session**
+
+Esto es: **algo conceptualmente parecido a `express-session`, pero sin cookies y controlado por el proceso principal de Electron**.
 
 La idea sería:
 

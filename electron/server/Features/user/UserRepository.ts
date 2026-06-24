@@ -2,19 +2,22 @@ import {db as DatabaseInstance} from '../../Configs/database.js';
 import { BaseRepository } from '../../Shared/Repositories/BaseRepository.js';
 import { CaseConverter } from '../../Shared/Utils/CaseConverter.js';
 import { UserProps } from './User.js';
+import { SqliteDb } from '../../Configs/dbConfigs/DatabaseClient.js';
+
+import { Users } from '../../dbTypes/db.types.js';
 
 export class UserRepository {
-  private base: BaseRepository<UserProps, any, any>;
-  private db: any;
-  constructor(db: any = DatabaseInstance) {
-    this.base = new BaseRepository<UserProps, any, any>('users', 'user_id');
+  private base: BaseRepository<UserProps, Omit<Users, 'created_at' | 'updated_at'>, Partial<Users>>;
+  private db: SqliteDb;
+  constructor(db: SqliteDb = DatabaseInstance) {
+    this.base = new BaseRepository<UserProps, Omit<Users, 'created_at' | 'updated_at'>, Partial<Users>>('users', 'user_id');
     this.db = db;
   }
-  async create(data:any){
+  async create(data: Omit<Users, 'created_at' | 'updated_at'>){
     const response = this.base.create(data);
     return response.results
   } 
-  async update(id:string, data:any){
+  async update(id:string, data: Partial<Users>){
     const response =  this.base.update(id, data);
     return response.results
   }

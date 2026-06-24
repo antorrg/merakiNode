@@ -1,7 +1,7 @@
 import pino, { type Logger as PinoLogger } from 'pino'
 import envConfig from './envConfig.js'
 import { fileTransport } from './Logger/transports/fileTransport.js'
-import { dbWritableStream, levelToText } from './Logger/transports/dbTransport.js'
+import { dbWritableStream } from './Logger/transports/dbTransport.js'
 
 let logger: PinoLogger
 

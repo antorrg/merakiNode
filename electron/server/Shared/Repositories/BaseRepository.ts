@@ -20,7 +20,7 @@ export class BaseRepository<TEntity, TCreate extends Record<string, any>, TUpdat
   create(data: TCreate): IResponse<string> {
     const processedData = this.useCaseConversion ? CaseConverter.mapKeysToSnakeCase(data) : data;
     const columns = Object.keys(processedData);
-    const values = Object.values(processedData);
+    const values = Object.values(processedData).map(v => typeof v === 'boolean' ? (v ? 1 : 0) : v);
     const placeholders = columns.map(() => "?").join(", ");
     
     const stmt = db.db.prepare(`
@@ -53,7 +53,7 @@ export class BaseRepository<TEntity, TCreate extends Record<string, any>, TUpdat
   update(id: string | number, data: TUpdate): IResponse<TEntity | null> {
     const processedData = this.useCaseConversion ? CaseConverter.mapKeysToSnakeCase(data) : data;
     const columns = Object.keys(processedData);
-    const values = Object.values(processedData);
+    const values = Object.values(processedData).map(v => typeof v === 'boolean' ? (v ? 1 : 0) : v);
     const setClause = columns.map(col => `${col} = ?`).join(", ");
     
     // Using RETURNING * to return the updated entity

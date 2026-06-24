@@ -3,7 +3,7 @@ import path from 'path'
 import type Database from 'better-sqlite3'
 
 // Resolve relative to the project root so types land in the source directory instead of dist-electron
-const dirname = path.join(process.cwd(), 'electron/api/database/dbTypes')
+const dirname = path.join(process.cwd(), 'electron/server/dbTypes')
 
 function toPascal(name: string) {
   return name.replace(/(^|_)(\w)/g, (_, __, c) => c.toUpperCase())
@@ -15,7 +15,7 @@ function mapType(declaredType: string): string {
   if (dt.includes('CHAR') || dt.includes('TEXT') || dt.includes('CLOB') || dt.includes('UUID')) return 'string'
   if (dt.includes('REAL') || dt.includes('FLOA') || dt.includes('DOUB') || dt.includes('NUME') || dt.includes('DECI')) return 'number'
   if (dt.includes('BOOL')) return 'boolean'
-  if (dt.includes('DATE') || dt.includes('TIME')) return 'Date'
+  if (dt.includes('DATE') || dt.includes('TIME')) return 'string'
   if (dt.includes('BLOB')) return 'Buffer'
   return 'any'
 }

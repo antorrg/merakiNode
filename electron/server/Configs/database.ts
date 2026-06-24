@@ -1,5 +1,6 @@
 import envConfig from './envConfig.js'
 import { SqliteDb, Table } from './dbConfigs/DatabaseClient.js'
+import logger from './logger.js'
 
 const nameOfDb = (): string => {
   const url = envConfig.DatabasePath
@@ -8,7 +9,7 @@ const nameOfDb = (): string => {
   return parts[parts.length - 1] || 'unknown'
 }
 
-import { users, patients, patient_relations, history_entry,  diagnosis, treatment, sessions } from '../Schema/schema.js'
+import { users, patients, patient_relations, history_entry,  diagnosis, treatment, sessions, log } from '../Schema/schema.js'
 
 // Aquí puedes definir tus esquemas de tabla para auto-crearse si no existen
 const initialTables: Table[] = [
@@ -18,7 +19,8 @@ const initialTables: Table[] = [
   history_entry,
   diagnosis,
   treatment,
-  sessions
+  sessions,
+  log
 ]
 
 // Calculamos la ruta. Si estamos en test usamos memoria RAM pura para mayor velocidad.
@@ -27,11 +29,16 @@ const dbPath = envConfig.DatabasePath
 const db = new SqliteDb(dbPath, initialTables)
 
 async function startUp (syncing: boolean= false, reset: boolean = false){
+  const messageRestart:string = `🔄 Restarting database "${nameOfDb()}" for testing...`
+  const messageExec:string = '🧪  Database testing setup executed'
+  const messageSuccess:string = `🟢 Database SQLite initialized successfully at ${dbPath}!!`
   try {
     if(syncing=== true && reset === true){
-      console.log(`🔄 Restarting database "${nameOfDb()}" for testing...`)
+      logger.info(messageRestart)
+      console.log(messageRestart)
       db.sync({ force: true })
-      console.log('🧪  Database testing setup executed')
+      logger.info(messageExec)
+      console.log(messageExec)
     } else if(syncing=== true){
       // Sincroniza (crea) las tablas definidas en initialTables si no existen
       db.sync()
@@ -39,8 +46,10 @@ async function startUp (syncing: boolean= false, reset: boolean = false){
     
     // Verificamos que la conexión funciona (síncrono)
     db.authenticate()
-    console.log(`🟢​  Database SQLite initialized successfully at ${dbPath}!!`)
+    logger.info(messageSuccess)
+    console.log(messageSuccess)
   } catch (error) {
+    logger.error(error)
     console.error('❌ Error starting database: ', error)
   }
 }

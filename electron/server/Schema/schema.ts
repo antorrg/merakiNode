@@ -125,3 +125,23 @@ export const sessions: Table = {
   );`,
   deps: ['users']
 }
+export const log: Table = {
+  name: 'logs',
+  sql: `CREATE TABLE IF NOT EXISTS logs (
+  id INTEGER PRIMARY KEY,
+  level_name TEXT NOT NULL,
+  level_code INTEGER,
+  message TEXT NOT NULL,
+  type TEXT,
+  status INTEGER,
+  stack TEXT,
+  contexts TEXT DEFAULT '[]',
+  pid INTEGER NOT NULL,
+  time INTEGER,
+  hostname TEXT,
+  keep BOOLEAN DEFAULT 0,
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+  );`,
+  deps: []
+}

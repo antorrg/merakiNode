@@ -2,14 +2,16 @@ import { db } from '../../Configs/database.js';
 import { BaseRepository } from '../../Shared/Repositories/BaseRepository.js';
 import { Session, SessionProp } from '../../Shared/Auth/Session.js';
 
+import { Sessions } from '../../dbTypes/db.types.js';
+
 export class SessionRepository {
   // Composición: SessionRepository "tiene un" BaseRepository en lugar de "ser un" BaseRepository
-  private readonly base: BaseRepository<SessionProp, SessionProp, Partial<SessionProp>>;
+  private readonly base: BaseRepository<SessionProp, Sessions, Partial<Sessions>>;
   private readonly tableName = 'sessions';
 
   constructor() {
     // Le pasamos el nombre de la tabla y la columna clave primaria ("session_id")
-    this.base = new BaseRepository<SessionProp, SessionProp, Partial<SessionProp>>(this.tableName, 'session_id');
+    this.base = new BaseRepository<SessionProp, Sessions, Partial<Sessions>>(this.tableName, 'session_id');
   }
   /**
    * Caché en memoria para las sesiones, provee un acceso mucho más rápido.
@@ -23,14 +25,18 @@ export class SessionRepository {
   saveSession(session: Session): boolean {
     const data = session.toJSON();
     
-    // SQLite no tiene booleanos, guardamos 1 o 0.
-    const sessionDataToSave = {
-      ...data,
-      rolling: data.rolling ? 1 : 0
-    } as unknown as SessionProp;
+    const sessionDataToSave: Sessions = {
+      session_id: data.sessionId,
+      user_id: data.userId,
+      username: data.username,
+      role: data.role,
+      created_at: data.createdAt,
+      expires_at: data.expiresAt,
+      rolling: data.rolling
+    };
 
     // Guardamos la sesión localmente (caché)
-    this.#sessionStore.set(sessionDataToSave.sessionId, sessionDataToSave);
+    this.#sessionStore.set(data.sessionId, data);
 
     // Usamos el método genérico del BaseRepository
     const response = this.base.create(sessionDataToSave);
@@ -67,7 +73,7 @@ export class SessionRepository {
       role: result.role,
       createdAt: result.createdAt,
       expiresAt: result.expiresAt,
-      rolling: Boolean(result.rolling) // Volvemos de 1/0 a true/false
+      rolling: result.rolling
     };
 
     return new Session(sessionProp);
@@ -86,8 +92,8 @@ export class SessionRepository {
     }
 
     // Solo actualizamos lo necesario a través del BaseRepository
-    const updateData = {
-      expiresAt: data.expiresAt
+    const updateData: Partial<Sessions> = {
+      expires_at: data.expiresAt
     };
     
     const response = this.base.update(data.sessionId, updateData);

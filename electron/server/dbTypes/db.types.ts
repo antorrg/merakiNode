@@ -8,8 +8,8 @@ export interface Users {
   user_name?: string
   role: string
   enabled?: boolean
-  created_at: Date
-  updated_at: Date
+  created_at: string
+  updated_at: string
 }
 
 export interface Patients {
@@ -19,18 +19,31 @@ export interface Patients {
   last_name?: string
   type_doc?: string
   identity_code?: string
+  birth_date: string
+  age?: number
   phone?: string
   address?: string
   city?: string
   postal_code?: string
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date
+  created_at: string
+  updated_at: string
+  deleted_at?: string
+}
+
+export interface PatientRelations {
+  relation_id?: string
+  guardian_id: string
+  dependent_id: string
+  relationship_type?: string
+  is_primary_contact?: boolean
+  created_at: string
+  updated_at: string
 }
 
 export interface HistoryEntry {
   history_id?: string
   patient_id: string
+  userId: string
   visit_date?: string
   reason?: string
   diagnosis?: string
@@ -39,9 +52,9 @@ export interface HistoryEntry {
   tratment_plan?: string
   recomendations?: string
   professional_name?: string
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date
+  created_at: string
+  updated_at: string
+  deleted_at?: string
 }
 
 export interface Diagnosis {
@@ -49,12 +62,12 @@ export interface Diagnosis {
   patient_id: string
   title?: string
   description?: string
-  start_date: Date
-  end_date?: Date
+  start_date: string
+  end_date?: string
   status?: string
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date
+  created_at: string
+  updated_at: string
+  deleted_at?: string
 }
 
 export interface Treatment {
@@ -64,9 +77,9 @@ export interface Treatment {
   description?: string
   frequency?: string
   objective?: string
-  created_at: Date
-  updated_at: Date
-  deleted_at?: Date
+  created_at: string
+  updated_at: string
+  deleted_at?: string
 }
 
 export interface Sessions {
@@ -79,13 +92,20 @@ export interface Sessions {
   rolling?: boolean
 }
 
-export interface PatientRelations {
-  relation_id?: string
-  guardian_id: string
-  dependent_id: string
-  relationship_type?: string
-  is_primary_contact?: boolean
-  created_at: Date
-  updated_at: Date
+export interface Logs {
+  id?: number
+  level_name: string
+  level_code?: number
+  message: string
+  type?: string
+  status?: number
+  stack?: string
+  contexts?: string
+  pid: number
+  time?: number
+  hostname?: string
+  keep?: boolean
+  created_at: string
+  updated_at: string
 }
 

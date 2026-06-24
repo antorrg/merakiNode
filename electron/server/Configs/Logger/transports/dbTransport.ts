@@ -1,18 +1,34 @@
 import { Writable } from 'stream'
-import { Log } from '../../database.js'
+import { BaseRepository } from '../../../Shared/Repositories/BaseRepository.js'
+import { Logs } from '../../../dbTypes/db.types.js'
 
+export interface PinoLog {
+  level: number;
+  msg: string;
+  pid: number;
+  time: number;
+  hostname: string;
+  err?: {
+    type?: string;
+    status?: number;
+    stack?: string;
+    contexts?: unknown[];
+  };
+  [key: string]: unknown;
+}
+
+const repo = new BaseRepository<Logs, Omit<Logs, 'id'|'created_at'|'updated_at'>, Partial<Logs>>('logs', 'id', false, false)
 function dbTransport () {
-  return async function saveToDb (logObject: Record<string, any>) {
+  return async function saveToDb (logObject: string | PinoLog) {
     try {
       // Si el transport envía strings, parseamos. Si es objeto, lo usamos directo.
-      const obj = typeof logObject === 'string'
+      const obj = (typeof logObject === 'string'
         ? JSON.parse(logObject)
-        : logObject
+        : logObject) as PinoLog
 
       // Filtramos logs de error / fatal (>= 50)
-      //console.log(normalizedLog(obj))
       if (obj?.level >= 50) {
-        await Log.create(normalizedLog(obj))
+        repo.create(normalizedLog(obj))
       }
     } catch (error) {
       console.error('Error guardando log en DB:', error)
@@ -25,16 +41,17 @@ export function dbWritableStream () {
 
   return new Writable({
     objectMode: true,
-    async write (chunk, enc, next) {
+    async write (chunk, _enc, next) {
       try {
         await handler(chunk)
         next()
-      } catch (err: any) {
-        next(err)
+      } catch (err: unknown) {
+        next(err instanceof Error ? err : new Error(String(err)))
       }
     }
   })
 }
+
 const pinoLevels: Record<number, string> = {
   10: 'Trace',
   20: 'Debug',
@@ -47,15 +64,17 @@ const pinoLevels: Record<number, string> = {
 export function levelToText(level: number) {
   return pinoLevels[level] ?? 'unknown';
 }
-const normalizedLog = (log:any)=>({
-  levelName: levelToText(log.level),//string
-  levelCode: log.level,//number
-  message: log.msg, //string
-  type: log.err?.type ?? null,     // 👈 Aquí
-  status: log.err?.status ?? null,//number
-  stack: log.err?.stack ?? null, //jsonb
-  contexts: log.err?.contexts ?? [],//string
-  pid: log.pid,//number
-  time:log.time,//number
-  hostname: log.hostname //string
+
+const normalizedLog = (log: PinoLog): Omit<Logs, 'id'|'created_at'|'updated_at'> => ({
+  level_name: levelToText(log.level),
+  level_code: log.level,
+  message: log.msg,
+  type: log.err?.type ?? undefined,
+  status: log.err?.status ?? undefined,
+  stack: log.err?.stack ?? undefined,
+  contexts: JSON.stringify(log.err?.contexts ?? []),
+  pid: log.pid,
+  time: log.time,
+  hostname: log.hostname,
+  keep: false
 });

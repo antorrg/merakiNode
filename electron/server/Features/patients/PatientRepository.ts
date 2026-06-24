@@ -3,35 +3,22 @@ import { db } from '../../Configs/database.js';
 import { CaseConverter } from '../../Shared/Utils/CaseConverter.js';
 import { PatientProps, GuardianRelation } from './Patient.js';
 
-export interface PatientPersistence {
-  patient_id: string;
-  email: string | null;
-  first_name: string;
-  last_name: string;
-  type_doc: string;
-  identity_code: string;
-  birth_date: string;
-  age: number;
-  phone: string | null;
-  address: string;
-  city: string;
-  postal_code: string;
-}
+import { Patients } from '../../dbTypes/db.types.js';
 
-export interface GuardianRelationRow extends PatientPersistence {
+export interface GuardianRelationRow extends Patients {
   relationId: string;
   relationshipType: string;
   isPrimaryContact: number;
 }
 
 export class PatientRepository {
-  private baseRepo: BaseRepository<PatientProps, PatientPersistence, Partial<PatientPersistence>>;
+  private baseRepo: BaseRepository<PatientProps, Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>, Partial<Patients>>;
 
   constructor() {
-    this.baseRepo = new BaseRepository<PatientProps, PatientPersistence, Partial<PatientPersistence>>('patients', 'patient_id', true);
+    this.baseRepo = new BaseRepository<PatientProps, Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>, Partial<Patients>>('patients', 'patient_id', true);
   }
 
-  create(patientData: PatientPersistence, relations: GuardianRelation[]): string {
+  create(patientData: Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>, relations: GuardianRelation[]): string {
     const insertTransaction = db.db.transaction(() => {
       // 1. Guardar el paciente principal
       this.baseRepo.create(patientData);
@@ -55,7 +42,7 @@ export class PatientRepository {
     });
     
     insertTransaction();
-    return patientData.patient_id;
+    return patientData.patient_id as string;
   }
 
   getById(id: string): PatientProps | null {
@@ -95,7 +82,7 @@ export class PatientRepository {
     return patientProps;
   }
 
-  update(id: string, patientData: Partial<PatientPersistence>) {
+  update(id: string, patientData: Partial<Patients>) {
     return this.baseRepo.update(id, patientData);
   }
 

@@ -18,7 +18,7 @@ export interface ILogger {
 export interface LoggerCreate {
   level: string
   message: string
-  data?: Record<string, any> | null
+  data?: Record<string, unknown> | null
 }
 
 export type LoggerUpdate = Pick<ILogger, 'keep'>

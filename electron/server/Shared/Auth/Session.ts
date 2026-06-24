@@ -107,21 +107,19 @@ export class Session{
         }
     }
     static LevelRoles: Record<string, number> = Object.freeze({
-        ADMIN: 9,
-        MODERATOR: 3,
-        MECANICO: 2,
+        PROPIETARIO: 9,
+        ADMIN: 3,
         USER: 1
     })
 
-    static #convertRole(p: number | string): string | number {
+    static #convertRole(p: number | string): number {
         if (typeof p === 'number') {
-            return Object.keys(Session.LevelRoles).find(
-                k => Session.LevelRoles[k] === p
-            )?.toString() ?? 'USER'
+            return p
         }
 
         const key = p.trim()
-        return Number(Session.LevelRoles[key]) ?? Number(Session.LevelRoles.USER)
+        const val = Session.LevelRoles[key]
+        return typeof val === 'number' ? val : Session.LevelRoles.USER
     }
 
 }

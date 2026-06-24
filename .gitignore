@@ -8,6 +8,11 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
+release
+release/
+dist-electron/
+*.asar
+*.zip
 dist
 dist-ssr
 *.local

@@ -1,5 +1,5 @@
 import { ErrorCode, type ErrorCodeType } from './errorCode.js'
-import type { IpcMainInvokeEvent } from 'electron'
+import logger from '../logger.js'
 
 
 export interface ServerActionError {
@@ -83,11 +83,14 @@ class CustomError extends Error {
     const normalized = this.processError(err, context)
 
     if (this.log) {
-      console.error(
+      logger.error(
         {
-          code: normalized.code,
-          contexts: normalized.contexts,
-          message: normalized.message
+          err: {
+            type: 'AppError',
+            status: normalized.code === ErrorCode.INTERNAL_ERROR ? 500 : 400,
+            contexts: normalized.contexts,
+            stack: err instanceof Error ? err.stack : undefined
+          }
         },
         normalized.message
       )

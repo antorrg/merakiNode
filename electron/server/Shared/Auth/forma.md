@@ -1,3 +1,6 @@
+
+# Forma login
+
 Sí: para React enviaría **un objeto de sesión público**, pero **no el objeto interno completo**.
 
 Separaría dos cosas:

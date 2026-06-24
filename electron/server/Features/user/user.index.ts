@@ -7,8 +7,8 @@ import { userService } from '../../Shared/dependencies.js';
 
 export default {
 
-createUser: async(data:any)=>{
-    const valid = NodeValidator.validateBody(data as any, sch.createUserSchema)
+createUser: async(data: unknown)=>{
+    const valid = NodeValidator.validateBody(data, sch.createUserSchema)
     const response = await userService.createUser(valid)
     return response
 },
@@ -19,25 +19,30 @@ getUserById: (userId:string)=>{
     const validId = NodeValidator.paramId('userId',userId, NodeValidator.ValidReg.UUIDv4)
     return userService.getById(validId)
 },
-updateUserProfile: (data:any)=>{
+updateUserProfile: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.updateProfileSchema)
     const {userId, rest} = NodeValidator.splitObjectProps(validData, ['userId'])
     const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
-    return userService.updateProfile(validId, rest)
+    const updateData: import('./User.js').UserUpdate = {
+        userEmail: (rest as any).email as string,
+        userName: (rest as any).name as string,
+        nickname: (rest as any).nickname as string | null
+    };
+    return userService.updateProfile(validId, updateData)
 },
-updateStatusUser: (data:any)=>{
+updateStatusUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changeStatusSchema)
     const {userId, enabled} = NodeValidator.splitObjectProps(validData, ['userId'])
     const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
     return userService.changeStatus(validId, enabled as boolean)
 },
-updateRoleUser: (data:any)=>{
+updateRoleUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changeRoleSchema)
     const {userId, role} = NodeValidator.splitObjectProps(validData, ['userId'])
     const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
     return userService.changeRole(validId, role)
 },
-updatePasswordUser: (data:any)=>{
+updatePasswordUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changePasswordSchema)
     const {userId, password, newPassword} = NodeValidator.splitObjectProps(validData, ['userId'])
     const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)

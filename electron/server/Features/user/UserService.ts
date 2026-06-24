@@ -5,18 +5,29 @@ import { BooleanConverter } from '../../Shared/Utils/BooleanConverter.js';
 import { throwError} from '../../Configs/Errors/ErrorHandler.js';
 import { ErrorCode } from '../../Configs/Errors/errorCode.js';
 
+
+type UserDataInput = Partial<UserProps> & {
+  user_id?: string;
+  user_email?: string;
+  email?: string;
+  user_name?: string | null;
+  name?: string | null;
+  created_at?: string;
+  updated_at?: string;
+};
+
 export class UserService {
 
   constructor(private userRepository: UserRepository) {}
-  private parser(data:any){
+  private parser(data: UserDataInput, isPublic:boolean = false): UserProps {
     return {
-      userId: data.userId || data.user_id,
-      userEmail: data.userEmail || data.user_email || data.email,
-      password:  data.password,
-      nickname: data.nickname,
-      userName: data.userName || data.user_name || data.name,
-      role: data.role,
-      enabled: typeof data.enabled === 'boolean' ? data.enabled : BooleanConverter.intToBool(data.enabled),
+      userId: (data.userId || data.user_id) as string,
+      userEmail: (data.userEmail || data.user_email || data.email) as string,
+      password:  isPublic? '' : data.password,
+      nickname: data.nickname || null,
+      userName: (data.userName || data.user_name || data.name) || null,
+      role: data.role as string,
+      enabled: typeof data.enabled === 'boolean' ? data.enabled : BooleanConverter.intToBool((data.enabled as number) ?? 1),
       createdAt: data.createdAt || data.created_at,
       updatedAt: data.updatedAt || data.updated_at
     }
@@ -24,7 +35,6 @@ export class UserService {
 
 
   async createUser(userData: { userEmail: string; password?: string, role?:string }) {
-    try {
       const record = await this.userRepository.findByEmail(userData.userEmail);
       if(record) throwError('Email is already registered',ErrorCode.DATA_CONFLICT);
       
@@ -38,51 +48,32 @@ export class UserService {
 
       await this.userRepository.create(user.toPersistence());
       return user.toDTO();
-    } catch (error: any) {
-      // Manejo de errores específicos (ej: constraint unique email)
-      if (error.code === '23505') throwError('Email is already registered', ErrorCode.DATA_CONFLICT);
-      
-      // Errores de validación del Dominio (arrojan mensajes 'Invalid...' o 'Missing...')
-      if (error.message && (error.message.includes('Invalid') || error.message.includes('Missing'))) {
-        throwError(error.message, ErrorCode.VALIDATION_ERROR);
-      }
-
-      throw error;
-    }
   }
 
   async getAll() {
-    try {
       const records = await this.userRepository.getAll();
       return records!.map((r: UserProps) => {
-        const parsed = this.parser(r);
-        const { password, ...safeUser } = parsed;
-        return safeUser;
+        const parsed = this.parser(r, true);
+        // const { password, ...safeUser } = parsed;
+        // password
+        return parsed
       });
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 
   async getById(userId: string) {
-    try {
       const record = await this.userRepository.getById(userId);
       
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       return user.toDTO();
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 
   async changeStatus(userId: string, enabled: boolean) {
-    try {
       const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       
       // Aplicamos dominio para variar estatus
       if(enabled===true) {
@@ -91,61 +82,45 @@ export class UserService {
         user.disableUser();
       }
       
-      await this.userRepository.update(userId, user.toPersistence() as any);
+      await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();
-    } catch (error: unknown) {
-      throw error;
-    }
   }
   async changeEmail(userId: string, email: string){
-       try {
       const exists = await this.userRepository.findByEmail(email);
       if(exists) throwError('Email is already registered', ErrorCode.DATA_CONFLICT);
       const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found',ErrorCode.NOT_FOUND);
 
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       user.changeEmail(email);
       
-      await this.userRepository.update(userId, user.toPersistence() as any);
+      await this.userRepository.update(userId, user.toPersistence() );
       return user.toDTO();
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 
-  async updateProfile(userId: string, updateData: any) {
-    try {
+  async updateProfile(userId: string, updateData: import('./User.js').UserUpdate) {
       const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       user.updateProfile(updateData);
       
-      await this.userRepository.update(userId, user.toPersistence() as any);
+      await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 
   async changeRole(userId: string, newRole: string) {
-    try {
       const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       user.changeRole(newRole);
       
-      await this.userRepository.update(userId, user.toPersistence() as any);
+      await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 
   async changePassword(userId: string, currentPassword: string, newPassword: string) {
-    try {
       const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
@@ -157,18 +132,14 @@ export class UserService {
       const hashedNewPassword = await Hasher.hash(newPassword);
 
       // Aplicamos el cambio
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       user.changePassword(hashedNewPassword);
       
-      await this.userRepository.update(userId, user.toPersistence() as any);
+      await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 
   async authenticate(email: string, plainPassword: string) {
-    try {
       const record = await this.userRepository.findByEmail(email);
       
       // Mensaje ambiguo intencional por seguridad (OWASP)
@@ -177,11 +148,7 @@ export class UserService {
       const isMatch = await Hasher.compare(plainPassword, record!.password as string);
       if (!isMatch) throwError('Invalid email or password', ErrorCode.ACCESS_DENIED);
 
-      const user = new User(this.parser(record));
+      const user = new User(this.parser(record!));
       return user.toDTO();
-
-    } catch (error: unknown) {
-      throw error;
-    }
   }
 }
