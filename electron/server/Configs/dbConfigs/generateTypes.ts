@@ -30,7 +30,7 @@ export function generateTypes(db: Database.Database) {
     FROM sqlite_master
     WHERE type = 'table' AND name NOT LIKE 'sqlite_%';
   `).all() as { name: string }[];
-  console.log('va a ser engorroso de leer: ',tables)
+  console.log('Better-sqlite creo las tablas: ',tables)
 
   let output = `// AUTO-GENERATED FILE — DO NOT EDIT\n\n`
 

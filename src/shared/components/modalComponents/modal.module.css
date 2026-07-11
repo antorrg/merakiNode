@@ -1,0 +1,46 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+  backdrop-filter: blur(3px); /* Un pequeño efecto de cristal en el fondo */
+  animation: fadeIn 0.2s ease-out;
+}
+
+.modalCard {
+  background-color: #ffffff;
+  border-radius: 16px;
+  padding: 32px;
+  max-width: 90%;
+  width: 450px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  /* Animación tipo 'pop' similar a SweetAlert */
+  animation: scaleUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  color: #333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleUp {
+  from { 
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to { 
+    opacity: 1;
+    transform: scale(1);
+  }
+}

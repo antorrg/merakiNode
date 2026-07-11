@@ -91,15 +91,15 @@ describe('Session', () => {
     describe('hasAccess (Validación de Roles)', () => {
         it('debería dar acceso si el rol es mayor o igual al requerido', () => {
             const adminSession = Session.createSession({ ...validSessionData, role: 'ADMIN' })
+            expect(adminSession.hasAccess('PROPIETARIO')).toBe(false)
             expect(adminSession.hasAccess('ADMIN')).toBe(true)
-            expect(adminSession.hasAccess('MODERATOR')).toBe(true)
             expect(adminSession.hasAccess('USER')).toBe(true)
         })
 
         it('debería denegar el acceso si el usuario tiene un nivel menor al requerido', () => {
             const userSession = Session.createSession({ ...validSessionData, role: 'USER' })
+            expect(userSession.hasAccess('PROPIETARIO')).toBe(false)
             expect(userSession.hasAccess('ADMIN')).toBe(false)
-            expect(userSession.hasAccess('MECANICO')).toBe(false)
             expect(userSession.hasAccess('USER')).toBe(true)
         })
     })

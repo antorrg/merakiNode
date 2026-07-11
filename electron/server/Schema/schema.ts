@@ -57,23 +57,24 @@ export const patient_relations: Table = {
 export const history_entry: Table = {
   name: 'history_entry',
   sql: `CREATE TABLE IF NOT EXISTS history_entry (
-    history_id TEXT PRIMARY KEY,
+    entry_id TEXT PRIMARY KEY,
     patient_id TEXT NOT NULL,
-    userId TEXT NOT NULL,
+    professional_id TEXT NOT NULL,
+    visit_type TEXT,
     visit_date TEXT,
     reason TEXT,
-    diagnosis TEXT,
+    diagnosis_summary TEXT,
     observations TEXT,
     evolution TEXT,
-    tratment_plan TEXT,
-    recomendations TEXT,
-    professional_name TEXT,
+    treatment_plan TEXT,
+    recommendations TEXT,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATETIME DEFAULT NULL,
-    FOREIGN KEY(patient_id) REFERENCES patients(patient_id) ON UPDATE CASCADE
+    FOREIGN KEY(patient_id) REFERENCES patients(patient_id) ON UPDATE CASCADE,
+    FOREIGN KEY(professional_id) REFERENCES users(user_id) ON UPDATE CASCADE
   );`,
-  deps: ['patients']
+  deps: ['patients', 'users']
 };
 
 export const diagnosis:Table = {
@@ -98,15 +99,17 @@ export const treatment: Table = {
   name: 'treatment',
   sql: `CREATE TABLE IF NOT EXISTS treatment (
   treatment_id TEXT PRIMARY KEY,
-  history_id TEXT NOT NULL,
+  entry_id TEXT NOT NULL,
   name TEXT,
   description TEXT,
   frequency TEXT,
   objective TEXT,
+  start_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  end_date DATETIME,
   created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   deleted_at DATETIME DEFAULT NULL,
-  FOREIGN KEY(history_id) REFERENCES history_entry(history_id) ON UPDATE CASCADE
+  FOREIGN KEY(entry_id) REFERENCES history_entry(entry_id) ON UPDATE CASCADE
   );`,
   deps: ['history_entry']
 }

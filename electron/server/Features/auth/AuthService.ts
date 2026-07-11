@@ -11,6 +11,19 @@ export class AuthService {
   ) {}
 
   /**
+   * Chequea la existencia de usuarios
+   */
+  async checkUsers(){
+    return await this.userService.checkUsers()
+  }
+  /**
+   * Crea un nuevo usuario inicial
+   */
+  async createInitalOwner (userData: {email:string, username:string}){
+    return await this.userService.createInitalOwner(userData)
+  }
+
+  /**
    * Autentica al usuario usando credenciales y genera una sesión stateful.
    */
   async login(data: { email: string; password: string }, rolling: boolean = true) {

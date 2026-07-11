@@ -1,0 +1,31 @@
+// 1. Core Variables (Brand colors)
+// These should be hex values for Sass to perform color math (darken, lighten, etc.)
+$primary:       #3456ec !default; // Indigo
+$secondary:     #64748b !default;
+$success:       #22c55e !default;
+$info:          #06d4c3 !default;
+$warning:       #f59e0b !default;
+$danger:        #ef4444 !default;
+$light:         #f8fafc !default;
+$dark:          #0d1321 !default;
+
+// 2. Map merging
+// This allows Bootstrap to generate utilities for our custom colors
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+) !default;
+
+// 3. Global settings
+$enable-dark-mode: true;
+$enable-css-custom-properties: true;
+
+// 4. Layout & Typography
+$font-family-base: 'Inter', system-ui, -apple-system, sans-serif !default;
+$border-radius: 0.625rem !default;

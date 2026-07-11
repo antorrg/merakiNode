@@ -1,10 +1,10 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, Tray, Menu } from 'electron'
 
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { startUp } from './server/Configs/database.js'
 import { registerAllIpc } from './server/index.server.js'
-import {fillDbWithSeeds} from '../seeds/initApp.js'
+//import {fillDbWithSeeds} from '../seeds/initApp.js'
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -28,12 +28,21 @@ export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist')
 process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL ? path.join(process.env.APP_ROOT, 'public') : RENDERER_DIST
 
 let win: BrowserWindow | null
+let tray: Tray | null = null
+let isQuitting:boolean = false
 
 function createWindow() {
+  const iconPath = path.join(process.env.VITE_PUBLIC, 'merakifav.png');
+  
   win = new BrowserWindow({
-    icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    icon: iconPath,
+    width: 900,
+    height: 680,
+    autoHideMenuBar: true, // Oculta el menú tipo navegador (Archivo, Editar, etc.)
     webPreferences: {
       preload: path.join(__dirname, 'preload.mjs'),
+      contextIsolation: true,
+      nodeIntegration: false,
     },
   })
 
@@ -48,16 +57,68 @@ function createWindow() {
     // win.loadFile('dist/index.html')
     win.loadFile(path.join(RENDERER_DIST, 'index.html'))
   }
+
+  // --- Lógica del System Tray (Bandeja del Sistema) ---
+  tray = new Tray(iconPath)
+  
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Abrir Meraki', click: () => {
+      if (win && !win.isDestroyed()) {
+          win.show()
+          win.focus()
+        }
+      } 
+    },
+    { type: 'separator' },
+    { label: 'Salir', 
+      click: () =>{ 
+        isQuitting = true
+        tray?.destroy()
+        app.quit() 
+    }}
+  ])
+  
+  tray.setToolTip('Meraki')
+  tray.setContextMenu(contextMenu)
+
+  // Opcional: Que un clic izquierdo en el icono de la bandeja abra/enfoque la app
+  tray.on('click', () => {
+    if (win) {
+      if (win.isVisible()) {
+        win.focus()
+      } else {
+        win.show()
+      }
+    }
+  })
+
+  // Opcional: "Minimizar a la bandeja" (la ventana desaparece de la barra de tareas)
+  // Si deseas que quede en la barra Y en la bandeja, borra o comenta esto:
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  win.on('minimize', (event: any) => {
+    event.preventDefault()
+    win?.hide()
+  })
+  win.on('close', (event) => {
+  if (!isQuitting) {
+    event.preventDefault()
+    win?.hide()
+  }
+})
+
+win.on('closed', () => {
+  win = null
+})
 }
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-    win = null
-  }
+//   if (process.platform !== 'darwin') {
+//     app.quit()
+//     win = null
+//   }
 })
 
 app.on('activate', () => {
@@ -72,7 +133,7 @@ app.on('activate', () => {
 async function bootstrap (){
   try {
     await startUp(true)
-    await fillDbWithSeeds()
+    //await fillDbWithSeeds()
     await app.whenReady()
     registerAllIpc()
     createWindow()

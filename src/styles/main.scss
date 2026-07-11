@@ -1,0 +1,31 @@
+// 1. Configuration & Variables (Sass)
+@use "bootstrap-variables" as vars;
+
+// 2. Bootstrap Core with Configuration
+@use "bootstrap/scss/bootstrap" with (
+  $primary: vars.$primary,
+  $secondary: vars.$secondary,
+  $success: vars.$success,
+  $info: vars.$info,
+  $warning: vars.$warning,
+  $danger: vars.$danger,
+  $light: vars.$light,
+  $dark: vars.$dark,
+  $theme-colors: vars.$theme-colors,
+  $font-family-base: vars.$font-family-base,
+  $border-radius: vars.$border-radius);
+
+// 3. Theme Tokens (CSS Variables)
+@use "tokens-light";
+@use "tokens-dark";
+
+// 4. Custom Overrides & Components
+@use "overrides";
+
+@use "custom-styles";
+
+// 5. Global Styles
+body {
+  transition: background-color .3s ease, color .3s ease;
+  min-height: 100vh;
+}

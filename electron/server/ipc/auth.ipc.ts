@@ -23,5 +23,19 @@ export function authIpc () {
             (_event, sessionId)=> auth.logout(sessionId),
             'auth:logout'
         )
+    ),
+    ipcMain.handle(
+        'auth:check-users',
+        wrapIpcHandler(
+            (_event, )=>auth.checkUsers(),
+            'auth:check-users'
+        )
+    ),
+        ipcMain.handle(
+        'auth:create-initial-owner',
+        wrapIpcHandler(
+            (_event, data)=>auth.createInitialOwner(data),
+            'auth:create-initial-owner'
+        )
     )
 }

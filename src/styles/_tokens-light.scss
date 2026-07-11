@@ -1,0 +1,12 @@
+[data-bs-theme="light"],
+:root {
+	--bs-body-bg: #ffffff;
+	--bs-body-color: #0f172a;
+
+	// Custom brand colors (must match $primary, etc. in _bootstrap-variables.scss)
+	--bs-primary: #2d30f3;
+	--bs-secondary: #64748b;
+
+	// Custom properties for components
+	--bs-border-radius: 0.625rem;
+}

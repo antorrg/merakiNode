@@ -4,6 +4,7 @@ import { Hasher } from '../../Shared/Utils/Hasher.js';
 import { BooleanConverter } from '../../Shared/Utils/BooleanConverter.js';
 import { throwError} from '../../Configs/Errors/ErrorHandler.js';
 import { ErrorCode } from '../../Configs/Errors/errorCode.js';
+import { InitialUser } from './InitialUser.js';
 
 
 type UserDataInput = Partial<UserProps> & {
@@ -33,7 +34,23 @@ export class UserService {
     }
   }
 
-
+  async checkUsers(){
+    return await this.userRepository.checkUsers()
+  }
+  async createInitalOwner(userData:{email: string, username:string}){
+    const newPassword = InitialUser.generatePassword(12)
+    const userMsg = `email: ${userData.email}\n\nNombre de usuario: ${userData.username}\n\nContrasena: ${newPassword}\n\nSu rol es 'PROPIETARIO'\n\n\nNo pierda este archivo, sin el no tendra\nacceso a la aplicacion.`
+    const hashedNewPassword = await Hasher.hash(newPassword)
+        const newInitialUser = User.register({
+        userEmail: userData.email,
+        password: hashedNewPassword,
+        userName: userData.username,
+        role: 'PROPIETARIO'
+      });
+      await this.userRepository.create(newInitialUser.toPersistence());
+      await InitialUser.writePassword(userMsg, 'meraki-propietario')
+      return newInitialUser.toDTO();
+  }
   async createUser(userData: { userEmail: string; password?: string, role?:string }) {
       const record = await this.userRepository.findByEmail(userData.userEmail);
       if(record) throwError('Email is already registered',ErrorCode.DATA_CONFLICT);

@@ -41,17 +41,17 @@ export interface PatientRelations {
 }
 
 export interface HistoryEntry {
-  history_id?: string
+  entry_id?: string
   patient_id: string
-  userId: string
+  professional_id: string
+  visit_type?: string
   visit_date?: string
   reason?: string
-  diagnosis?: string
+  diagnosis_summary?: string
   observations?: string
   evolution?: string
-  tratment_plan?: string
-  recomendations?: string
-  professional_name?: string
+  treatment_plan?: string
+  recommendations?: string
   created_at: string
   updated_at: string
   deleted_at?: string
@@ -72,11 +72,13 @@ export interface Diagnosis {
 
 export interface Treatment {
   treatment_id?: string
-  history_id: string
+  entry_id: string
   name?: string
   description?: string
   frequency?: string
   objective?: string
+  start_date: string
+  end_date?: string
   created_at: string
   updated_at: string
   deleted_at?: string

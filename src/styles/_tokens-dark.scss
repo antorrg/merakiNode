@@ -1,0 +1,12 @@
+[data-bs-theme="dark"] {
+	--bs-body-bg: #0f172a;
+	--bs-body-color: #f1f5f9;
+
+	// Custom brand colors for dark mode (can be slightly different for better contrast)
+	--bs-primary: #0e25f1; // Lighter indigo for dark mode
+	--bs-secondary: #94a3b8;
+
+	// Components
+	--bs-card-bg: #1e293b;
+	--bs-border-color: #334155;
+}

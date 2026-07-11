@@ -14,7 +14,7 @@ export interface UserProps {
   updatedAt?: string;
 }
 
-export type UserCreate = {userEmail:string, password?:string, role:string}
+export type UserCreate = {userEmail:string, userName?:string|null, password?:string, role:string}
 export type UserUpdate = Omit<UserProps, 'userId'|'password'| 'role'| 'enabled'|'createdAt'|'updatedAt'>
 
 export class User {
@@ -55,13 +55,13 @@ export class User {
        if(typeof prop !== 'boolean') throw new Error('Invalid enabled')
         return prop
   }
-  static register({userEmail, password, role}:UserCreate){
+  static register({userEmail,userName, password, role}:UserCreate){
    if(!userEmail || !password || !role) throw new Error('Missing parameters')
    return new User({
         userId: UuidHandler.idCreator(),
         userEmail: userEmail,
         password: password,
-        userName: 'No name',
+        userName: userName ?? 'No name',
         nickname: userEmail?.split('@')[0] ?? 'user',
         role: role,
         enabled: true
@@ -91,6 +91,7 @@ updateProfile(user: UserUpdate){
 changeEmail(email:string) {
     this.userEmail = UserApplications.Email(email)
   }
+
 
   // Mapeos para Infraestructura (DB) y Cliente (DTO)
   toPersistence() {

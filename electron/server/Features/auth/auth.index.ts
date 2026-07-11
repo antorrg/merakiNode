@@ -14,5 +14,11 @@ export default {
   },
   logout: (sessionId: string)=>{
     return authService.logout(sessionId)
+  },
+  checkUsers: () => {
+    return authService.checkUsers()
+  },
+  createInitialOwner: (data: {email: string, username: string})=>{
+    return authService.createInitalOwner(data)
   }
 }

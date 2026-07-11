@@ -38,4 +38,9 @@ export class UserRepository {
     const result = this.db.db.prepare(sql).get(email)
     return result ? CaseConverter.mapKeysToCamelCase(result) as UserProps : null;
   }
+  async checkUsers(): Promise<boolean> {
+    const sql = `SELECT EXISTS(SELECT 1 FROM users)`;
+    const exists = this.db.db.prepare(sql).pluck().get();
+    return Boolean(exists);
+  }
 }

@@ -13,7 +13,7 @@ export interface AppError {
   contexts: string[]
 }
 
-class CustomError extends Error {
+export class CustomError extends Error {
   public log: boolean
   constructor(log: boolean = false) {
     super()
@@ -44,11 +44,12 @@ class CustomError extends Error {
     let normalized: AppError
 
     if (err instanceof Error) {
+      const appErr = err as Error & { code?: ErrorCodeType; contexts?: string[] }
       normalized = {
-        code: (err as any).code ?? ErrorCode.INTERNAL_ERROR,
+        code: appErr.code ?? ErrorCode.INTERNAL_ERROR,
         message: err.message,
-        contexts: Array.isArray((err as any).contexts)
-          ? (err as any).contexts
+        contexts: Array.isArray(appErr.contexts)
+          ? appErr.contexts
           : []
       }
     } else {
@@ -68,7 +69,7 @@ class CustomError extends Error {
   }
 
   processAndThrow = (err: unknown, context: string): never => {
-    const error = err instanceof Error ? err : new Error(String(err)) as any
+    const error = (err instanceof Error ? err : new Error(String(err))) as Error & { code?: ErrorCodeType; contexts?: string[] }
     
     if (!error.code) error.code = ErrorCode.INTERNAL_ERROR
     if (!Array.isArray(error.contexts)) error.contexts = []
@@ -102,7 +103,7 @@ class CustomError extends Error {
     }
   }
 
-  wrapIpcHandler = <TArgs = any, TResult = any>(
+  wrapIpcHandler = <TArgs = unknown, TResult = unknown>(
     handler: (event: Electron.IpcMainInvokeEvent, payload: TArgs) => Promise<TResult>,
     context: string
   ) => {

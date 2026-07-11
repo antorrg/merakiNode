@@ -1,11 +1,11 @@
 import { UuidHandler } from "../../Utils/UuidHandler"
-type Role = 'ADMIN' | 'MODERATOR' | 'MECANICO' | 'USER'
+type Role = 'PROPIETARIO'|'ADMIN'| 'USER'
 
 export class AuthApplications {
 
 
 
-  static #allowedRoles: Role[] = ['ADMIN', 'MODERATOR', 'MECANICO', 'USER']
+  static #allowedRoles: Role[] = ['PROPIETARIO','ADMIN', 'USER']
 
   static #uuidValidator(id: string): string {
     if (!id) {
