@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import SuccessModal from '../../shared/components/modalComponents/SuccessModal';
 
 const Login = () => {
     const { login, createOwner, hasOwner, isAuthenticated } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
+    const [isSuccessOpen, setIsSuccessOpen] = useState(false);
 
     // Si ya está autenticado, podríamos redirigirlo al dashboard
     if (isAuthenticated) {
@@ -58,6 +60,7 @@ const Login = () => {
             await createOwner(setupInput);
             // Al crearse con éxito, hasOwner pasará a true y se mostrará el form de Login
             setSetupInput({ email: '', username: '' });
+            setIsSuccessOpen(true);
         } catch (error) {
             console.error("Error al crear propietario", error);
         } finally {
@@ -186,6 +189,14 @@ const Login = () => {
                 </form>
             )}
         </main>
+
+        <SuccessModal
+            isOpen={isSuccessOpen}
+            onAccept={() => setIsSuccessOpen(false)}
+            title="Propietario Creado"
+            message="El usuario propietario ha sido creado. Revisa el archivo 'meraki-propietario.txt' en el directorio de la aplicación para ver tu contraseña generada."
+            buttonText="Entendido"
+        />
     </div>
   );
 };

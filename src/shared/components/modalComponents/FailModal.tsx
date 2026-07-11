@@ -1,6 +1,6 @@
 import Modal from './Modal'
 
-type FailodalProps = {
+type FailModalProps = {
   isOpen: boolean
   onAccept: () => void
   title?: string
@@ -11,10 +11,10 @@ type FailodalProps = {
 const FailModal = ({
   isOpen, 
   onAccept, 
-  title = "¡Érror!", 
+  title = "¡Error!", 
   message = "La operación no se pudo realizar.", 
   buttonText = "Aceptar"
-}: FailodalProps) => {
+}: FailModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onAccept}>
       <h2>{title}</h2>

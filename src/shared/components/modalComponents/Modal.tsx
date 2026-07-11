@@ -1,10 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import style from './modal.module.css'
 
 type ModalProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  children: any
+  children: ReactNode
   isOpen: boolean
   onClose: () => void
   styles?: {

@@ -80,7 +80,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         if (!response?.ok) {
             throw response?.error || new Error('No se pudo crear el propietario');
         }
-        toast.createInitUser('Propietario creado. Revisa el archivo meraki-propietario.txt para ver tu contraseña.', '¡Éxito!');
         setHasOwner(true); // Cambiamos el estado para que muestre el login
       } catch (error: any) {
         const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error al crear propietario');

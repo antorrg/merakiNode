@@ -34,6 +34,7 @@ describe('InitialUser', () => {
     it('should contain at least one uppercase letter and one symbol', () => {
       const password = InitialUser.generatePassword(20);
       const hasUpper = /[A-Z]/.test(password);
+      // eslint-disable-next-line no-useless-escape
       const hasSymbol = /[!@#$%&*()\-_¿+\[\]{};:<>\/?]/.test(password);
       
       expect(hasUpper).toBe(true);
@@ -53,7 +54,7 @@ describe('InitialUser', () => {
 
       // Verify fs.writeFile was called with correct path and content
       const expectedPath = path.join('/mocked/documents/path', `${testFileName}.txt`);
-      const expectedFileContent = `DOCUMENTO GENERADO AUTOMATICAMENTE, NO EDITAR\n${testContent}`;
+      const expectedFileContent = `DOCUMENTO GENERADO AUTOMATICAMENTE, NO EDITAR\n\n${testContent}`;
       
       expect(writeFile).toHaveBeenCalledWith(expectedPath, expectedFileContent, 'utf8');
     });

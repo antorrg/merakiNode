@@ -5,29 +5,33 @@ import crypto from 'node:crypto'
 
 export class InitialUser{
     static generatePassword(length = 12) {
-    const lower = 'abcdefghijklmnopqrstuvwxyz'
-    const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-    const digits = '0123456789'
-    const symbols = '!@#$%&*()-_¿+[]{};:<>/?'
 
-    const all = lower + digits + upper// + symbols
+     if (length < 4) throw new Error('length debe ser >= 4')
 
-    let password = ''
+      const lower = 'abcdefghijklmnopqrstuvwxyz'
+      const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+      const digits = '0123456789'
+      const symbols = '!@#$%&*()-_+[]{};:<>/?'
+      const all = lower + upper + digits + symbols
 
-    // 1. Garantizar al menos una mayúscula y un símbolo
-    password += upper[crypto.randomInt(upper.length)]
-    password += symbols[crypto.randomInt(symbols.length)]
+      const chars = [
+        lower[crypto.randomInt(lower.length)],
+        upper[crypto.randomInt(upper.length)],
+        digits[crypto.randomInt(digits.length)],
+        symbols[crypto.randomInt(symbols.length)],
+      ]
 
-    // 2. Completar el resto hasta el largo deseado
-    for (let i = 2; i < length; i++) {
-      password += all[crypto.randomInt(all.length)]
-    }
+      for (let i = chars.length; i < length; i++) {
+        chars.push(all[crypto.randomInt(all.length)])
+      }
 
-    // 3. Mezclar el resultado para que la mayúscula no quede siempre al principio
-    return password
-      .split('')
-      .sort(() => crypto.randomInt(2) - 1)
-      .join('')
+      // Fisher-Yates con crypto.randomInt (shuffle uniforme real)
+      for (let i = chars.length - 1; i > 0; i--) {
+        const j = crypto.randomInt(i + 1)
+        ;[chars[i], chars[j]] = [chars[j], chars[i]]
+      }
+
+      return chars.join('')
     }
     static async writePassword(value:string, nameFile: string='user'){
        const documentsPath = app.getPath('documents')
