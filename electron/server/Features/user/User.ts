@@ -14,7 +14,7 @@ export interface UserProps {
   updatedAt?: string;
 }
 
-export type UserCreate = {userEmail:string, userName?:string|null, password?:string, role:string}
+export type UserCreate = {userEmail:string, userName?:string|null, nickname?:string|null,password?:string, role:string}
 export type UserUpdate = Omit<UserProps, 'userId'|'password'| 'role'| 'enabled'|'createdAt'|'updatedAt'>
 
 export class User {
@@ -55,41 +55,32 @@ export class User {
        if(typeof prop !== 'boolean') throw new Error('Invalid enabled')
         return prop
   }
-  static register({userEmail,userName, password, role}:UserCreate){
+  static register({userEmail,userName, nickname, password, role}:UserCreate){
    if(!userEmail || !password || !role) throw new Error('Missing parameters')
    return new User({
         userId: UuidHandler.idCreator(),
         userEmail: userEmail,
         password: password,
         userName: userName ?? 'No name',
-        nickname: userEmail?.split('@')[0] ?? 'user',
+        nickname: nickname ?? userEmail?.split('@')[0],
         role: role,
         enabled: true
     })
-  }
-  // Métodos de dominio (cambios de estado autorizados)
-  disableUser() {
-    this.enabled = false;
-  }
-  enabledUser(){
-    this.enabled = true
   }
 
  changePassword(hashedPassword: string) {
     this.password = User.validatePasswordHash(hashedPassword);
   }
 
-changeRole(role:string) {
-    this.role = UserApplications.Role(role)
+changeStatus(data: {enabled:boolean, role:string}) {
+    this.enabled = User.validateEnabled(data.enabled)
+    this.role = UserApplications.Role(data.role)
   }
 
 updateProfile(user: UserUpdate){ 
         this.userEmail = user.userEmail
         this.userName = user.userName
         this.nickname = user.nickname
-  }
-changeEmail(email:string) {
-    this.userEmail = UserApplications.Email(email)
   }
 
 

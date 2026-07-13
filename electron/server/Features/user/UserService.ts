@@ -51,7 +51,7 @@ export class UserService {
       await InitialUser.writePassword(userMsg, 'meraki-propietario')
       return newInitialUser.toDTO();
   }
-  async createUser(userData: { userEmail: string; password?: string, role?:string }) {
+  async createUser(userData: { userEmail: string; userName:string, nickname?: string|undefined, password?: string, role?:string }) {
       const record = await this.userRepository.findByEmail(userData.userEmail);
       if(record) throwError('Email is already registered',ErrorCode.DATA_CONFLICT);
       
@@ -59,6 +59,8 @@ export class UserService {
       
       const user = User.register({
         userEmail: userData.userEmail,
+        userName: userData.userName ?? 'User',
+        nickname: userData.nickname,
         password: hashedPassword,
         role: userData.role? userData.role : 'USER'
       });
@@ -86,52 +88,22 @@ export class UserService {
       return user.toDTO();
   }
 
-  async changeStatus(userId: string, enabled: boolean) {
-      const record = await this.userRepository.getById(userId);
+  async updateStatusUser(userId: string, updateData: {enabled:boolean, role:string}) {
+    const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
       const user = new User(this.parser(record!));
-      
-      // Aplicamos dominio para variar estatus
-      if(enabled===true) {
-        user.enabledUser();
-      } else {
-        user.disableUser();
-      }
+      user.changeStatus(updateData);
       
       await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();
   }
-  async changeEmail(userId: string, email: string){
-      const exists = await this.userRepository.findByEmail(email);
-      if(exists) throwError('Email is already registered', ErrorCode.DATA_CONFLICT);
-      const record = await this.userRepository.getById(userId);
-      if (!record) throwError('User not found',ErrorCode.NOT_FOUND);
-
-      const user = new User(this.parser(record!));
-      user.changeEmail(email);
-      
-      await this.userRepository.update(userId, user.toPersistence() );
-      return user.toDTO();
-  }
-
-  async updateProfile(userId: string, updateData: import('./User.js').UserUpdate) {
+    async updateProfile(userId: string, updateData: import('./User.js').UserUpdate) {
     const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
       const user = new User(this.parser(record!));
       user.updateProfile(updateData);
-      
-      await this.userRepository.update(userId, user.toPersistence());
-      return user.toDTO();
-  }
-
-  async changeRole(userId: string, newRole: string) {
-      const record = await this.userRepository.getById(userId);
-      if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
-
-      const user = new User(this.parser(record!));
-      user.changeRole(newRole);
       
       await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();

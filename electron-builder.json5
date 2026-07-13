@@ -1,15 +1,15 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "Meraki",
+  "appId": "com.antorrg-software.merakinapp",
   "asar": true,
   "productName": "MerakiApp",
   "directories": {
     "output": "release/${version}"
   },
   "files": [
-    "dist",
-    "dist-electron"
+    "dist/**/*",
+    "dist-electron/**/*"
   ],
   "mac": {
     "target": [
@@ -33,7 +33,10 @@
     "oneClick": false,
     "perMachine": false,
     "allowToChangeInstallationDirectory": true,
-    "deleteAppDataOnUninstall": false
+    "deleteAppDataOnUninstall": false,
+    createDesktopShortcut: true,
+    createStartMenuShortcut: true,
+    shortcutName: "MerakiApp"
   },
   "linux": {
     "target": [

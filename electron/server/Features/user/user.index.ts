@@ -8,6 +8,7 @@ import { userService } from '../../Shared/dependencies.js';
 export default {
 
 createUser: async(data: unknown)=>{
+     console.log('soy la data del front',data)
     const valid = NodeValidator.validateBody(data, sch.createUserSchema)
     const response = await userService.createUser(valid)
     return response
@@ -20,27 +21,26 @@ getUserById: (userId:string)=>{
     return userService.getById(validId)
 },
 updateUserProfile: (data: unknown)=>{
+    console.log('datos de update', data)
     const validData = NodeValidator.validateBody(data, sch.updateProfileSchema)
-    const {userId, rest} = NodeValidator.splitObjectProps(validData, ['userId'])
+    const {userId, email, name, nickname} = NodeValidator.splitObjectProps(validData, ['userId', 'email', 'name','nickname'])
     const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
     const updateData: import('./User.js').UserUpdate = {
-        userEmail: (rest as any).email as string,
-        userName: (rest as any).name as string,
-        nickname: (rest as any).nickname as string | null
+        userEmail: email as string,
+        userName: name as string,
+        nickname: nickname as string | null
     };
     return userService.updateProfile(validId, updateData)
 },
 updateStatusUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changeStatusSchema)
-    const {userId, enabled} = NodeValidator.splitObjectProps(validData, ['userId','enabled'])
+    const {userId, enabled,role} = NodeValidator.splitObjectProps(validData, ['userId','enabled', 'role'])
     const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
-    return userService.changeStatus(validId, enabled as boolean)
-},
-updateRoleUser: (data: unknown)=>{
-    const validData = NodeValidator.validateBody(data, sch.changeRoleSchema)
-    const {userId, role} = NodeValidator.splitObjectProps(validData, ['userId', 'role'])
-    const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
-    return userService.changeRole(validId, role)
+    const validatedInput = {
+        enabled,
+        role
+    }
+    return userService.updateStatusUser(validId, validatedInput)
 },
 updatePasswordUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changePasswordSchema)

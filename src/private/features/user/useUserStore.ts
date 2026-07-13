@@ -57,20 +57,20 @@ export const useUserStore = create<UserState>((set, get) => ({
           reject: (err: any) => { throw err; }
         });
       }
-      // 2. Actualizar rol
-      if (data.role) {
-        await adminApi.execute({
-          request: { channel: 'user:updateRole', payload: { userId, role: data.role } },
-          reject: (err: any) => { throw err; }
-        });
-      }
-      // 3. Actualizar estado
-      if (data.enabled !== undefined) {
-        await adminApi.execute({
-          request: { channel: 'user:updateStatus', payload: { userId, enabled: data.enabled } },
-          reject: (err: any) => { throw err; }
-        });
-      }
+      // // 2. Actualizar rol
+      // if (data.role) {
+      //   await adminApi.execute({
+      //     request: { channel: 'user:updateRole', payload: { userId, role: data.role } },
+      //     reject: (err: any) => { throw err; }
+      //   });
+      // }
+      // // 3. Actualizar estado
+      // if (data.enabled !== undefined) {
+      //   await adminApi.execute({
+      //     request: { channel: 'user:updateStatus', payload: { userId, enabled: data.enabled } },
+      //     reject: (err: any) => { throw err; }
+      //   });
+      // }
 
       toast.success('Usuario actualizado con éxito');
       await get().fetchUsers();

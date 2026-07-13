@@ -26,7 +26,13 @@ export const updateProfileSchema: Schema = {
   }
 };
 export const createUserSchema: Schema = {
-  email: {
+  userEmail: {
+    type: "string",
+    sanitize: {
+      trim: true
+    }
+  },
+    userName: {
     type: "string",
     sanitize: {
       trim: true
@@ -34,6 +40,13 @@ export const createUserSchema: Schema = {
   },
   password: {
     type: "string",
+    sanitize: {
+      trim: true
+    }
+  },
+    role: {
+    type: "string",
+    default: 'USER',
     sanitize: {
       trim: true
     }
@@ -47,12 +60,7 @@ export const changeStatusSchema: Schema = {
     type: "boolean",
     default: true
   },
-};
-export const changeRoleSchema : Schema = {
-  userId:{
-    type:"string",
-  },
-  role: {
+    role: {
     type:"string",
   },
 };

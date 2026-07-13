@@ -1,10 +1,9 @@
 import { app, BrowserWindow, Tray, Menu } from 'electron'
-
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import { startUp } from './server/Configs/database.js'
 import { registerAllIpc } from './server/index.server.js'
-//import {fillDbWithSeeds} from '../seeds/initApp.js'
+
 
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -133,7 +132,6 @@ app.on('activate', () => {
 async function bootstrap (){
   try {
     await startUp(true)
-    //await fillDbWithSeeds()
     await app.whenReady()
     registerAllIpc()
     createWindow()

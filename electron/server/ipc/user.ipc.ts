@@ -50,15 +50,6 @@ export function userIpc (){
         )
     );
     ipcMain.handle(
-        'user:updateRole',
-        wrapIpcHandler(
-            withAuth(async (_event: any, data: any) => {
-                return await user.updateRoleUser(data);
-            }, 'ADMIN'),
-            'user:updateRole'
-        )
-    );
-    ipcMain.handle(
         'user:updatePassword',
         wrapIpcHandler(
             withAuth(async (_event: any, data: any) => {

@@ -2,12 +2,15 @@
   "name": "merakinode",
   "private": true,
   "version": "0.0.0",
+  "description": "Sistema de gestión para Espacio Integral Meraki",
+  "author": "antorrg-software",
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
     "build": "tsc && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
+    "postinstall": "electron-builder install-app-deps",
     "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run"
   },
   "dependencies": {
@@ -34,7 +37,6 @@
     "cross-env": "^10.1.0",
     "electron": "^30.0.1",
     "electron-builder": "^24.13.3",
-    "electron-rebuild": "^3.2.9",
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
@@ -44,6 +46,10 @@
     "vite-plugin-electron": "^0.28.6",
     "vite-plugin-electron-renderer": "^0.14.5",
     "vitest": "^4.1.8"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/antorrg/merakiNode.git"
   },
   "main": "dist-electron/main.js"
 }
