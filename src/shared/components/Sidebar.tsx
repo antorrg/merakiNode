@@ -1,21 +1,32 @@
 import { useState } from 'react';
+import { useAuth } from '../../context/AuthContext';
 import { Link, Outlet } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Offcanvas from 'react-bootstrap/Offcanvas';
+import ConfirmModal from './modalComponents/ConfirmModal';
+import { hasRole } from '../utils/hasRole';
+import { Role } from '../types'
 
 function Sidebar() {
-  const [show, setShow] = useState(false);
+  const { user, logout } = useAuth();
+  const [show, setShow] = useState<boolean>(false);
+  const [alert, setAlert] = useState<boolean>(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
+  const onCancelAlert = () => {
+    setShow(false)
+    setAlert(false)
+    return
+  }
 
   return (
     <>
     {!show?
       <Button
-        variant="outline-secondary"
+        variant="outline-warning"
         className="position-fixed top-0 start-0 m-3 rounded-1 shadow-sm d-flex align-items-center justify-content-center"
         style={{ zIndex: 1100, width: '48px', height: '28px' }}
         onClick={handleShow}
@@ -39,7 +50,7 @@ function Sidebar() {
         <Offcanvas.Header closeButton>
           <Offcanvas.Title>Meraki</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body>
+        <Offcanvas.Body className="d-flex flex-column">
           <Form className="d-flex mb-3">
             <Form.Control
               type="search"
@@ -54,10 +65,31 @@ function Sidebar() {
             <Nav.Link as={Link} to="/dashboard" onClick={handleClose}>Inicio</Nav.Link>
             <Nav.Link as={Link} to="/dashboard/patients" onClick={handleClose}>Pacientes</Nav.Link>
             <Nav.Link as={Link} to="/dashboard/history" onClick={handleClose}>Historia</Nav.Link>
+            
+          </Nav>
+          
+          <Nav className="flex-column gap-2 mt-auto mb-0">
+                        {/* Ejemplo de enlace oculto según el rol del usuario */}
+            {hasRole(user?.role, Role.ADMIN)? (
+              <>
+              <Nav.Link as={Link} to="/dashboard/users" onClick={handleClose} className="text-success">Usuarios</Nav.Link>
+              <Nav.Link as={Link} to="/dashboard/admin" onClick={handleClose} className="text-warning">Administración</Nav.Link>
+              </>
+            ):null}
+            <Nav.Link as={Link} to="#" onClick={()=>setAlert(true)} className="text-danger">Cerrar sesión</Nav.Link>
           </Nav>
         </Offcanvas.Body>
       </Offcanvas>
-}
+}         
+          <ConfirmModal
+            isOpen={alert} 
+            onCancel= {onCancelAlert}
+            onConfirm= {()=>logout()}
+            title = "Cerrar Sesión" 
+            message = " ¿Deseas continuar?"
+            confirmText = "Sí, cerrar sesión"
+            cancelText = "No, volver"
+          />
          <Outlet/>
           </>
   );

@@ -7,12 +7,12 @@ const NotAuthorized = () => {
     useEffect(() => {
         const timer = setTimeout(() => {
             navigate('/');
-        }, 4000);
+        }, 3000);
         return () => clearTimeout(timer);
     }, [navigate]);
 
     return (
-        <div className="vh-100 d-flex flex-column justify-content-center align-items-center bg-light px-3">
+        <div className="vh-100 d-flex flex-column justify-content-center align-items-center meraki-back-color px-3">
             <div className="card border-0 shadow-sm p-4 p-md-5 text-center" style={{ maxWidth: '500px', width: '100%', borderRadius: '15px' }}>
                 <div className="mb-4 text-danger">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" fill="currentColor" className="bi bi-shield-lock-fill" viewBox="0 0 16 16">

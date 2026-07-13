@@ -24,7 +24,7 @@ export class User {
     protected role: string
     protected userName: string | null
     protected nickname: string | null
-    protected enabled: boolean
+    protected enabled: boolean 
     public readonly createdAt?: string
     public readonly updatedAt?: string
 
@@ -102,7 +102,7 @@ changeEmail(email:string) {
       role: this.role,
       user_name: this.userName ?? undefined,
       nickname: this.nickname ?? undefined,
-      enabled: this.enabled
+      enabled: BooleanConverter.boolToInt(this.enabled) as unknown as boolean
     }
   }
 

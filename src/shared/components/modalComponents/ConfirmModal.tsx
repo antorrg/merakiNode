@@ -17,7 +17,7 @@ const ConfirmModal = ({
   title = "¿Estás seguro?", 
   message = " ¿Deseas continuar?", 
   confirmText = "Sí, continuar", 
-  cancelText = "No, volver"
+  cancelText = "No, volver",
 }: ConfirmModalProps) => {
   return (
     <Modal isOpen={isOpen} onClose={onCancel}>
@@ -27,7 +27,7 @@ const ConfirmModal = ({
       <div style={{ display: 'flex', gap: '15px', justifyContent: 'center', marginTop: '25px' }}>
         <button 
           type="button"
-          className="btn btn--secondary" 
+          className="btn btn-sm btn-outline-danger" 
           onClick={onCancel}
         >
           {cancelText}
@@ -35,7 +35,7 @@ const ConfirmModal = ({
         
         <button 
           type="button"
-          className="btn" 
+          className="btn btn-sm btn-outline-primary" 
           onClick={onConfirm}
         >
           {confirmText}

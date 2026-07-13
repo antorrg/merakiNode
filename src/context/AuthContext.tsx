@@ -1,12 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { toast } from '../shared/components/toast/toastManager';
+import {type IUser} from '../shared/types'
 export interface LoginUser {
     email: string;
     password?: string;
 }
 
 export interface AuthState {
-    user: any | null;
+    user: IUser | null;
     isAuthenticated: boolean;
     loading: boolean;
     isLoggingOut: boolean;
@@ -16,10 +17,6 @@ interface AuthContextType extends AuthState {
     logout: () => Promise<void>;
     createOwner: (data: { email: string; username: string }) => Promise<void>;
     hasOwner: boolean | null;
-    isAuthenticated: boolean;
-    user: any;
-    loading: boolean;
-    isLoggingOut: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -36,7 +33,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ======================================================
   // UTILS Y HELPERS INTERNOS 
   // ======================================================
-  const startSession = (userData: any, sessionId: string) => {
+  const startSession = (userData: IUser, sessionId: string) => {
     setState({
         user: userData,
         isAuthenticated: true,
@@ -67,8 +64,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             startSession(data.user, data.session.sessionId);
             toast.success('Autenticación exitosa');
         }
-      } catch (error: any) {
-        const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error de autenticación');
+      } catch (error: unknown) {
+        let errorMessage = 'Error de autenticación';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
+        } else if (error && typeof error === 'object' && 'message' in error) {
+            errorMessage = String((error as { message: unknown }).message);
+        }
         toast.error(errorMessage);
         throw error;
       }
@@ -81,8 +85,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
             throw response?.error || new Error('No se pudo crear el propietario');
         }
         setHasOwner(true); // Cambiamos el estado para que muestre el login
-      } catch (error: any) {
-        const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error al crear propietario');
+      } catch (error: unknown) {
+        let errorMessage = 'Error al crear propietario';
+        if (error instanceof Error) {
+            errorMessage = error.message;
+        } else if (typeof error === 'string') {
+            errorMessage = error;
+        } else if (error && typeof error === 'object' && 'message' in error) {
+            errorMessage = String((error as { message: unknown }).message);
+        }
         toast.error(errorMessage);
         throw error;
       }

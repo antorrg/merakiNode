@@ -2,7 +2,7 @@ import { NodeValidator } from 'req-valid-express';
 import * as sch from './schemas/user.schema.js';
 import { userService } from '../../Shared/dependencies.js';
 
-
+///^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
 
 export default {
@@ -16,13 +16,13 @@ getUsers: ()=> {
     return userService.getAll()
 },
 getUserById: (userId:string)=>{
-    const validId = NodeValidator.paramId('userId',userId, NodeValidator.ValidReg.UUIDv4)
+    const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
     return userService.getById(validId)
 },
 updateUserProfile: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.updateProfileSchema)
     const {userId, rest} = NodeValidator.splitObjectProps(validData, ['userId'])
-    const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
+    const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
     const updateData: import('./User.js').UserUpdate = {
         userEmail: (rest as any).email as string,
         userName: (rest as any).name as string,
@@ -32,20 +32,20 @@ updateUserProfile: (data: unknown)=>{
 },
 updateStatusUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changeStatusSchema)
-    const {userId, enabled} = NodeValidator.splitObjectProps(validData, ['userId'])
-    const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
+    const {userId, enabled} = NodeValidator.splitObjectProps(validData, ['userId','enabled'])
+    const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
     return userService.changeStatus(validId, enabled as boolean)
 },
 updateRoleUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changeRoleSchema)
-    const {userId, role} = NodeValidator.splitObjectProps(validData, ['userId'])
-    const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
+    const {userId, role} = NodeValidator.splitObjectProps(validData, ['userId', 'role'])
+    const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
     return userService.changeRole(validId, role)
 },
 updatePasswordUser: (data: unknown)=>{
     const validData = NodeValidator.validateBody(data, sch.changePasswordSchema)
-    const {userId, password, newPassword} = NodeValidator.splitObjectProps(validData, ['userId'])
-    const validId = NodeValidator.paramId('userId', userId, NodeValidator.ValidReg.UUIDv4)
+    const {userId, password, newPassword} = NodeValidator.splitObjectProps(validData, ['userId', 'password', 'newPassword'])
+    const validId = NodeValidator.paramId({userId}, 'userId', /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/)
     return userService.changePassword(validId, password, newPassword)
 },
 }

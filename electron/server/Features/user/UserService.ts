@@ -116,7 +116,7 @@ export class UserService {
   }
 
   async updateProfile(userId: string, updateData: import('./User.js').UserUpdate) {
-      const record = await this.userRepository.getById(userId);
+    const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
 
       const user = new User(this.parser(record!));

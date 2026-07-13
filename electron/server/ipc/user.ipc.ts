@@ -8,19 +8,63 @@ export function userIpc (){
         'user:create',
         wrapIpcHandler(
             withAuth(async (_event: any, data: any) => {
-                // withAuth inyecta sessionClient en data, pero pasamos data a createUser
                 return await user.createUser(data);
-            }, 'ADMIN'), // Si quieres restringir crear usuarios solo a ADMIN, pásalo aquí.
+            }, 'ADMIN'),
             'user:create'
         )
-    ),
+    );
     ipcMain.handle(
         'users.getAll',
         wrapIpcHandler(
             withAuth(async (_event: any)=> {
                 return await user.getUsers()
             }),
-            'user:getAll'
+            'users:getAll'
         )
-    )
+    );
+    ipcMain.handle(
+        'user:getById',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return await user.getUserById(data.userId);
+            }),
+            'user:getById'
+        )
+    );
+    ipcMain.handle(
+        'user:updateProfile',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return await user.updateUserProfile(data);
+            }, 'ADMIN'), 
+            'user:updateProfile'
+        )
+    );
+    ipcMain.handle(
+        'user:updateStatus',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return await user.updateStatusUser(data);
+            }, 'ADMIN'),
+            'user:updateStatus'
+        )
+    );
+    ipcMain.handle(
+        'user:updateRole',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return await user.updateRoleUser(data);
+            }, 'ADMIN'),
+            'user:updateRole'
+        )
+    );
+    ipcMain.handle(
+        'user:updatePassword',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return await user.updatePasswordUser(data);
+            }), 
+            'user:updatePassword'
+        )
+    );
 }
