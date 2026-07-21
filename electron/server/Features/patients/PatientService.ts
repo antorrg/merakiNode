@@ -39,12 +39,12 @@ export class PatientService {
     return patient.toDTO();
   }
 
-  getAllPatients() {
-    const response = this.repository.getAll();
-    if (!response.results) return [];
+  getAllPatients(options: any = {}) {
+    const response = this.repository.getAll(options);
     
-    // Mapear cada registro a una Entidad y luego a DTO
-    return response.results.map((props: PatientProps) => new Patient(props).toDTO());
+    // Devolvemos el resultado paginado directamente ya que el repositorio
+    // retorna una selección de campos parcial y no es necesario mapearlo todo a Entidad
+    return response;
   }
 
   updatePatientContact(id: string, phone: string, email: string | null) {

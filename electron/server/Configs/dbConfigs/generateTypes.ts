@@ -37,14 +37,15 @@ export function generateTypes(db: Database.Database) {
   for (const row of tables) {
     const table = row.name
 
-    const cols = db.pragma(`table_info('${table}')`) as any[]
+    const cols = db.pragma(`table_info('${table}')`) as any[] //eslint-disable-line
 
     output += `export interface ${toPascal(table)} {\n`
 
     for (const col of cols) {
       const tsType = mapType(col.type || '')
       const optional = col.notnull === 0 ? '?' : ''
-      output += `  ${col.name}${optional}: ${tsType}\n`
+      const typeSuffix = col.notnull === 0 ? ' | null' : ''
+      output += `  ${col.name}${optional}: ${tsType}${typeSuffix}\n`
     }
 
     output += `}\n\n`

@@ -24,4 +24,45 @@ export interface IPatient {
     age: number
     address: string
     city: string
+    email?: string
+    phone?: string
+}
+
+export enum VisitType {
+  PRESENTIAL = 'PRESENTIAL',
+  VIRTUAL = 'VIRTUAL',
+  PHONE = 'PHONE',
+  REPORT = 'REPORT'
+}
+
+export interface IHistoryEntry {
+  entryId: string;
+  patientId: string;
+  professionalId: string;
+  visitType: VisitType;
+  visitDate: string;
+  reason: string;
+  diagnosisSummary?: string | null;
+  observations?: string | null;
+  evolution?: string | null;
+  treatmentPlan?: string | null;
+  recommendations?: string | null;
+  diagnosisIds?: string[]; // Para el frontend: array de IDs vinculados
+}
+
+export enum DiagnosisStatus {
+  ACTIVE = 'ACTIVE',
+  RESOLVED = 'RESOLVED',
+  CHRONIC = 'CHRONIC',
+  SUSPENDED = 'SUSPENDED'
+}
+
+export interface IDiagnosis {
+  diagnosisId: string;
+  patientId: string;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate?: string | null;
+  status: DiagnosisStatus;
 }

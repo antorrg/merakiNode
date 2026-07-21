@@ -6,7 +6,7 @@ import { Session, SessionProp } from '../../Shared/Auth/Session.js'
 type SessionRow = {
   session_id: string;
   user_id: string;
-  username: string;
+  userName: string;
   role: string;
   created_at: number;
   expires_at: number;
@@ -53,7 +53,7 @@ describe('SessionRepository', () => {
     const prop: SessionProp = {
       sessionId: id,
       userId: 'f47ac10b-58cc-4372-a567-0e02b2c3d470',
-      username: 'testuser',
+      userName: 'testuser',
       role: 'ADMIN',
       createdAt: Date.now(),
       expiresAt: expiresAt,

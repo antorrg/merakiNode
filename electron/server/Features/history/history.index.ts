@@ -10,7 +10,7 @@ export default {
     
     // Asumimos que los IDs de paciente son UUID, si no lo son, se puede ajustar la regex.
     // Omitimos NodeValidator.ValidReg.UUIDv4 si los IDs son custom. Por ahora intentaremos validarlo como string puro.
-    const patientId = String((data as any).patientId);
+    const patientId = String((data as { patientId: unknown }).patientId);
     if (!patientId || patientId.trim().length === 0) {
         throw new Error('El patientId es inválido');
     }

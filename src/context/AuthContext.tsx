@@ -16,6 +16,7 @@ interface AuthContextType extends AuthState {
     login: (credentials: LoginUser) => Promise<void>;
     logout: () => Promise<void>;
     createOwner: (data: { email: string; username: string }) => Promise<void>;
+    refreshSession: () => Promise<void>;
     hasOwner: boolean | null;
 }
 
@@ -118,6 +119,22 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     toast.success('Sesión terminada');
   };
 
+  const refreshSession = async () => {
+    const sessionId = localStorage.getItem('sessionId');
+    if (!sessionId) return;
+    try {
+      const response = await window.ipcRenderer.invoke('auth:getSession', sessionId);
+      if (response?.ok && response.data) {
+          const data = response.data;
+          if (data.sessionId) {
+              startSession(data.user || data, sessionId);
+          }
+      }
+    } catch (error) {
+       console.warn('Error al refrescar la sesión:', error);
+    }
+  };
+
   // ======================================================
   // VALIDAR AL MONTAR LA APP E HIDRATAR ESTADO
   // ======================================================
@@ -168,7 +185,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
     return (
-        <AuthContext.Provider value={{ ...state, hasOwner, login, logout, createOwner }}>
+        <AuthContext.Provider value={{ ...state, hasOwner, login, logout, createOwner, refreshSession }}>
             {children}
         </AuthContext.Provider>
     );

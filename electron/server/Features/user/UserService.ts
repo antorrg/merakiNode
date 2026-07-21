@@ -91,8 +91,9 @@ export class UserService {
   async updateStatusUser(userId: string, updateData: {enabled:boolean, role:string}) {
     const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
+      const acceptedRecord = this.protectedUser(record!)
 
-      const user = new User(this.parser(record!));
+      const user = new User(this.parser(acceptedRecord!));
       user.changeStatus(updateData);
       
       await this.userRepository.update(userId, user.toPersistence());
@@ -101,8 +102,9 @@ export class UserService {
     async updateProfile(userId: string, updateData: import('./User.js').UserUpdate) {
     const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
+      const acceptedRecord = this.protectedUser(record!)
 
-      const user = new User(this.parser(record!));
+      const user = new User(this.parser(acceptedRecord!));
       user.updateProfile(updateData);
       
       await this.userRepository.update(userId, user.toPersistence());
@@ -112,6 +114,7 @@ export class UserService {
   async changePassword(userId: string, currentPassword: string, newPassword: string) {
       const record = await this.userRepository.getById(userId);
       if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
+      //const acceptedRecord = this.protectedUser(record!)
 
       // Verificamos el password actual con Hasher
       const isMatch = await Hasher.compare(currentPassword, record!.password as string);
@@ -127,17 +130,31 @@ export class UserService {
       await this.userRepository.update(userId, user.toPersistence());
       return user.toDTO();
   }
+  async deleteUser(userId:string){
+       const record = await this.userRepository.getById(userId);
+      if (!record) throwError('User not found', ErrorCode.NOT_FOUND);
+      this.protectedUser(record!);
+      await this.userRepository.delete(userId);
+  }
 
   async authenticate(email: string, plainPassword: string) {
       const record = await this.userRepository.findByEmail(email);
       
       // Mensaje ambiguo intencional por seguridad (OWASP)
       if (!record) throwError('Invalid email or password', ErrorCode.ACCESS_DENIED);
+      if (record!.enabled=== false){throwError('Usuario bloqueado', ErrorCode.CLIENT_STATE_INVALID)}
 
       const isMatch = await Hasher.compare(plainPassword, record!.password as string);
       if (!isMatch) throwError('Invalid email or password', ErrorCode.ACCESS_DENIED);
 
       const user = new User(this.parser(record!));
       return user.toDTO();
+  }
+
+  protectedUser(record: UserProps): UserProps {
+    if (record.role === 'PROPIETARIO') {
+      throwError('No se puede editar a un propietario', ErrorCode.FORBIDDEN);
+    }
+    return record;
   }
 }

@@ -11,7 +11,8 @@ export const users: Table = {
     role TEXT NOT NULL DEFAULT 'USER',
     enabled BOOLEAN DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL
   );`,
   deps: []
 };
@@ -24,7 +25,7 @@ export const patients: Table = {
     first_name TEXT,
     last_name TEXT,
     type_doc TEXT,
-    identity_code TEXT,
+    identity_code TEXT UNIQUE,
     birth_date TEXT NOT NULL,
     age INTEGER,
     phone TEXT,
@@ -148,3 +149,16 @@ export const log: Table = {
   );`,
   deps: []
 }
+
+export const entry_diagnoses: Table = {
+  name: 'entry_diagnoses',
+  sql: `CREATE TABLE IF NOT EXISTS entry_diagnoses (
+    entry_id TEXT NOT NULL,
+    diagnosis_id TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (entry_id, diagnosis_id),
+    FOREIGN KEY(entry_id) REFERENCES history_entry(entry_id) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY(diagnosis_id) REFERENCES diagnosis(diagnosis_id) ON DELETE CASCADE ON UPDATE CASCADE
+  );`,
+  deps: ['history_entry', 'diagnosis']
+};

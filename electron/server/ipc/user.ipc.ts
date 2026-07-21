@@ -36,7 +36,7 @@ export function userIpc (){
         wrapIpcHandler(
             withAuth(async (_event: any, data: any) => {
                 return await user.updateUserProfile(data);
-            }, 'ADMIN'), 
+            }), 
             'user:updateProfile'
         )
     );
@@ -56,6 +56,15 @@ export function userIpc (){
                 return await user.updatePasswordUser(data);
             }), 
             'user:updatePassword'
+        )
+    );
+        ipcMain.handle(
+        'user:delete',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: string) => {
+                return await user.deleteUser(data);
+            }, 'ADMIN'),
+            'user:delete'
         )
     );
 }

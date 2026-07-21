@@ -6,7 +6,7 @@ describe('Session', () => {
     const validUserId = crypto.randomUUID()
     const validSessionData: SessionData = {
         userId: validUserId,
-        username: 'Tony Stark',
+        userName: 'Tony Stark',
         role: 'ADMIN'
     }
 
@@ -28,7 +28,7 @@ describe('Session', () => {
             
             const clientData = session.toClient()
             expect(clientData.userId).toBe(validUserId)
-            expect(clientData.username).toBe('Tony Stark')
+            expect(clientData.userName).toBe('Tony Stark')
             expect(clientData.role).toBe('ADMIN')
             
             const dbData = session.toJSON()

@@ -6,7 +6,7 @@ import { NodeValidator } from 'req-valid-express';
 export default {
   login : (data:{email:string, password:string})=>{
     const verifiedData = NodeValidator.validateBody(data, authLogin)
-    console.log('verifiedData',verifiedData)
+   // console.log('verifiedData',verifiedData)
     return authService.login(verifiedData)
   },
   getSession: (sessionId:string)=>{

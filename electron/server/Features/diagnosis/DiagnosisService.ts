@@ -18,6 +18,14 @@ export class DiagnosisService {
     });
   }
 
+  getActivePatientDiagnoses(patientId: string) {
+    const rows = this.repository.getActiveByPatientId(patientId);
+    return rows.map(row => {
+      const diag = new Diagnosis(row);
+      return diag.toDTO();
+    });
+  }
+
   updateDiagnosis(diagnosisId: string, updates: Partial<Pick<DiagnosisProps, 'title' | 'description' | 'status' | 'endDate'>>) {
     const existing = this.repository.getById(diagnosisId);
     if (!existing) throw new Error('Diagnosis not found');

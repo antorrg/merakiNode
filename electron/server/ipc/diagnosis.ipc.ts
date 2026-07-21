@@ -15,6 +15,16 @@ export function diagnosisIpc() {
     );
 
     ipcMain.handle(
+        'diagnosis:getActive',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return diagnosis.getActiveDiagnoses(data);
+            }),
+            'diagnosis:getActive'
+        )
+    );
+
+    ipcMain.handle(
         'diagnosis:update',
         wrapIpcHandler(
             withAuth(async (_event: any, data: any) => {

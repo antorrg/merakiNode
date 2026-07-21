@@ -8,11 +8,13 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import ConfirmModal from './modalComponents/ConfirmModal';
 import { hasRole } from '../utils/hasRole';
 import { Role } from '../types'
+import ProfileModal from '../../private/features/user/forms/ProfileModal';
 
 function Sidebar() {
   const { user, logout } = useAuth();
   const [show, setShow] = useState<boolean>(false);
   const [alert, setAlert] = useState<boolean>(false);
+  const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
 
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -51,6 +53,10 @@ function Sidebar() {
           <Offcanvas.Title>Meraki</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body className="d-flex flex-column">
+          <div className="mb-3 px-2 py-2 bg-light rounded text-center shadow-sm">
+            <span className="text-muted small">Bienvenido,</span><br/>
+            <strong className="text-primary">{user?.userName || 'Usuario'}</strong>
+          </div>
           <Form className="d-flex mb-3">
             <Form.Control
               type="search"
@@ -76,6 +82,7 @@ function Sidebar() {
               <Nav.Link as={Link} to="/dashboard/admin" onClick={handleClose} className="text-warning">Administración</Nav.Link>
               </>
             ):null}
+            <Nav.Link as={Link} to="#" onClick={() => { handleClose(); setShowProfileModal(true); }} className="text-primary">Mi Perfil</Nav.Link>
             <Nav.Link as={Link} to="#" onClick={()=>setAlert(true)} className="text-danger">Cerrar sesión</Nav.Link>
           </Nav>
         </Offcanvas.Body>
@@ -90,6 +97,7 @@ function Sidebar() {
             confirmText = "Sí, cerrar sesión"
             cancelText = "No, volver"
           />
+          <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />
          <Outlet/>
           </>
   );

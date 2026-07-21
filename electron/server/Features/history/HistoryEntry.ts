@@ -66,6 +66,7 @@ export class HistoryEntry {
   }
 
   update(data: Partial<Omit<HistoryEntryProps, 'entryId' | 'patientId' | 'professionalId' | 'deletedAt'>>) {
+    console.dir('data para actualizar en el domain: ', data)
     if (data.visitType !== undefined) this.visitType = data.visitType;
     if (data.visitDate !== undefined) this.visitDate = data.visitDate;
     if (data.reason !== undefined) this.reason = HistoryEntry.validateReason(data.reason);
@@ -84,11 +85,11 @@ export class HistoryEntry {
       visit_type: this.visitType,
       visit_date: this.visitDate,
       reason: this.reason,
-      diagnosis_summary: this.diagnosisSummary || undefined,
-      observations: this.observations || undefined,
-      evolution: this.evolution || undefined,
-      treatment_plan: this.treatmentPlan || undefined,
-      recommendations: this.recommendations || undefined
+      diagnosis_summary: this.diagnosisSummary || null,
+      observations: this.observations || null,
+      evolution: this.evolution || null,
+      treatment_plan: this.treatmentPlan || null,
+      recommendations: this.recommendations || null
     };
   }
 

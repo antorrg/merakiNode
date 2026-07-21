@@ -4,10 +4,12 @@ import Table from 'react-bootstrap/Table';
 import Spinner from 'react-bootstrap/Spinner';
 import { useUserStore } from './useUserStore';
 import UserForms, { UserFormMode } from './UserForms';
+import ConfirmModal from '../../../shared/components/modalComponents/ConfirmModal';
 
 const Users = () => {
-  const { users, isLoading, fetchUsers } = useUserStore();
+  const { users, isLoading, fetchUsers, deleteUser } = useUserStore();
   const [showModal, setShowModal] = useState(false);
+  const [showAlert, setShowAlert] = useState(false);
   const [formMode, setFormMode] = useState<UserFormMode>(null);
   const [selectedUserId, setSelectedUserId] = useState<string | undefined>();
 
@@ -26,6 +28,16 @@ const Users = () => {
     setFormMode('UPDATE');
     setSelectedUserId(id);
     setShowModal(true);
+  };
+
+  const handleDelete = (id: string) => {
+    setSelectedUserId(id);
+    setShowAlert(true);
+  };
+  const handleConfirmDelete = () => {
+    deleteUser(selectedUserId!);
+    setShowAlert(false);
+    fetchUsers();
   };
 
   return (
@@ -72,8 +84,11 @@ const Users = () => {
                       </span>
                     </td>
                     <td className="text-center">
-                      <Button variant="outline-primary" size="sm" onClick={() => handleEdit(user.userId)}>
+                      <Button variant="outline-primary mb-2 me-2" size="sm" onClick={() => handleEdit(user.userId)}>
                         Editar
+                      </Button>
+                      <Button variant="outline-danger" size="sm" onClick={() => handleDelete(user.userId)}>
+                        Borrar
                       </Button>
                     </td>
                   </tr>
@@ -96,6 +111,15 @@ const Users = () => {
         mode={formMode} 
         selectedUserId={selectedUserId} 
       />
+            <ConfirmModal
+        isOpen={showAlert}
+  onCancel={() => setShowAlert(false)}
+  onConfirm={handleConfirmDelete}
+  title = "Borrar usuario"
+  message = "El usuario seleccionado sera eliminado permanentemente ¿Desea continuar?"
+  confirmText = "Sí, continuar"
+  cancelText = "No, volver"
+    />
     </div>
   );
 };

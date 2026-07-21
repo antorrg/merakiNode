@@ -112,7 +112,7 @@ describe('PatientService (SQLite Integration)', () => {
   it('debería obtener un paciente por ID con sus relaciones hidratadas', () => {
     // Obtenemos todos para agarrar el ID del menor
     const all = service.getAllPatients();
-    const minor = all.find(p => p.firstName === 'Niño');
+    const minor = all.data.find(p => p.firstName === 'Niño');
     expect(minor).toBeDefined();
 
     const minorId = minor!.patientId;
@@ -130,7 +130,7 @@ describe('PatientService (SQLite Integration)', () => {
 
   it('debería actualizar el contacto de un paciente adulto', () => {
     const all = service.getAllPatients();
-    const adult = all.find(p => p.firstName === 'Juan');
+    const adult = all.data.find(p => p.firstName === 'Juan');
     
     const updated = service.updatePatientContact(adult!.patientId, '111222333', 'nuevo@email.com');
     
@@ -149,7 +149,7 @@ describe('PatientService (SQLite Integration)', () => {
     // Dado que el update solo permite cambiar phone y email, un menor podría fallar si se le intenta poner phone vacío.
     // Sin embargo, en el updatePatientContact no mandamos nuevos guardianes, usa los que ya tiene guardados.
     const all = service.getAllPatients();
-    const minor = all.find(p => p.firstName === 'Niño');
+    const minor = all.data.find(p => p.firstName === 'Niño');
     
     // Si intentamos actualizarle el telefono a algo vacío, y ya era menor...
     // Como tiene tutores, debería pasar (el dominio dice "si es menor, necesita tutor", que ya lo tiene).
@@ -160,7 +160,7 @@ describe('PatientService (SQLite Integration)', () => {
 
   it('debería borrar un paciente', () => {
     const all = service.getAllPatients();
-    const minor = all.find(p => p.firstName === 'Niño');
+    const minor = all.data.find(p => p.firstName === 'Niño');
     
     const result = service.deletePatient(minor!.patientId);
     

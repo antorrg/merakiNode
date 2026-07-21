@@ -1,7 +1,7 @@
 import React from 'react';
 import Modal from 'react-bootstrap/Modal';
 import UserCreate from './forms/UserCreate';
-import UserUpdate from './forms/UserUpdate';
+import UserUpgrade from './forms/UserUpgrade';
 
 export type UserFormMode = 'CREATE' | 'UPDATE' | null;
 
@@ -22,7 +22,7 @@ const UserForms: React.FC<UserFormsProps> = ({ show, onHide, mode, selectedUserI
       </Modal.Header>
       <Modal.Body>
         {mode === 'CREATE' && <UserCreate onHide={onHide} />}
-        {mode === 'UPDATE' && selectedUserId && <UserUpdate onHide={onHide} userId={selectedUserId} />}
+        {mode === 'UPDATE' && selectedUserId && <UserUpgrade onHide={onHide} userId={selectedUserId} />}
       </Modal.Body>
     </Modal>
   );

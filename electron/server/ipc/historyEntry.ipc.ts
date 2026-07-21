@@ -38,4 +38,23 @@ export function historyEntryIpc() {
             'entry:delete'
         )
     );
+
+    ipcMain.handle(
+        'entry:getByPatient',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                const role = data.sessionClient?.role;
+                const userId = data.sessionClient?.userId;
+                
+                // Si NO es PROPIETARIO, forzamos que solo vea los suyos
+                // Si es PROPIETARIO, no inyectamos professionalId para que traiga todos (auditoría)
+                if (role !== 'PROPIETARIO') {
+                    data.professionalId = userId;
+                }
+                
+                return entry.getPatientEntries(data);
+            }),
+            'entry:getByPatient'
+        )
+    );
 }

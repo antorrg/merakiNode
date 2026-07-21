@@ -28,7 +28,7 @@ export class SessionRepository {
     const sessionDataToSave: Sessions = {
       session_id: data.sessionId,
       user_id: data.userId,
-      username: data.username,
+      username: data.userName,
       role: data.role,
       created_at: data.createdAt,
       expires_at: data.expiresAt,
@@ -55,10 +55,13 @@ export class SessionRepository {
     // Si no está localmente, buscar en la base de datos
     if (!result) {
       const response = this.base.getById(sessionId);
-      result = response.results as SessionProp | null;
+      const dbResult = response.results as any;
 
-      // Si se encuentra en la base de datos, la guardamos en la memoria local (caché)
-      if (result) {
+      if (dbResult) {
+        result = {
+          ...dbResult,
+          userName: dbResult.username
+        } as SessionProp;
         this.#sessionStore.set(result.sessionId, result);
       }
     }
@@ -69,7 +72,7 @@ export class SessionRepository {
     const sessionProp: SessionProp = {
       sessionId: result.sessionId,
       userId: result.userId,
-      username: result.username,
+      userName: result.userName,
       role: result.role,
       createdAt: result.createdAt,
       expiresAt: result.expiresAt,

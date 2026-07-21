@@ -17,8 +17,8 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:getAll',
         wrapIpcHandler(
-            withAuth(async (_event: any) => {
-                return patient.getPatients();
+            withAuth(async (_event: any, data: any) => {
+                return patient.getPatients(data);
             }),
             'patient:getAll'
         )
@@ -41,6 +41,16 @@ export function patientsIpc() {
                 return patient.updateContactData(data);
             }),
             'patient:updateContact'
+        )
+    );
+
+    ipcMain.handle(
+        'patient:delete',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return patient.deletePatient(data);
+            }),
+            'patient:delete'
         )
     );
 }

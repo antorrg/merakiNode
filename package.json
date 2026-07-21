@@ -14,6 +14,10 @@
     "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run"
   },
   "dependencies": {
+    "@tiptap/extension-underline": "^3.28.0",
+    "@tiptap/pm": "^3.28.0",
+    "@tiptap/react": "^3.28.0",
+    "@tiptap/starter-kit": "^3.28.0",
     "argon2": "^0.44.0",
     "better-sqlite3": "^12.10.0",
     "bootstrap": "^5.3.8",

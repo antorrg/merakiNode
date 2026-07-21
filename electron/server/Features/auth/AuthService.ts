@@ -29,10 +29,10 @@ export class AuthService {
   async login(data: { email: string; password: string }, rolling: boolean = true) {
     const user = await this.userService.authenticate(data.email, data.password);
     if (!user) throwError('Invalid email or password', ErrorCode.ACCESS_DENIED);
-
+    console.log(user)
     const sessionData: SessionData = {
       userId: user!.userId,
-      username: user!.nickname || user!.userName || user!.userEmail.split('@')[0],
+      userName:  user!.userName || user!.nickname || user!.userEmail.split('@')[0],
       role: user!.role
     };
 

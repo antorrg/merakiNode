@@ -23,6 +23,12 @@ export class DiagnosisRepository {
     return rows.map(row => CaseConverter.mapKeysToCamelCase<DiagnosisProps>(row));
   }
 
+  getActiveByPatientId(patientId: string): DiagnosisProps[] {
+    const stmt = db.db.prepare(`SELECT * FROM diagnosis WHERE patient_id = ? AND status IN ('ACTIVE', 'CHRONIC') AND deleted_at IS NULL ORDER BY start_date DESC`);
+    const rows = stmt.all(patientId) as DbDiagnosis[];
+    return rows.map(row => CaseConverter.mapKeysToCamelCase<DiagnosisProps>(row));
+  }
+
   getById(id: string): DiagnosisProps | null {
     const result = this.baseRepo.getById(id);
     return result.results || null;

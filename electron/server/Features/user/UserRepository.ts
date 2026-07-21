@@ -10,7 +10,7 @@ export class UserRepository {
   private base: BaseRepository<UserProps, Omit<Users, 'created_at' | 'updated_at'>, Partial<Users>>;
   private db: SqliteDb;
   constructor(db: SqliteDb = DatabaseInstance) {
-    this.base = new BaseRepository<UserProps, Omit<Users, 'created_at' | 'updated_at'>, Partial<Users>>('users', 'user_id');
+    this.base = new BaseRepository<UserProps, Omit<Users, 'created_at' | 'updated_at'>, Partial<Users>>('users', 'user_id', true);
     this.db = db;
   }
   async create(data: Omit<Users, 'created_at' | 'updated_at'>){
@@ -30,8 +30,11 @@ export class UserRepository {
     return response.results as UserProps | null;
   }
   async getAll(): Promise<UserProps[]> {
-    const response =  this.base.getAll();
-    return response.results as UserProps[];
+    const sql = `SELECT * FROM users`
+    const stmt = this.db.db.prepare(sql);
+    const rows = stmt.all();
+    return (rows && rows.length > 0) ? rows.map(r => CaseConverter.mapKeysToCamelCase(r) as UserProps) : [];
+
   }
   async findByEmail(email: string): Promise<UserProps | null> {
     const sql = ` SELECT * FROM users WHERE user_email = ? LIMIT 1 `

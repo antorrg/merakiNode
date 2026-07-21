@@ -7,8 +7,9 @@ export function historyIpc() {
     ipcMain.handle(
         'history:getFull',
         wrapIpcHandler(
-            withAuth(async (_event: any, data: any) => {
-                return await history.getFullHistory(data);
+            withAuth(async (_event:any, data:any) => { // eslint-disable-line
+               const response = await history.getFullHistory(data);
+                return response
             }),
             'history:getFull'
         )

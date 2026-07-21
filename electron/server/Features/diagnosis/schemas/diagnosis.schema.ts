@@ -19,3 +19,7 @@ export const updateDiagnosisSchema: Schema = {
 export const deleteDiagnosisSchema: Schema = {
   diagnosisId: { type: "string" }
 };
+
+export const getByPatientSchema: Schema = {
+  patientId: { type: "string" }
+};

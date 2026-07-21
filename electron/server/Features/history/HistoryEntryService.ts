@@ -4,29 +4,42 @@ import { HistoryEntryRepository } from './HistoryEntryRepository.js';
 export class HistoryEntryService {
   constructor(private repository: HistoryEntryRepository) {}
 
-  addEntry(props: HistoryEntryCreate): HistoryEntryProps {
-    const entry = HistoryEntry.register(props);
-    this.repository.create(entry.toPersistence());
-    return entry.toDTO();
+  addEntry(props: HistoryEntryCreate & { diagnosisIds?: string[] }): HistoryEntryProps & { diagnosisIds?: string[] } {
+    const { diagnosisIds, ...entryProps } = props;
+    const entry = HistoryEntry.register(entryProps);
+    this.repository.create(entry.toPersistence(), diagnosisIds || []);
+    
+    const dto = entry.toDTO() as HistoryEntryProps & { diagnosisIds?: string[] };
+    dto.diagnosisIds = diagnosisIds || [];
+    return dto;
   }
 
-  getPatientEntries(patientId: string) {
-    const rows = this.repository.getByPatientId(patientId);
+  getPatientEntries(patientId: string, professionalId?: string) {
+    const rows = this.repository.getByPatientId(patientId, professionalId);
     return rows.map(row => {
       const entry = new HistoryEntry(row);
       return entry.toDTO();
     });
   }
 
-  updateEntry(entryId: string, updates: Partial<Omit<HistoryEntryProps, 'entryId' | 'patientId' | 'professionalId' | 'deletedAt'>>) {
+  updateEntry(entryId: string, updates: Partial<Omit<HistoryEntryProps, 'entryId' | 'patientId' | 'professionalId' | 'deletedAt'>> & { diagnosisIds?: string[] }) {
     const existing = this.repository.getById(entryId);
     if (!existing) throw new Error('History entry not found');
-
     const entry = new HistoryEntry(existing);
-    entry.update(updates);
 
-    this.repository.update(entryId, entry.toPersistence());
-    return entry.toDTO();
+    const { diagnosisIds, ...domainUpdates } = updates;
+    entry.update(domainUpdates);
+
+    const infoUpdated = entry.toPersistence()
+    
+    this.repository.update(entryId, infoUpdated);
+    if (diagnosisIds !== undefined) {
+      this.repository.linkDiagnoses(entryId, diagnosisIds);
+    }
+    
+    const dto = entry.toDTO() as HistoryEntryProps & { diagnosisIds?: string[] };
+    dto.diagnosisIds = diagnosisIds !== undefined ? diagnosisIds : existing.diagnosisIds;
+    return dto;
   }
 
   deleteEntry(entryId: string) {

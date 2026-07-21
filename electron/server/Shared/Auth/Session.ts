@@ -4,7 +4,7 @@ import { AuthApplications } from './Applications/AuthApplications.js'
 export interface SessionProp {
     sessionId:string
     userId: string
-    username: string
+    userName: string
     role: string
     createdAt: number
     expiresAt: number
@@ -12,22 +12,22 @@ export interface SessionProp {
 }
 export type SessionData = {
     userId: string
-    username: string
+    userName: string
     role: string
 
 }
 export class Session{
     protected readonly sessionId: string
     protected readonly userId: string
-    protected username: string
+    protected userName: string
     protected role: string
     protected createdAt: number
     protected expiresAt: number
     protected rolling : boolean
- constructor({sessionId, userId, username, role, createdAt, expiresAt, rolling= false}: SessionProp){
+ constructor({sessionId, userId, userName, role, createdAt, expiresAt, rolling= false}: SessionProp){
     this.sessionId = AuthApplications.sessionIdVALID(sessionId)
     this.userId = AuthApplications.userIdVALID(userId)
-    this.username = AuthApplications.usernameVALID(username)
+    this.userName = AuthApplications.usernameVALID(userName)
     this.role = AuthApplications.roleVALID(role)
     this.createdAt = AuthApplications.createdAtVALID(createdAt)
     this.expiresAt = AuthApplications.expiresAtVALID(expiresAt)
@@ -43,7 +43,7 @@ export class Session{
        return new Session({
         sessionId: id,
         userId: sessionData.userId,
-        username:sessionData.username,
+        userName:sessionData.userName,
         role: sessionData.role,
         createdAt: created_at,
         expiresAt: timeToExpire,
@@ -89,7 +89,7 @@ export class Session{
         return {
             sessionId: this.sessionId,
             userId: this.userId,
-            username: this.username,
+            userName: this.userName,
             role: this.role,
             createdAt: this.createdAt,
             expiresAt: this.expiresAt,
@@ -102,7 +102,7 @@ export class Session{
         return {
             sessionId: this.sessionId,
             userId: this.userId,
-            username: this.username,
+            userName: this.userName,
             role: this.role
         }
     }

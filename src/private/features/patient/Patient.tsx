@@ -1,31 +1,22 @@
-import { useState } from 'react'
-import SuccessModal from '../../../shared/components/modalComponents/SuccessModal';
-import FailModal from '../../../shared/components/modalComponents/FailModal';
 
-export default function Patient(){
-     const [isSuccessOpen, setIsSuccessOpen] = useState<boolean>(false);
-     const [isFailOpen, setIsFailOpen] = useState<boolean>(false);
-    return(
-         <div style={{backgroundColor:'gray'}}>
-        <div className="container" >
-        <h3>Esta es la pagina de pacientes</h3>
-        <button className="btn btn-sm btn-primary me-3" onClick={()=>setIsSuccessOpen(true)}>Boton</button>
-        <button className="btn btn-sm btn-primary" onClick={()=>setIsFailOpen(true)}>Boton2</button>
-        </div>
-        <SuccessModal
-            isOpen={isSuccessOpen}
-            onAccept={() => setIsSuccessOpen(false)}
-            title="Propietario Creado"
-            message="El usuario propietario ha sido creado. Revisa el archivo 'meraki-propietario.txt' en el directorio de la aplicación para ver tu contraseña generada."
-            buttonText="Entendido"
-        />
-        <FailModal
-            isOpen={isFailOpen}
-            onAccept={() => setIsFailOpen(false)}
-            title="Propietario Creado"
-            message="El usuario propietario ha sido creado. Revisa el archivo 'meraki-propietario.txt' en el directorio de la aplicación para ver tu contraseña generada."
-            buttonText="Entendido"
-        />
-        </div>
-    )
+
+
+interface PatientProps { patientId: string; }
+
+
+const Patient = ({ patientId }:PatientProps) => {
+       console.log(patientId)
+         return (
+          <div className="bg-white p-4 rounded shadow-sm border border-light">
+            <div className='d-flex justify-content-between align-items-center mb-4'>
+            <h4 className="text-primary">Detalle del paciente</h4>
+            <button className='btn btn-sm btn-outline-secondary' onClick={()=>alert('Simula la Edicion de paciente')}>Editar</button>
+            </div>
+            <div className="p-5 text-center text-muted bg-light rounded border">
+              <p>Aquí se renderizará la información del paciente.</p>
+            </div>
+          </div>
+        );
 }
+
+export default Patient
