@@ -17,9 +17,9 @@ export class HistoryEntryRepository {
     this.baseRepo.create(data);
     const entryId = data.entry_id;
     if (diagnosisIds && diagnosisIds.length > 0) {
-      this.linkDiagnoses(entryId, diagnosisIds);
+      this.linkDiagnoses(entryId!, diagnosisIds);
     }
-    return entryId;
+    return entryId!;
   }
 
   linkDiagnoses(entryId: string, diagnosisIds: string[]) {
@@ -44,7 +44,7 @@ export class HistoryEntryRepository {
 
   getByPatientId(patientId: string, professionalId?: string): HistoryEntryProps[] {
     let query = `SELECT * FROM history_entry WHERE patient_id = ? AND deleted_at IS NULL`;
-    const params: any[] = [patientId];
+    const params:string[] = [patientId];
     if (professionalId) {
       query += ` AND professional_id = ?`;
       params.push(professionalId);

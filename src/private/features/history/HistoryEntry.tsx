@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Form, Button, Row, Col, Spinner, Badge, InputGroup, Accordion } from 'react-bootstrap';
 import { useHistoryEntryStore } from './useHistoryEntryStore';
 import { useDiagnosisStore } from '../diagnostic/useDiagnosisStore';

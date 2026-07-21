@@ -107,7 +107,7 @@ describe('SessionRepository', () => {
     `).run(
       session.toJSON().sessionId, 
       session.toJSON().userId, 
-      session.toJSON().username, 
+      session.toJSON().userName, 
       session.toJSON().role, 
       session.toJSON().createdAt, 
       session.toJSON().expiresAt, 

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { db } from '../../Configs/database.js';
-import { patients, users, history_entry } from '../../Schema/schema.js';
+import { patients, users, history_entry, diagnosis, entry_diagnoses } from '../../Schema/schema.js';
 import { HistoryEntryService } from './HistoryEntryService.js';
 import { HistoryEntryRepository } from './HistoryEntryRepository.js';
 import { VisitType } from './HistoryEntry.js';
@@ -29,6 +29,8 @@ describe('HistoryEntryService (SQLite Integration)', () => {
     db.db.exec(users.sql);
     db.db.exec(patients.sql);
     db.db.exec(history_entry.sql);
+    db.db.exec(diagnosis.sql);
+    db.db.exec(entry_diagnoses.sql);
     
     entryService = new HistoryEntryService(new HistoryEntryRepository());
     patientService = new PatientService();
@@ -37,6 +39,7 @@ describe('HistoryEntryService (SQLite Integration)', () => {
     // Crear profesional
     const proData = {
       userEmail: 'dr@test.com',
+      userName: 'tester',
       password: '123',
       role: 'ADMIN'
     };
@@ -61,6 +64,8 @@ describe('HistoryEntryService (SQLite Integration)', () => {
   });
 
   afterAll(() => {
+    db.db.exec(`DROP TABLE IF EXISTS entry_diagnoses;`);
+    db.db.exec(`DROP TABLE IF EXISTS diagnosis;`);
     db.db.exec(`DROP TABLE IF EXISTS history_entry;`);
     db.db.exec(`DROP TABLE IF EXISTS patients;`);
     db.db.exec(`DROP TABLE IF EXISTS users;`);

@@ -118,7 +118,7 @@ describe('PatientService (SQLite Integration)', () => {
     const minorId = minor!.patientId;
 
     // Ejecutamos getPatientById
-    const fetchedMinor = service.getPatientById(minorId);
+    const fetchedMinor = service.getPatientById(minorId!);
     
     expect(fetchedMinor).toBeDefined();
     expect(fetchedMinor.firstName).toBe('Niño');
@@ -132,13 +132,13 @@ describe('PatientService (SQLite Integration)', () => {
     const all = service.getAllPatients();
     const adult = all.data.find(p => p.firstName === 'Juan');
     
-    const updated = service.updatePatientContact(adult!.patientId, '111222333', 'nuevo@email.com');
+    const updated = service.updatePatientContact(adult!.patientId!, '111222333', 'nuevo@email.com');
     
     expect(updated.phone).toBe('111222333');
     expect(updated.email).toBe('nuevo@email.com');
 
     // Verificamos que se haya guardado en DB
-    const fetched = service.getPatientById(adult!.patientId);
+    const fetched = service.getPatientById(adult!.patientId!);
     expect(fetched.phone).toBe('111222333');
     expect(fetched.email).toBe('nuevo@email.com');
   });
@@ -154,7 +154,7 @@ describe('PatientService (SQLite Integration)', () => {
     // Si intentamos actualizarle el telefono a algo vacío, y ya era menor...
     // Como tiene tutores, debería pasar (el dominio dice "si es menor, necesita tutor", que ya lo tiene).
     expect(() => {
-      service.updatePatientContact(minor!.patientId, '', null);
+      service.updatePatientContact(minor!.patientId!, '', null);
     }).not.toThrow();
   });
 
@@ -162,12 +162,12 @@ describe('PatientService (SQLite Integration)', () => {
     const all = service.getAllPatients();
     const minor = all.data.find(p => p.firstName === 'Niño');
     
-    const result = service.deletePatient(minor!.patientId);
+    const result = service.deletePatient(minor!.patientId!);
     
     // El BaseRepository.delete devuelve en results el numero de rows (como string)
     expect(result.results).toBe('1');
     
     // Si intentamos buscarlo, debe lanzar error (Patient not found)
-    expect(() => service.getPatientById(minor!.patientId)).toThrow('Patient not found');
+    expect(() => service.getPatientById(minor!.patientId!)).toThrow('Patient not found');
   });
 });

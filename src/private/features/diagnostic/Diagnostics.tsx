@@ -1,7 +1,9 @@
 
 
 interface DiagnosticsProps { patientId: string; }
+
 const Diagnostics: React.FC<DiagnosticsProps> = ({ patientId }) => {
+  console.log(patientId)
         return (
           <div className="bg-white p-4 rounded shadow-sm border border-light">
             <h4 className="mb-4 text-primary">Diagnóstico</h4>

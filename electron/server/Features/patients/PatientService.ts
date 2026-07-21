@@ -1,4 +1,4 @@
-import { Patient, PatientCreate, PatientProps } from './Patient.js';
+import { Patient, PatientCreate } from './Patient.js';
 import { PatientRepository } from './PatientRepository.js';
 import { Patients } from '../../dbTypes/db.types.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
@@ -39,8 +39,8 @@ export class PatientService {
     return patient.toDTO();
   }
 
-  getAllPatients(options: any = {}) {
-    const response = this.repository.getAll(options);
+  getAllPatients(options: unknown = {}) {
+    const response = this.repository.getAll(options!);
     
     // Devolvemos el resultado paginado directamente ya que el repositorio
     // retorna una selección de campos parcial y no es necesario mapearlo todo a Entidad

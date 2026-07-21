@@ -42,6 +42,7 @@ describe('TreatmentService (SQLite Integration)', () => {
     // Setup: User -> Patient -> Entry -> Treatment
     const userResult = await userService.createUser({
       userEmail: 'dr_treat@test.com',
+      userName:'Dr. Orchestrator',
       password: '123',
       role: 'ADMIN'
     });

@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { db } from '../../Configs/database.js';
-import { patients, patient_relations, users, history_entry, treatment, diagnosis } from '../../Schema/schema.js';
+import { patients, patient_relations, users, history_entry, treatment, diagnosis, entry_diagnoses  } from '../../Schema/schema.js';
 import { HistoryService } from './HistoryService.js';
 import { HistoryEntryService } from './HistoryEntryService.js';
 import { HistoryEntryRepository } from './HistoryEntryRepository.js';
@@ -35,6 +35,8 @@ describe('HistoryService (Orchestrator)', () => {
     db.db.exec(history_entry.sql);
     db.db.exec(treatment.sql);
     db.db.exec(diagnosis.sql);
+    db.db.exec(entry_diagnoses.sql);
+    
 
     const userService = new UserService(new UserRepository());
     const patientService = new PatientService();
@@ -48,6 +50,7 @@ describe('HistoryService (Orchestrator)', () => {
     const userResult = await userService.createUser({
       userEmail: 'dr_orchestrator@test.com',
       password: '123',
+      userName: 'Dr. Orchestrator',
       role: 'ADMIN'
     });
 
@@ -109,8 +112,9 @@ describe('HistoryService (Orchestrator)', () => {
   });
 
   afterAll(() => {
-    db.db.exec(`DROP TABLE IF EXISTS treatment;`);
+    db.db.exec(`DROP TABLE IF EXISTS entry_diagnoses;`);
     db.db.exec(`DROP TABLE IF EXISTS diagnosis;`);
+    db.db.exec(`DROP TABLE IF EXISTS treatment;`);
     db.db.exec(`DROP TABLE IF EXISTS history_entry;`);
     db.db.exec(`DROP TABLE IF EXISTS patient_relations;`);
     db.db.exec(`DROP TABLE IF EXISTS patients;`);

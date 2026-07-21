@@ -2,6 +2,7 @@
 
 interface TreatmentsProps { patientId: string; }
 const Treatments: React.FC<TreatmentsProps> = ({ patientId }) => {
+  console.log(patientId)
         return (
           <div className="bg-white p-4 rounded shadow-sm border border-light">
             <h4 className="mb-4 text-primary">Tratamientos</h4>

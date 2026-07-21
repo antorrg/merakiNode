@@ -11,7 +11,7 @@ interface RichTextEditorProps {
   placeholder?: string;
 }
 
-const MenuBar = ({ editor }: { editor: any }) => {
+const MenuBar = ({ editor }: { editor: any }) => {//eslint-disable-line
   if (!editor) return null;
 
   return (
@@ -86,7 +86,7 @@ const MenuBar = ({ editor }: { editor: any }) => {
   );
 };
 
-const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, placeholder }) => {
+const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange }) => {
   const editor = useEditor({
     extensions: [
       StarterKit,
@@ -107,8 +107,8 @@ const RichTextEditor: React.FC<RichTextEditorProps> = ({ content, onChange, plac
   // Sincronizar contenido si cambia desde afuera (e.g. al cambiar de pestaña de paciente)
   useEffect(() => {
     if (editor && content !== editor.getHTML()) {
-      editor.commands.setContent(content, false); // false evita que se dispare onUpdate de nuevo
-    }
+      editor.commands.setContent(content, (false as any));//eslint-disable-line
+    } // false evita que se dispare onUpdate de nuevo
   }, [content, editor]);
 
   return (
