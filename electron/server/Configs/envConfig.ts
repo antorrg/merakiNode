@@ -9,7 +9,7 @@ const isDev = process.env.NODE_ENV === 'development'
 const Status = isDev? 'development' : isTest? 'test': null
 
 const databaseName = isTest
-  ? 'database.test.sqlite'
+  ? 'memory'
   : isDev
     ? 'database.dev.sqlite'
     : 'database.sqlite'

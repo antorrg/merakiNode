@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { IUser } from '../../../shared/types';
+import { IUser } from '../../../types';
 import { adminApi } from '../../../shared/api/api';
 import { toast } from '../../../shared/components/toast/toastManager';
 

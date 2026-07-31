@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { IPatient } from '../../../shared/types';
+import { IPatient } from '../../../types';
 import { adminApi } from '../../../shared/api/api';
 import { toast } from '../../../shared/components/toast/toastManager';
 
@@ -15,8 +15,20 @@ interface ApiResponse<T> {
   info?: PaginationInfo;
 }
 
-export type CreatePatientPayload = Omit<IPatient, 'patientId'>;
-export type UpdatePatientContactPayload = { phone?: string; email?: string; [key: string]: unknown };
+export type CreatePatientPayload = Omit<IPatient, 'patientId' | 'age'>;
+export type UpdatePatientContactPayload = {
+  firstName?: string;
+  lastName?: string;
+  typeDoc?: string;
+  identityCode?: string;
+  birthDate?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+  city?: string;
+  postalCode?: string;
+  [key: string]: unknown;
+};
 
 interface ApiError extends Error {
   message: string;
@@ -25,11 +37,14 @@ interface ApiError extends Error {
 
 export interface PatientState {
   patients: IPatient[];
+  patientDetail: IPatient | null;
   info: PaginationInfo | null;
   isLoading: boolean;
   error: string | null;
-  fetchPatients: (page?: number, limit?: number) => Promise<void>;
-  createPatient: (data: CreatePatientPayload) => Promise<void>;
+  searchTerm: string;
+  setSearchTerm: (search: string) => void;
+  fetchPatients: (page?: number, limit?: number, search?: string) => Promise<void>;
+  createPatient: (data: CreatePatientPayload) => Promise<IPatient>;
   updatePatientContact: (patientId: string, data: UpdatePatientContactPayload) => Promise<void>;
   deletePatient: (patientId: string) => Promise<void>;
   getPatientById: (patientId: string) => Promise<IPatient>;
@@ -37,16 +52,25 @@ export interface PatientState {
 
 export const usePatientStore = create<PatientState>((set, get) => ({
   patients: [],
+  patientDetail: null,
   info: null,
   isLoading: false,
   error: null,
+  searchTerm: '',
 
-  fetchPatients: async (page = 1, limit = 5) => {
+  setSearchTerm: (searchTerm: string) => set({ searchTerm }),
+
+  fetchPatients: async (page = 1, limit = 5, search?: string) => {
     set({ isLoading: true, error: null });
     
+    const activeSearch = search !== undefined ? search : get().searchTerm;
+    if (search !== undefined) {
+      set({ searchTerm: search });
+    }
+
     try {
       const response = await adminApi.execute<ApiResponse<IPatient[]>>({
-        request: { channel: 'patient:getAll', payload: { page, limit } },
+        request: { channel: 'patient:getAll', payload: { page, limit, search: activeSearch } },
         reject: (err: unknown) => {
           throw err;
         }
@@ -78,7 +102,10 @@ export const usePatientStore = create<PatientState>((set, get) => ({
         }
       });
       if (!response) throw new Error('Respuesta vacía del servidor');
-      set({ isLoading: false });
+      set({ 
+        isLoading: false,
+        patientDetail:response 
+      });
       return response;
     } catch (err) {
       const error = err as ApiError;
@@ -88,10 +115,10 @@ export const usePatientStore = create<PatientState>((set, get) => ({
     }
   },
 
-  createPatient: async (data: CreatePatientPayload) => {
+  createPatient: async (data: CreatePatientPayload): Promise<IPatient> => {
     set({ isLoading: true, error: null });
     try {
-      await adminApi.execute<IPatient>({
+      const response = await adminApi.execute<IPatient>({
         request: { channel: 'patient:register', payload: data },
         hasMessage: true,
         successMessage: 'Paciente registrado con éxito',
@@ -100,9 +127,13 @@ export const usePatientStore = create<PatientState>((set, get) => ({
         }
       });
       
+      if (!response) throw new Error('Respuesta vacía del servidor');
+      
       const currentInfo = get().info;
-      await get().fetchPatients(currentInfo?.page || 1, currentInfo?.limit || 5);
+      const targetLimit = (currentInfo?.limit && currentInfo.limit <= 10) ? currentInfo.limit : 5;
+      await get().fetchPatients(currentInfo?.page || 1, targetLimit);
       set({ isLoading: false });
+      return response;
     } catch (err) {
       const error = err as ApiError;
       const errorMessage = error?.message || 'Error al registrar paciente';
@@ -117,7 +148,7 @@ export const usePatientStore = create<PatientState>((set, get) => ({
      const response = await adminApi.execute<IPatient>({
         request: { channel: 'patient:updateContact', payload: { patientId, ...data } },
         hasMessage: true,
-        successMessage: 'Contacto actualizado con éxito',
+        successMessage: 'Paciente actualizado con éxito',
         reject: (error: unknown) => {
           throw error;
         }
@@ -128,7 +159,10 @@ export const usePatientStore = create<PatientState>((set, get) => ({
       }
       const currentInfo = get().info;
       await get().fetchPatients(currentInfo?.page || 1, currentInfo?.limit || 10);
-      set({ isLoading: false });
+      set({
+        patientDetail: response,
+        isLoading: false
+      });
     } catch (err) {
       const error = err as ApiError;
       const errorMessage = error?.message || 'Error al actualizar contacto';

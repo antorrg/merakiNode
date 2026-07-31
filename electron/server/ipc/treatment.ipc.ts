@@ -33,4 +33,14 @@ export function treatmentIpc() {
             'treatment:delete'
         )
     );
+
+    ipcMain.handle(
+        'treatment:getByPatient',
+        wrapIpcHandler(
+            withAuth(async (_event: any, data: any) => {
+                return treatment.getTreatmentsByPatient(data);
+            }),
+            'treatment:getByPatient'
+        )
+    );
 }

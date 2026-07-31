@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react';
 import { Form, Button, Row, Col, Spinner, Badge, InputGroup, Accordion } from 'react-bootstrap';
 import { useHistoryEntryStore } from './useHistoryEntryStore';
 import { useDiagnosisStore } from '../diagnostic/useDiagnosisStore';
-import { useWorkspaceStore } from '../patient/workspace/useWorkspaceStore';
+import { useWorkspaceStore } from '../workspace/useWorkspaceStore';
 import RichTextEditor from '../../../shared/components/RichTextEditor/RichTextEditor';
-import { VisitType, DiagnosisStatus } from '../../../shared/types';
+import { VisitType, DiagnosisStatus } from '../../../types';
+import HistoryNotAuthorized from './HistoryNotAuthorized';
+import { useAuth } from '../../../context/AuthContext';
+import { Role } from '../../../types';
+import { hasRole } from '../../../shared/utils/hasRole';
 
 interface HistoryEntryProps {
   patientId: string;
 }
 
 const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
+  const { user } = useAuth()
   const { draftsByPatient, setDraft, clearDraft, saveNewEntry, isLoading: isEntryLoading } = useHistoryEntryStore();
   const { activeDiagnosesByPatient, fetchActiveDiagnoses, createDiagnosis, isLoading: isDiagLoading } = useDiagnosisStore();
   
@@ -65,10 +70,14 @@ const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
   };
 
   return (
+    <>
+    {hasRole(user?.role, Role.ADMIN)===false ?
+      <HistoryNotAuthorized/>
+      :
     <div className="bg-white p-4 rounded shadow-sm border border-light">
       <div className="d-flex justify-content-between align-items-center mb-4">
         <h4 className="text-primary m-0">
-          {draft.entryId ? '✏️ Editando Evolución' : 'Nueva Evolución'}
+          {draft.entryId ? '✏️ Editando Visita' : 'Nueva Visita'}
         </h4>
         <div className="d-flex gap-2">
           {draft.entryId && (
@@ -81,7 +90,7 @@ const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
             onClick={handleSave} 
             disabled={isEntryLoading || !draft.reason || draft.reason.trim().length < 2}
           >
-            {isEntryLoading ? <Spinner size="sm" /> : (draft.entryId ? 'Guardar Cambios' : 'Guardar Evolución')}
+            {isEntryLoading ? <Spinner size="sm" /> : (draft.entryId ? 'Guardar Cambios' : 'Guardar Visita')}
           </Button>
         </div>
       </div>
@@ -104,7 +113,7 @@ const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
           </Col>
           <Col md={8}>
             <Form.Group>
-              <Form.Label className="fw-medium text-secondary">Motivo o Título de la Sesión *</Form.Label>
+              <Form.Label className="fw-medium text-secondary">Motivo o Título de la Visita *</Form.Label>
               <Form.Control 
                 type="text" 
                 maxLength={80}
@@ -163,7 +172,7 @@ const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
         <Row className="mb-4">
           <Col md={12}>
             <Form.Group>
-              <Form.Label className="fw-medium text-secondary">Evolución de la Sesión *</Form.Label>
+              <Form.Label className="fw-medium text-secondary">Evolución de la Visita *</Form.Label>
               <RichTextEditor 
                 content={draft.evolution || ''} 
                 onChange={(html) => setDraft(patientId, { evolution: html })}
@@ -228,6 +237,8 @@ const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
         </Accordion>
       </Form>
     </div>
+    }
+    </>
   );
 };
 

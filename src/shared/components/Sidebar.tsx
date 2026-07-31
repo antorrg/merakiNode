@@ -2,12 +2,11 @@ import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Link, Outlet } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import Nav from 'react-bootstrap/Nav';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import ConfirmModal from './modalComponents/ConfirmModal';
 import { hasRole } from '../utils/hasRole';
-import { Role } from '../types'
+import { Role } from '../../types'
 import ProfileModal from '../../private/features/user/forms/ProfileModal';
 
 function Sidebar() {
@@ -57,26 +56,17 @@ function Sidebar() {
             <span className="text-muted small">Bienvenido,</span><br/>
             <strong className="text-primary">{user?.userName || 'Usuario'}</strong>
           </div>
-          <Form className="d-flex mb-3">
-            <Form.Control
-              type="search"
-              placeholder="Buscar"
-              className="me-2"
-              aria-label="Buscar"
-            />
-            <Button variant="outline-success">Ir</Button>
-          </Form>
 
           <Nav className="flex-column gap-2">
             <Nav.Link as={Link} to="/dashboard" onClick={handleClose}>Inicio</Nav.Link>
             <Nav.Link as={Link} to="/dashboard/patients" onClick={handleClose}>Pacientes</Nav.Link>
-            <Nav.Link as={Link} to="/dashboard/history" onClick={handleClose}>Historia</Nav.Link>
+            <Nav.Link as={Link} to="/dashboard/calendar" onClick={handleClose}>Agenda</Nav.Link>
             
           </Nav>
           
           <Nav className="flex-column gap-2 mt-auto mb-0">
                         {/* Ejemplo de enlace oculto según el rol del usuario */}
-            {hasRole(user?.role, Role.ADMIN)? (
+            {hasRole(user?.role, Role.PROPIETARIO)? (
               <>
               <Nav.Link as={Link} to="/dashboard/users" onClick={handleClose} className="text-success">Usuarios</Nav.Link>
               <Nav.Link as={Link} to="/dashboard/admin" onClick={handleClose} className="text-warning">Administración</Nav.Link>

@@ -1,5 +1,5 @@
 import { Nav } from 'react-bootstrap'
-import { OpenPatient } from '../useWorkspaceStore'
+import { OpenPatient } from './useWorkspaceStore'
 
 type NavbarProps = {
     op: OpenPatient,

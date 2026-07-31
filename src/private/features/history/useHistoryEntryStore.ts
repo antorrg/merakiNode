@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { IHistoryEntry, VisitType } from '../../../shared/types';
+import { IHistoryEntry, VisitType } from '../../../types';
 import { adminApi } from '../../../shared/api/api';
 import { toast } from '../../../shared/components/toast/toastManager';
 

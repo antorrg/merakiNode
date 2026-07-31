@@ -34,7 +34,7 @@ export class InitialUser{
       return chars.join('')
     }
     static async writePassword(value:string, nameFile: string='user'){
-       const documentsPath = app.getPath('documents')
+       const documentsPath = app?.getPath ? app.getPath('documents') : process.cwd()
         const filePath = path.join(documentsPath, `${nameFile}.txt`)
         const content = `DOCUMENTO GENERADO AUTOMATICAMENTE, NO EDITAR\n\n${value}`
 

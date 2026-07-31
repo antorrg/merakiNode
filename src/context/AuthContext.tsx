@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { toast } from '../shared/components/toast/toastManager';
-import {type IUser} from '../shared/types'
+import { type IUser } from '../types';
+import { subscribeUnauthorized, subscribeForbidden } from '../shared/api/base/IpcClient';
 export interface LoginUser {
     email: string;
     password?: string;
@@ -139,6 +140,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // VALIDAR AL MONTAR LA APP E HIDRATAR ESTADO
   // ======================================================
   useEffect(() => {
+    const unsubUnauth = subscribeUnauthorized(() => {
+      cleanSession();
+      toast.warning('Su sesión ha expirado o no es válida. Por favor, vuelva a iniciar sesión.', 'Sesión Expirada');
+    });
+
+    const unsubForbidden = subscribeForbidden(() => {
+      toast.error('No tiene permisos suficientes para realizar esta acción.', 'Acceso Denegado');
+    });
+
     const attemptHydration = async () => {
       // 1. Verificamos si existen usuarios en la DB para el flujo de "primer inicio"
       try {
@@ -182,6 +192,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
 
     attemptHydration();
+
+    return () => {
+      unsubUnauth();
+      unsubForbidden();
+    };
   }, []);
 
     return (

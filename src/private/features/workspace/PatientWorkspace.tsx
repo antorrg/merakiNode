@@ -3,8 +3,8 @@ import { Nav, Button, Row, Col } from 'react-bootstrap';
 import { useWorkspaceStore } from './useWorkspaceStore';
 import WorkspaceSidebar from './WorkspaceSidebar';
 import WorkspaceContent from './WorkspaceContent';
-import EmptyPatient from './components/EmptyPatient';
-import NavbarTabs from './components/NavbarTabs';
+import EmptyPatient from '../patient/components/EmptyPatient';
+import NavbarTabs from './NavbarTabs';
 
 const PatientWorkspace = () => {
   const navigate = useNavigate();

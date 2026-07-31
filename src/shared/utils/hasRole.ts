@@ -1,4 +1,4 @@
-import { Role } from '../types'
+import { Role } from '../../types'
 
 const roleLevel: Record<Role, number> = {
   [Role.USER]: 1,

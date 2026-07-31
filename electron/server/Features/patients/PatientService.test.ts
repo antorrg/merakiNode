@@ -4,6 +4,7 @@ import { patients, patient_relations } from '../../Schema/schema.js';
 import { PatientService } from './PatientService.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
 import { PatientCreate } from './Patient.js';
+import patientIndex from './patient.index.js';
 
 vi.mock('../../Configs/envConfig.js', () => ({
   default: {
@@ -156,6 +157,83 @@ describe('PatientService (SQLite Integration)', () => {
     expect(() => {
       service.updatePatientContact(minor!.patientId!, '', null);
     }).not.toThrow();
+  });
+
+  it('debería actualizar los datos del paciente mediante patientIndex.updateContactData', () => {
+    const all = service.getAllPatients();
+    const adult = all.data.find(p => p.firstName === 'Juan');
+    
+    const payload = {
+      patientId: adult!.patientId,
+      firstName: 'Juan Carlos',
+      lastName: 'Pérez Modificado',
+      typeDoc: 'Pasaporte',
+      identityCode: 'PAS123456',
+      birthDate: '10/10/1985',
+      phone: '999888777',
+      email: null,
+      address: 'Nueva Calle 456',
+      city: 'Cordoba',
+      postalCode: '5000',
+      guardians: []
+    };
+
+    const updated = patientIndex.updateContactData(payload);
+    expect(updated.firstName).toBe('Juan Carlos');
+    expect(updated.lastName).toBe('Pérez Modificado');
+    expect(updated.typeDoc).toBe('Pasaporte');
+    expect(updated.identityCode).toBe('PAS123456');
+    expect(updated.birthDate).toBe('10/10/1985');
+    expect(updated.phone).toBe('999888777');
+  });
+
+  it('debería agregar un SEGUNDO tutor a un paciente menor de edad', () => {
+    const all = service.getAllPatients();
+    const minor = all.data.find(p => p.firstName === 'Niño');
+    const adultJuan = all.data.find(p => p.firstName?.includes('Juan'));
+    const adultTutor = all.data.find(p => p.firstName === 'Tutor');
+
+    expect(minor).toBeDefined();
+    expect(adultJuan).toBeDefined();
+    expect(adultTutor).toBeDefined();
+
+    // Obtenemos los datos completos del menor
+    const fullMinor = service.getPatientById(minor!.patientId!);
+    expect(fullMinor.guardians).toHaveLength(1);
+
+    // Creamos el payload con 2 tutores: el existente + Juan como segundo tutor
+    const payload = {
+      patientId: fullMinor.patientId,
+      phone: fullMinor.ownPhone,
+      email: fullMinor.ownEmail,
+      address: fullMinor.address,
+      city: fullMinor.city,
+      postalCode: fullMinor.postalCode,
+      guardians: [
+        {
+          relationId: fullMinor.guardians[0].relationId,
+          guardianId: fullMinor.guardians[0].guardianId,
+          relationshipType: fullMinor.guardians[0].relationship,
+          isPrimaryContact: true
+        },
+        {
+          guardianId: adultJuan!.patientId,
+          relationshipType: 'Tutor Legal',
+          isPrimaryContact: false
+        }
+      ]
+    };
+
+    const updated = patientIndex.updateContactData(payload);
+
+    expect(updated.guardians).toHaveLength(2);
+    expect(updated.guardians.find((g: any) => g.name.includes('Juan'))).toBeDefined();
+
+    // Verificamos en DB directamente haciendo getPatientById
+    const fetchedInDb = service.getPatientById(fullMinor.patientId);
+    expect(fetchedInDb.guardians).toHaveLength(2);
+    expect(fetchedInDb.ownEmail).toBeNull();
+    expect(fetchedInDb.email).toBe('tutor@test.com');
   });
 
   it('debería borrar un paciente', () => {

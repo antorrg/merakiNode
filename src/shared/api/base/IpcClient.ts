@@ -11,6 +11,28 @@ interface IpcClientOptions {
   onResponseError?: (error: any) => void | Promise<void>;
 }
 
+type SessionListener = (error: any) => void;
+const unauthorizedListeners: Set<SessionListener> = new Set();
+const forbiddenListeners: Set<SessionListener> = new Set();
+
+export const subscribeUnauthorized = (listener: SessionListener) => {
+  unauthorizedListeners.add(listener);
+  return () => { unauthorizedListeners.delete(listener); };
+};
+
+export const subscribeForbidden = (listener: SessionListener) => {
+  forbiddenListeners.add(listener);
+  return () => { forbiddenListeners.delete(listener); };
+};
+
+const notifyUnauthorized = (error: any) => {
+  unauthorizedListeners.forEach(fn => fn(error));
+};
+
+const notifyForbidden = (error: any) => {
+  forbiddenListeners.forEach(fn => fn(error));
+};
+
 export class IpcClient {
   private getSessionId?: () => string | null | undefined;
   private requireAuth: boolean;
@@ -33,14 +55,15 @@ export class IpcClient {
       if (this.requireAuth) {
         const sessionId = this.getSessionId?.();
         if (!sessionId) {
-          throw new Error('Token o sessionId no encontrado');
+          const err = new Error('Token o sessionId no encontrado');
+          (err as any).code = 'UNAUTHORIZED';
+          throw err;
         }
 
         // Inyectamos el sessionId en el payload, ya que el backend (withAuth) lo espera así
         if (payload && typeof payload === 'object') {
           payload = { ...payload, sessionId };
         } else {
-          // Si el payload está vacío o no es un objeto
           payload = { sessionId };
         }
       }
@@ -48,8 +71,6 @@ export class IpcClient {
       const response = await window.ipcRenderer.invoke(config.channel, payload);
 
       if (!response || typeof response !== 'object' || !('ok' in response)) {
-          // Si por alguna razón la respuesta no viene envuelta en { ok, data, error },
-          // simplemente retornamos la data cruda.
           return response as T;
       }
       
@@ -62,12 +83,25 @@ export class IpcClient {
       await this.onResponseError?.(error);
 
       const code = error?.code || error?.error?.code;
-      if (code === 'SESSION_INVALID' || code === 'SESSION_EXPIRED' || code === 'UNAUTHORIZED') {
+      const message = String(error?.message || error?.error?.message || error || '');
+      
+      const isUnauthorized = 
+        code === 'SESSION_INVALID' || 
+        code === 'SESSION_EXPIRED' || 
+        code === 'UNAUTHORIZED' ||
+        message.includes('No session provided') ||
+        message.includes('Token o sessionId no encontrado') ||
+        message.includes('Session invalid') ||
+        message.includes('Session expired');
+
+      if (isUnauthorized) {
         await this.onUnauthorized?.(error);
+        notifyUnauthorized(error);
       }
       
       if (code === 'ACCESS_DENIED' || code === 'FORBIDDEN') {
         await this.onForbidden?.(error);
+        notifyForbidden(error);
       }
 
       throw error;

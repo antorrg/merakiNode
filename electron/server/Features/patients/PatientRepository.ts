@@ -2,6 +2,7 @@ import { BaseRepository } from '../../Shared/Repositories/BaseRepository.js';
 import { db } from '../../Configs/database.js';
 import { CaseConverter } from '../../Shared/Utils/CaseConverter.js';
 import { PatientProps, GuardianRelation } from './Patient.js';
+import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
 
 import { Patients } from '../../dbTypes/db.types.js';
 
@@ -88,20 +89,49 @@ export class PatientRepository {
       const { relationId, relationshipType, isPrimaryContact, ...guardianRawData } = row;
       const guardianData = CaseConverter.mapKeysToCamelCase<PatientProps>(guardianRawData);
       
-      return {
+      const pepe ={
         relationId,
         relationshipType,
         isPrimaryContact: Boolean(isPrimaryContact),
         guardian: guardianData
       };
+
+      return pepe
     });
 
     patientProps.guardians = guardians;
     return patientProps;
   }
 
-  update(id: string, patientData: Partial<Patients>) {
-    return this.baseRepo.update(id, patientData);
+  update(id: string, patientData: Partial<Patients>, relations?: GuardianRelation[]) {
+    const updateTransaction = db.db.transaction(() => {
+      this.baseRepo.update(id, patientData);
+
+      if (relations !== undefined) {
+        // Delete existing relations for this dependent
+        db.db.prepare('DELETE FROM patient_relations WHERE dependent_id = ?').run(id);
+
+        // Insert new relations
+        if (relations.length > 0) {
+          const stmt = db.db.prepare(`
+            INSERT INTO patient_relations (relation_id, guardian_id, dependent_id, relationship_type, is_primary_contact)
+            VALUES (?, ?, ?, ?, ?)
+          `);
+          for (const relation of relations) {
+            stmt.run(
+              relation.relationId || UuidHandler.idCreator(),
+              relation.guardian.patientId,
+              id,
+              relation.relationshipType,
+              relation.isPrimaryContact ? 1 : 0
+            );
+          }
+        }
+      }
+    });
+
+    updateTransaction();
+    return true;
   }
 
   delete(id: string) {
@@ -133,10 +163,10 @@ export class PatientRepository {
         if (searchField) {
           where.push(`${searchField} LIKE @search COLLATE NOCASE`);
         } else {
-          where.push(`(p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR p.identity_code LIKE @search COLLATE NOCASE)`);
+          where.push(`(p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR (p.first_name || ' ' || p.last_name) LIKE @search COLLATE NOCASE OR p.identity_code LIKE @search COLLATE NOCASE)`);
         }
       } else {
-        where.push(`(p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR p.identity_code LIKE @search COLLATE NOCASE)`);
+        where.push(`(p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR (p.first_name || ' ' || p.last_name) LIKE @search COLLATE NOCASE OR p.identity_code LIKE @search COLLATE NOCASE)`);
       }
       params.search = `%${options.search.trim()}%`;
     }

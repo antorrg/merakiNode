@@ -1,4 +1,4 @@
-import { Patient, PatientCreate } from './Patient.js';
+import { Patient, PatientCreate, PatientProps, GuardianRelation } from './Patient.js';
 import { PatientRepository } from './PatientRepository.js';
 import { Patients } from '../../dbTypes/db.types.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
@@ -47,25 +47,102 @@ export class PatientService {
     return response;
   }
 
-  updatePatientContact(id: string, phone: string, email: string | null) {
+  updatePatientContact(id: string, data: any, emailArg?: string | null) {
+    let firstName: string | undefined;
+    let lastName: string | undefined;
+    let typeDoc: string | undefined;
+    let identityCode: string | undefined;
+    let birthDate: string | undefined;
+    let phone: string | undefined;
+    let email: string | null | undefined;
+    let address: string | undefined;
+    let city: string | undefined;
+    let postalCode: string | undefined;
+    let guardiansData: any[] | undefined;
+
+    if (typeof data === 'string') {
+      phone = data;
+      email = emailArg;
+    } else if (data && typeof data === 'object') {
+      firstName = data.firstName;
+      lastName = data.lastName;
+      typeDoc = data.typeDoc;
+      identityCode = data.identityCode;
+      birthDate = data.birthDate;
+      phone = data.phone;
+      email = data.email;
+      address = data.address;
+      city = data.city;
+      postalCode = data.postalCode;
+      guardiansData = data.guardians;
+    }
+
     const patientProps = this.repository.getById(id);
     if (!patientProps) throw new Error('Patient not found');
-    
-    const patient = new Patient(patientProps);
-    
-    // Esta función del dominio verifica la mayoría de edad y asigna los datos
-    patient.updateContactData(phone, email);
-    
-    const updatedProps = patient.toPersistence() as Partial<Patients>;
-    
-    // Actualizamos solo los campos que cambiaron
-    this.repository.update(id, {
-      phone: updatedProps.phone,
-      email: updatedProps.email,
-      age: updatedProps.age
-    });
 
-    return patient.toDTO();
+    let updatedGuardians: GuardianRelation[] | undefined;
+    if (Array.isArray(guardiansData)) {
+      updatedGuardians = guardiansData.map((g: any) => {
+        let guardianProps: PatientProps;
+        const gId = g.guardianId || g.guardian?.patientId || g.guardianId;
+        if (gId) {
+          const found = this.repository.getById(gId);
+          if (!found) throw new Error(`Guardian patient ${gId} not found`);
+          guardianProps = found;
+        } else if (g.guardian) {
+          guardianProps = g.guardian;
+        } else {
+          throw new Error('Guardian information missing');
+        }
+
+        return {
+          relationId: g.relationId || UuidHandler.idCreator(),
+          guardian: guardianProps,
+          relationshipType: g.relationshipType || g.relationship || 'Otro',
+          isPrimaryContact: Boolean(g.isPrimaryContact ?? g.isPrimary)
+        };
+      });
+    }
+
+    const effectiveGuardians = updatedGuardians !== undefined ? updatedGuardians : (patientProps.guardians || []);
+
+    const updatedPropsForEntity: PatientProps = {
+      ...patientProps,
+      firstName: (firstName !== undefined && firstName !== null) ? firstName : patientProps.firstName,
+      lastName: (lastName !== undefined && lastName !== null) ? lastName : patientProps.lastName,
+      typeDoc: (typeDoc !== undefined && typeDoc !== null) ? typeDoc : patientProps.typeDoc,
+      identityCode: (identityCode !== undefined && identityCode !== null) ? identityCode : patientProps.identityCode,
+      birthDate: (birthDate !== undefined && birthDate !== null) ? birthDate : patientProps.birthDate,
+      phone: phone !== undefined ? phone : patientProps.phone,
+      email: email !== undefined ? email : patientProps.email,
+      address: (address !== undefined && address !== null) ? address : patientProps.address,
+      city: (city !== undefined && city !== null) ? city : patientProps.city,
+      postalCode: (postalCode !== undefined && postalCode !== null) ? postalCode : patientProps.postalCode,
+      guardians: effectiveGuardians
+    };
+
+    const patient = new Patient(updatedPropsForEntity);
+
+    // Validar requerimientos de edad del dominio
+    Patient.validateAgeRequirements(patient.toPersistence().age, patient.toPersistence().phone, effectiveGuardians);
+
+    const persistenceData = patient.toPersistence() as Partial<Patients>;
+
+    this.repository.update(id, {
+      first_name: persistenceData.first_name,
+      last_name: persistenceData.last_name,
+      type_doc: persistenceData.type_doc,
+      identity_code: persistenceData.identity_code,
+      birth_date: persistenceData.birth_date,
+      age: persistenceData.age,
+      phone: persistenceData.phone,
+      email: persistenceData.email,
+      address: persistenceData.address,
+      city: persistenceData.city,
+      postal_code: persistenceData.postal_code
+    }, updatedGuardians);
+
+    return this.getPatientById(id);
   }
 
   deletePatient(id: string) {

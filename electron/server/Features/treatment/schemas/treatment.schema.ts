@@ -23,3 +23,7 @@ export const updateTreatmentSchema: Schema = {
 export const deleteTreatmentSchema: Schema = {
   treatmentId: { type: "string" }
 };
+
+export const getByPatientSchema: Schema = {
+  patientId: { type: "string" }
+};

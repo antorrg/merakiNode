@@ -1,12 +1,13 @@
 import React from 'react';
-import { IPatient } from '../../../../shared/types';
+import { IPatient } from '../../../types';
 import { WorkspaceSection } from './useWorkspaceStore';
-import PatientHeader from './components/PatientHeader';
-import Histories from '../../history/Histories'
-import HistoryEntry from '../../history/HistoryEntry';
-import Treatments from '../../treatments/Treatments';
-import Diagnostics from '../../diagnostic/Diagnostics';
-import Patient from '../Patient'
+import PatientHeader from '../patient/components/PatientHeader';
+import Histories from '../history/Histories'
+import HistoryEntry from '../history/HistoryEntry';
+import Treatments from '../treatments/Treatments';
+import Diagnostics from '../diagnostic/Diagnostics';
+import PatientCalendar from '../calendar/PatientCalendar';
+import Patient from '../patient/Patient'
 
 interface ContentProps {
   patient: IPatient;
@@ -26,6 +27,8 @@ const WorkspaceContent: React.FC<ContentProps> = ({ patient, activeSection }) =>
         return <Treatments patientId={patient.patientId} />
       case 'diagnostic':
         return <Diagnostics patientId={patient.patientId} />
+      case 'pat_calendar':
+        return <PatientCalendar patientId={patient.patientId}/>
       default:
         return <div>Seleccione una sección</div>;
     }

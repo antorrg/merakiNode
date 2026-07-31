@@ -9,11 +9,12 @@ interface SidebarProps {
 
 const WorkspaceSidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSection }) => {
   const menuItems: { id: WorkspaceSection; label: string; icon: string }[] = [
-    { id: 'new-entry', label: 'Nueva Entrada', icon: '📝' },
-    { id: 'history', label: 'Entradas Anteriores', icon: '🕰️' },
-    { id: 'treatments', label: 'Tratamientos', icon: '💊' },
+    { id: 'new-entry', label: 'Nueva Visita', icon: '📝' },
+    { id: 'history', label: 'Visitas Anteriores', icon: '🕰️' },
+    { id: 'treatments', label: 'Tratamientos', icon: '🗣️' },
     { id: 'diagnostic', label: 'Diagnóstico', icon: '🩺' },
     { id: 'patient', label: 'Detalle paciente', icon: '👤' },
+    { id: 'pat_calendar', label: 'Agenda', icon: '📆​'}
   ];
 
   return (

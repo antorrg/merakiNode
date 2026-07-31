@@ -1,7 +1,7 @@
 import { Accordion, Badge, Button } from 'react-bootstrap';
-import { IHistoryEntry, VisitType } from '../../../shared/types';
+import { IHistoryEntry, VisitType } from '../../../types';
 import { useHistoryEntryStore } from './useHistoryEntryStore';
-import { useWorkspaceStore } from '../patient/workspace/useWorkspaceStore';
+import { useWorkspaceStore } from '../workspace/useWorkspaceStore';
 
 interface HistoryDetailProps {
   entry: IHistoryEntry;

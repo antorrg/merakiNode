@@ -23,6 +23,18 @@ export class TreatmentRepository {
     return rows.map(row => CaseConverter.mapKeysToCamelCase<TreatmentProps>(row));
   }
 
+  getByPatientId(patientId: string): TreatmentProps[] {
+    const stmt = db.db.prepare(`
+      SELECT t.*
+      FROM treatment t
+      JOIN history_entry h ON t.entry_id = h.entry_id
+      WHERE h.patient_id = ? AND t.deleted_at IS NULL AND h.deleted_at IS NULL
+      ORDER BY t.start_date DESC, t.created_at DESC
+    `);
+    const rows = stmt.all(patientId) as DbTreatment[];
+    return rows.map(row => CaseConverter.mapKeysToCamelCase<TreatmentProps>(row));
+  }
+
   getById(id: string): TreatmentProps | null {
     const result = this.baseRepo.getById(id);
     return result.results || null;

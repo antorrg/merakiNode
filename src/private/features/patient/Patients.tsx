@@ -7,36 +7,38 @@ import { usePatientStore } from './usePatientStore';
 import ConfirmModal from '../../../shared/components/modalComponents/ConfirmModal';
 import PatientForms from './PatientForms';
 import { PatientActionType, patientModalConfigs } from './patientModalConfigs';
-import { useWorkspaceStore } from './workspace/useWorkspaceStore';
+import { useWorkspaceStore } from '../workspace/useWorkspaceStore';
+import PatientSearchBar from './components/PatientSearchBar';
 
 const Patients = () => {
   const navigate = useNavigate();
   const { addPatient } = useWorkspaceStore();
-  const { patients, info, isLoading, fetchPatients, deletePatient, createPatient, updatePatientContact, getPatientById } = usePatientStore();
+  const { patients, info, isLoading, fetchPatients, deletePatient, createPatient, getPatientById, searchTerm } = usePatientStore();
   const [showFormModal, setShowFormModal] = useState(false);
-  const [formMode, setFormMode] = useState<PatientActionType>('CREATE'); // CREATE o UPDATE
+  //eslint-disable-next-line
   const [pendingAction, setPendingAction] = useState<{ type: PatientActionType | null, payload?: any }>({ type: null });
   const [showConfirmAlert, setShowConfirmAlert] = useState(false);
-  const [selectedPatientId, setSelectedPatientId] = useState<string | undefined>();
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const limit = 5;
 
   useEffect(() => {
-    fetchPatients(currentPage, limit);
-  }, [fetchPatients, currentPage]);
+    fetchPatients(currentPage, limit, searchTerm);
+  }, [fetchPatients, currentPage, searchTerm]);
+
+  const handleSearch = (term: string) => {
+    setCurrentPage(1);
+    fetchPatients(1, limit, term);
+  };
 
   const handleCreate = () => {
-    setFormMode('CREATE');
-    setSelectedPatientId(undefined);
     setShowFormModal(true);
   };
 
-  const handleEdit = (id: string) => {
-    setFormMode('UPDATE');
-    setSelectedPatientId(id);
-    setShowFormModal(true);
+  const handleCloseFormModal = () => {
+    setShowFormModal(false);
+    fetchPatients(currentPage, limit, searchTerm);
   };
 
   const handleDelete = (id: string) => {
@@ -46,7 +48,7 @@ const Patients = () => {
 
   const handleRequestConfirm = (action: PatientActionType, data: any) => {
     setPendingAction({ type: action, payload: data });
-    setShowFormModal(false); // Escondemos el form para mostrar el confirm
+    setShowFormModal(false);
     setShowConfirmAlert(true);
   };
 
@@ -55,10 +57,11 @@ const Patients = () => {
     
     if (pendingAction.type === 'DELETE' && pendingAction.payload?.patientId) {
       await deletePatient(pendingAction.payload.patientId);
+      await fetchPatients(currentPage, limit, searchTerm);
     } else if (pendingAction.type === 'CREATE' && pendingAction.payload) {
       await createPatient(pendingAction.payload);
-    } else if (pendingAction.type === 'UPDATE' && pendingAction.payload) {
-      await updatePatientContact(pendingAction.payload.patientId, pendingAction.payload);
+      setCurrentPage(1);
+      await fetchPatients(1, limit, searchTerm);
     }
     
     setPendingAction({ type: null });
@@ -80,7 +83,8 @@ const Patients = () => {
     <div className="container-fluid mt-4">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h2 className="fw-bold">Gestión de Pacientes</h2>
-        <Button variant="primary" onClick={handleCreate} className="shadow-sm">
+        <PatientSearchBar onSearch={handleSearch} initialValue={searchTerm} />
+        <Button variant="primary" onClick={handleCreate} size='sm' className="shadow-sm ">
           + Nuevo Paciente
         </Button>
       </div>
@@ -125,11 +129,8 @@ const Patients = () => {
                     <td>{patient.typeDoc}: {patient.identityCode}</td>
                     <td className="text-center">
                       <div className="d-flex justify-content-center gap-2">
-                        <Button variant="outline-primary" size="sm" onClick={() => handleEdit(patient.patientId)}>
-                          Editar
-                        </Button>
                         <Button variant="outline-danger" size="sm" onClick={() => handleDelete(patient.patientId)}>
-                          Borrar
+                          Eliminar
                         </Button>
                       </div>
                     </td>
@@ -138,7 +139,7 @@ const Patients = () => {
               ) : (
                 <tr>
                   <td colSpan={3} className="text-center py-4 text-muted">
-                    No hay pacientes registrados.
+                    {searchTerm ? 'No se encontraron pacientes que coincidan con la búsqueda.' : 'No hay pacientes registrados.'}
                   </td>
                 </tr>
               )}
@@ -176,9 +177,8 @@ const Patients = () => {
 
       <PatientForms 
         show={showFormModal}
-        onHide={() => setShowFormModal(false)}
-        mode={formMode}
-        selectedPatientId={selectedPatientId}
+        onHide={handleCloseFormModal}
+        mode="CREATE"
         onRequestConfirm={handleRequestConfirm}
       />
 

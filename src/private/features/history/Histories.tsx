@@ -2,12 +2,17 @@ import { useEffect } from 'react';
 import { Accordion, Spinner, Alert } from 'react-bootstrap';
 import { useHistoryEntryStore } from './useHistoryEntryStore';
 import HistoryDetail from './HistoryDetail';
+import { useAuth } from '../../../context/AuthContext';
+import { Role } from '../../../types';
+import { hasRole } from '../../../shared/utils/hasRole';
+import HistoryNotAuthorized from './HistoryNotAuthorized';
 
 interface HistoriesProps {
   patientId: string;
 }
 
 const Histories = ({ patientId }: HistoriesProps) => {
+  const {user} =useAuth()
   const { entriesByPatient, fetchEntriesByPatient, isLoading, error } = useHistoryEntryStore();
   
   const entries = entriesByPatient[patientId] || [];
@@ -20,7 +25,9 @@ const Histories = ({ patientId }: HistoriesProps) => {
     <div className="bg-white p-4 rounded shadow-sm border border-light">
       <h4 className="mb-4 text-primary">Historial Clínico</h4>
       
-      {isLoading && entries.length === 0 ? (
+      {(hasRole(user?.role, Role.ADMIN)===false)?
+      <HistoryNotAuthorized/>
+      : isLoading && entries.length === 0 ? (
         <div className="text-center p-5">
           <Spinner animation="border" variant="primary" />
           <p className="text-muted mt-2">Cargando historial...</p>

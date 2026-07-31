@@ -18,6 +18,14 @@ export class TreatmentService {
     });
   }
 
+  getTreatmentsByPatient(patientId: string) {
+    const rows = this.repository.getByPatientId(patientId);
+    return rows.map(row => {
+      const treatment = new Treatment(row);
+      return treatment.toDTO();
+    });
+  }
+
   updateTreatment(treatmentId: string, updates: Partial<Omit<TreatmentProps, 'treatmentId' | 'entryId' | 'deletedAt'>>) {
     const existing = this.repository.getById(treatmentId);
     if (!existing) throw new Error('Treatment not found');

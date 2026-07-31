@@ -16,15 +16,15 @@ export default {
   getPatientById: (data: unknown) => {
     const validData = NodeValidator.validateBody(data, sch.getByIdSchema);
     const validId = NodeValidator.paramId(validData,'patientId',  UuidHandler.regexUuid);
-    return  patientService.getPatientById(validId);
+    const response =  patientService.getPatientById(validId);
+    return response
   },
   
   updateContactData: (data: unknown) => {
     const validData = NodeValidator.validateBody(data, sch.updateContactSchema);
     const { patientId, rest } = NodeValidator.splitObjectProps(validData, ['patientId']);
-    const { phone, email } = rest as any;
     const validId = NodeValidator.paramId({patientId},'patientId',UuidHandler.regexUuid);
-    return patientService.updatePatientContact(validId, phone as string, email as string | null);
+    return patientService.updatePatientContact(validId, rest as any);//eslint-disable-line
   },
 
   deletePatient: (data: unknown) => {

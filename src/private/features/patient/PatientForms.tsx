@@ -17,7 +17,7 @@ const PatientForms: React.FC<PatientFormsProps> = ({ show, onHide, mode, selecte
     <Modal show={show} onHide={onHide} centered backdrop="static" size="lg">
       <Modal.Header closeButton>
         <Modal.Title>
-          {mode === 'CREATE' ? 'Registrar Nuevo Paciente' : 'Actualizar Datos de Contacto'}
+          {mode === 'CREATE' ? 'Registrar Nuevo Paciente' : 'Actualizar Datos del Paciente'}
         </Modal.Title>
       </Modal.Header>
       <Modal.Body>

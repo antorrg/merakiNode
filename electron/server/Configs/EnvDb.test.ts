@@ -16,7 +16,7 @@ describe('EnvDb test', () => {
       `Testing database: ${nameOfDb(envConfig.DatabasePath)}`
       expect(formatEnvInfo).toBe(
         'App running in: test'+
-        'Testing database: database.test.sqlite'
+        'Testing database: memory'
       )
     })
   })

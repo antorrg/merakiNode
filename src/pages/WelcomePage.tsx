@@ -20,8 +20,9 @@ export default function WelcomePage() {
 
 
     return (
-        <div className="vh-100 position-relative bg-light d-flex flex-column align-items-center justify-content-center">
-            
+        <div className="vh-100 position-relative meraki-back-color d-flex flex-column align-items-center justify-content-center">
+              <div className="bg-white p-4 rounded shadow-sm border border-light">
+       <div className="p-5 text-center text-muted bg-light rounded border">
             {/* FONDO / CONTENIDO POR DEFECTO DEL PANEL ADMIN */}
             <div className="text-center" style={{ zIndex: 1 }}>
                 <h1 className="display-4 fw-bold text-primary mb-3">Meraki Node</h1>
@@ -29,6 +30,8 @@ export default function WelcomePage() {
                 {isAuthenticated && (
                    <p className="mt-4 text-success">¡Sesión iniciada correctamente!</p>
                 )}
+            </div>
+            </div>
             </div>
 
             {/* OVERLAY DE CARGA (HYDRATION) */}

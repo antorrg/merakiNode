@@ -3,8 +3,13 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import Table from 'react-bootstrap/Table';
+import Alert from 'react-bootstrap/Alert';
 import { PatientActionType } from '../patientModalConfigs';
-import { usePatientStore } from '../usePatientStore';
+import { Guardian, IPatient } from '../../../../types';
+import QuickGuardianModal from '../modals/QuickGuardianModal';
+import TutorSearchBarSelect from '../components/TutorSearchBarSelect';
+import { normalizeDateInput, validateAndParseBirthDate } from '../../../../shared/utils/dateUtils';
 
 interface PatientCreateProps {
   onHide: () => void;
@@ -12,7 +17,6 @@ interface PatientCreateProps {
 }
 
 const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm }) => {
-  const { patients } = usePatientStore(); // Usamos los pacientes cacheados para seleccionar tutor
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -26,39 +30,102 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
     postalCode: ''
   });
 
-  const [hasGuardian, setHasGuardian] = useState(false);
-  const [guardianData, setGuardianData] = useState({
-    guardianId: '',
-    relationshipType: 'Padre/Madre',
-    isPrimaryContact: true
-  });
+  const [guardians, setGuardians] = useState<Guardian[]>([]);
+  const [showAddGuardian, setShowAddGuardian] = useState(false);
+  const [showQuickGuardianModal, setShowQuickGuardianModal] = useState(false);
+  const [quickModalSearchQuery, setQuickModalSearchQuery] = useState('');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleChange = (e: any) => {
+  const handleQuickGuardianCreated = (newGuardian: Guardian) => {
+    setGuardians(prev => {
+      let updated = [...prev];
+      if (newGuardian.isPrimary) {
+        updated = updated.map(g => ({ ...g, isPrimary: false }));
+      }
+      return [...updated, newGuardian];
+    });
+  };
+
+  const handleAddGuardianFromSearch = (selectedPatient: IPatient, relationshipType: string, isPrimaryContact: boolean) => {
+    setErrorMsg(null);
+    let updatedGuardians = [...guardians];
+    if (isPrimaryContact) {
+      updatedGuardians = updatedGuardians.map(g => ({ ...g, isPrimary: false }));
+    }
+
+    const guardianToAdd: Guardian = {
+      guardianId: selectedPatient.patientId,
+      name: `${selectedPatient.firstName} ${selectedPatient.lastName}`,
+      phone: selectedPatient.phone || 'Sin teléfono',
+      relationship: relationshipType,
+      isPrimary: isPrimaryContact || guardians.length === 0
+    };
+
+    setGuardians([...updatedGuardians, guardianToAdd]);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrorMsg(null);
   };
 
-  const handleGuardianChange = (e: any) => {
-    setGuardianData({ ...guardianData, [e.target.name]: e.target.value });
+  const handleBirthDateBlur = () => {
+    if (formData.birthDate) {
+      const normalized = normalizeDateInput(formData.birthDate);
+      setFormData(prev => ({ ...prev, birthDate: normalized }));
+    }
   };
+
+  const handleRemoveGuardian = (indexToRemove: number) => {
+    setErrorMsg(null);
+    const updated = guardians.filter((_, idx) => idx !== indexToRemove);
+    if (updated.length > 0 && !updated.some(g => g.isPrimary)) {
+      updated[0].isPrimary = true;
+    }
+    setGuardians(updated);
+  };
+
+  const dateValidation = validateAndParseBirthDate(formData.birthDate);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Construimos el array de guardians como lo espera el backend
-    const guardiansPayload = [];
-    if (hasGuardian && guardianData.guardianId) {
-      const selectedGuardian = patients.find(p => p.patientId === guardianData.guardianId);
-      if (selectedGuardian) {
-        guardiansPayload.push({
-          relationshipType: guardianData.relationshipType,
-          isPrimaryContact: guardianData.isPrimaryContact,
-          guardian: selectedGuardian
-        });
+    setErrorMsg(null);
+
+    const dateResult = validateAndParseBirthDate(formData.birthDate);
+    if (!dateResult.isValid) {
+      setErrorMsg(dateResult.errorMessage || 'La fecha de nacimiento no es válida.');
+      return;
+    }
+
+    const age = dateResult.age !== null ? dateResult.age : 99;
+    const isMinor = age < 18;
+
+    if (isMinor) {
+      if (guardians.length === 0) {
+        setErrorMsg('Un paciente menor de edad debe tener al menos un tutor asignado.');
+        return;
+      }
+      const hasPrimary = guardians.some(g => g.isPrimary);
+      if (!hasPrimary) {
+        setErrorMsg('Debe designar al menos un tutor como contacto principal.');
+        return;
+      }
+    } else {
+      if (!formData.phone || formData.phone.trim() === '') {
+        setErrorMsg('Un paciente mayor de edad debe contar con un teléfono de contacto.');
+        return;
       }
     }
 
+    const guardiansPayload = guardians.map(g => ({
+      relationshipType: g.relationship,
+      isPrimaryContact: g.isPrimary,
+      guardian: { patientId: g.guardianId }
+    }));
+
     const payload = {
       ...formData,
+      birthDate: dateResult.normalizedDate,
       guardians: guardiansPayload
     };
 
@@ -67,6 +134,8 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
 
   return (
     <Form onSubmit={handleSubmit}>
+      {errorMsg && <Alert variant="danger" onClose={() => setErrorMsg(null)} dismissible>{errorMsg}</Alert>}
+
       <Row>
         <Col md={6}>
           <Form.Group className="mb-3">
@@ -105,8 +174,28 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
         <Col md={6}>
           <Form.Group className="mb-3">
             <Form.Label>Fecha Nacimiento (DD/MM/YYYY)</Form.Label>
-            <Form.Control type="text" name="birthDate" placeholder="Ej: 15/08/1990" value={formData.birthDate} onChange={handleChange} required />
-            <Form.Text className="text-muted">Requerido. Si es menor de 18 años, debe asignar un tutor.</Form.Text>
+            <Form.Control 
+              type="text" 
+              name="birthDate" 
+              placeholder="Ej: 15/08/1990" 
+              value={formData.birthDate} 
+              onChange={handleChange}
+              onBlur={handleBirthDateBlur} 
+              required 
+            />
+            {dateValidation.isValid && dateValidation.age !== null && (
+              <Form.Text className="text-success d-block">
+                Edad calculada: {dateValidation.age} {dateValidation.age === 1 ? 'año' : 'años'}
+              </Form.Text>
+            )}
+            {!dateValidation.isValid && formData.birthDate.trim() !== '' && (
+              <Form.Text className="text-danger d-block">
+                {dateValidation.errorMessage}
+              </Form.Text>
+            )}
+            {formData.birthDate.trim() === '' && (
+              <Form.Text className="text-muted d-block">Requerido. Si es menor de 18 años, debe asignar al menos un tutor.</Form.Text>
+            )}
           </Form.Group>
         </Col>
         <Col md={6}>
@@ -144,54 +233,100 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
 
       <hr className="my-4" />
       
-      <Form.Group className="mb-3" controlId="hasGuardianCheckbox">
-        <Form.Check 
-          type="checkbox" 
-          label="Añadir Tutor / Responsable (Obligatorio para menores o pacientes con discapacidad)" 
-          checked={hasGuardian}
-          onChange={(e) => setHasGuardian(e.target.checked)}
-        />
-      </Form.Group>
-
-      {hasGuardian && (
-        <div className="p-3 border rounded bg-light mb-4">
-          <p className="text-muted small mb-3">
-            Nota: El adulto responsable debe estar registrado previamente como paciente en el sistema. 
-            Si no lo está, regístrelo primero.
-          </p>
-          <Row>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Seleccionar Tutor</Form.Label>
-                <Form.Select name="guardianId" value={guardianData.guardianId} onChange={handleGuardianChange} required={hasGuardian}>
-                  <option value="">-- Seleccione un adulto --</option>
-                  {patients.map(p => (
-                    <option key={p.patientId} value={p.patientId}>
-                      {p.firstName} {p.lastName} - {p.identityCode}
-                    </option>
-                  ))}
-                </Form.Select>
-              </Form.Group>
-            </Col>
-            <Col md={6}>
-              <Form.Group className="mb-3">
-                <Form.Label>Vínculo</Form.Label>
-                <Form.Select name="relationshipType" value={guardianData.relationshipType} onChange={handleGuardianChange}>
-                  <option value="Padre/Madre">Padre/Madre</option>
-                  <option value="Tutor Legal">Tutor Legal</option>
-                  <option value="Familiar">Familiar</option>
-                  <option value="Otro">Otro</option>
-                </Form.Select>
-              </Form.Group>
-            </Col>
-          </Row>
+      <div className="d-flex justify-content-between align-items-center mb-3">
+        <div>
+          <h6 className="fw-bold text-secondary mb-0">Tutores y Responsables</h6>
+          <small className="text-muted">Obligatorio para menores de 18 años (puede agregar 1 o más tutores)</small>
         </div>
+        <div className="d-flex gap-2">
+          <Button 
+            variant="outline-success" 
+            size="sm" 
+            onClick={() => {
+              setQuickModalSearchQuery('');
+              setShowQuickGuardianModal(true);
+            }}
+          >
+            + Crear tutor ahora
+          </Button>
+          <Button 
+            variant="outline-primary" 
+            size="sm" 
+            onClick={() => setShowAddGuardian(!showAddGuardian)}
+          >
+            {showAddGuardian ? 'Ocultar panel de búsqueda' : '+ Buscar tutor existente'}
+          </Button>
+        </div>
+      </div>
+
+      {showAddGuardian && (
+        <TutorSearchBarSelect 
+          onAddGuardian={handleAddGuardianFromSearch}
+          onOpenQuickModal={(query) => {
+            setQuickModalSearchQuery(query || '');
+            setShowQuickGuardianModal(true);
+          }}
+          alreadySelectedIds={guardians.map(g => g.guardianId || '')}
+        />
+      )}
+
+      {guardians.length > 0 ? (
+        <Table striped bordered hover size="sm" className="align-middle">
+          <thead className="table-light">
+            <tr>
+              <th>Nombre</th>
+              <th>Relación</th>
+              <th>Teléfono</th>
+              <th>Contacto Principal</th>
+              <th className="text-center">Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            {guardians.map((g, idx) => (
+              <tr key={g.guardianId || idx}>
+                <td>{g.name}</td>
+                <td>{g.relationship}</td>
+                <td>{g.phone}</td>
+                <td>
+                  {g.isPrimary ? (
+                    <span className="badge bg-success">Sí, principal</span>
+                  ) : (
+                    <span className="badge bg-secondary">Secundario</span>
+                  )}
+                </td>
+                <td className="text-center">
+                  <Button 
+                    variant="outline-danger" 
+                    size="sm" 
+                    onClick={() => handleRemoveGuardian(idx)}
+                  >
+                    Quitar
+                  </Button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </Table>
+      ) : (
+        <p className="text-muted small italic">No hay tutores asignados a este paciente.</p>
       )}
 
       <div className="d-flex justify-content-end gap-2 mt-4">
         <Button variant="secondary" onClick={onHide}>Cancelar</Button>
         <Button variant="primary" type="submit">Guardar y Confirmar</Button>
       </div>
+
+      <QuickGuardianModal 
+        show={showQuickGuardianModal} 
+        onHide={() => setShowQuickGuardianModal(false)}
+        defaultAddress={{
+          address: formData.address,
+          city: formData.city,
+          postalCode: formData.postalCode
+        }}
+        initialSearchQuery={quickModalSearchQuery}
+        onGuardianCreated={handleQuickGuardianCreated}
+      />
     </Form>
   );
 };

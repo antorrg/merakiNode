@@ -14,18 +14,30 @@ export interface IUser {
     createdAt:string
     updatedAt:string
 }
+export type Guardian = {
+  relationId?: string;
+  guardianId?: string;
+  isPrimary: boolean;
+  name: string;
+  phone: string;
+  relationship: string;
+}
 export interface IPatient {
     patientId:string
     firstName:string
     lastName:string
     typeDoc:string
     identityCode:string
+    guardians?: Guardian[] | []
     birthDate: string
     age: number
     address: string
     city: string
     email?: string
     phone?: string
+    ownEmail?: string | null
+    ownPhone?: string | null
+    postalCode?: string
 }
 
 export enum VisitType {
@@ -65,4 +77,15 @@ export interface IDiagnosis {
   startDate: string;
   endDate?: string | null;
   status: DiagnosisStatus;
+}
+
+export interface ITreatment {
+  treatmentId: string;
+  entryId: string;
+  name: string;
+  description?: string | null;
+  frequency?: string | null;
+  objective?: string | null;
+  startDate: string;
+  endDate?: string | null;
 }

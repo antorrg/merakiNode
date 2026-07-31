@@ -14,8 +14,8 @@ export const patientModalConfigs = {
     cancelText: 'Revisar datos'
   },
   UPDATE: {
-    title: 'Actualizar contacto',
-    message: '¿Está seguro de que desea actualizar los datos de contacto del paciente?',
+    title: 'Actualizar paciente',
+    message: '¿Está seguro de que desea actualizar los datos del paciente?',
     confirmText: 'Sí, actualizar',
     cancelText: 'Cancelar'
   }

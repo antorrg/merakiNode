@@ -164,13 +164,20 @@ export class Patient {
       age: this.age,
       address: this.address,
       city: this.city,
+      postalCode: this.postalCode,
       
+      // Datos propios (reales del paciente)
+      ownEmail: this.email,
+      ownPhone: this.phone,
+
       // Enviamos el contacto "inteligente" (si no tiene propio, envía el del padre)
       phone: this.contactPhone, 
       email: this.contactEmail, 
       
       // Enviamos info resumida de los tutores por si el Frontend quiere mostrarlos
       guardians: this.guardians.map(g => ({
+        relationId: g.relationId,
+        guardianId: g.guardian.patientId,
         relationship: g.relationshipType,
         isPrimary: g.isPrimaryContact,
         name: `${g.guardian.firstName} ${g.guardian.lastName}`,

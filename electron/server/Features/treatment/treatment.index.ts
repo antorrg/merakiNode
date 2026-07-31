@@ -24,5 +24,11 @@ export default {
     const validData = NodeValidator.validateBody(data, sch.deleteTreatmentSchema);
     const validId = NodeValidator.paramId( validData , 'treatmentId', UuidHandler.regexUuid);
     return treatmentService.deleteTreatment(validId);
+  },
+
+  getTreatmentsByPatient: (data: unknown) => {
+    const validData = NodeValidator.validateBody(data, sch.getByPatientSchema);
+    const validId = NodeValidator.paramId(validData, 'patientId', UuidHandler.regexUuid);
+    return treatmentService.getTreatmentsByPatient(validId);
   }
 }

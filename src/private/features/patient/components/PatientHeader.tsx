@@ -1,4 +1,4 @@
-import { type IPatient } from "../../../../../shared/types"
+import { type IPatient } from "../../../../types"
 
 type Patient = Pick<IPatient, 'firstName'| 'lastName'|'typeDoc'| 'identityCode'| 'age'| 'city'>
 type PatientHeaderProps = {
