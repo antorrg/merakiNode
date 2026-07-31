@@ -10,7 +10,7 @@ export default {
     return authService.login(verifiedData)
   },
   getSession: (sessionId:string)=>{
-    return authService.verifyService(sessionId, 'USER')
+    return authService.verifyService(sessionId, 'SECRETARIO')
   },
   logout: (sessionId: string)=>{
     return authService.logout(sessionId)

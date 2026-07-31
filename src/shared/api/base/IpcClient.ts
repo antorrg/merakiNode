@@ -1,5 +1,5 @@
 export interface IpcRequestConfig {
-  channel: string;
+  channel: import('../../../../electron/white-list.js').AllowedInvokeChannel | (string & {});
   payload?: any;
 }
 
@@ -68,7 +68,12 @@ export class IpcClient {
         }
       }
 
-      const response = await window.ipcRenderer.invoke(config.channel, payload);
+      const ipc = typeof window !== 'undefined' ? (window.api || (window as any).ipcRenderer) : undefined;
+      if (!ipc || typeof ipc.invoke !== 'function') {
+        throw new Error('API IPC de Electron no disponible. Asegúrate de ejecutar la app dentro de Electron.');
+      }
+
+      const response: any = await ipc.invoke(config.channel, payload);
 
       if (!response || typeof response !== 'object' || !('ok' in response)) {
           return response as T;

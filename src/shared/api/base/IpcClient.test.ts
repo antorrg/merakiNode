@@ -3,10 +3,11 @@ import { IpcClient } from './IpcClient';
 
 describe('IpcClient', () => {
   beforeEach(() => {
-    // Mock the ipcRenderer environment since we're in Vitest Node environment
+    // Mock the window.api environment since we're in Vitest Node environment
     vi.stubGlobal('window', {
-      ipcRenderer: {
+      api: {
         invoke: vi.fn(),
+        on: vi.fn(),
       }
     });
   });
@@ -17,7 +18,7 @@ describe('IpcClient', () => {
 
   it('llama al canal ipc correcto con el payload', async () => {
     const response = { ok: true, data: { success: true } };
-    vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(response);
+    vi.mocked(window.api.invoke).mockResolvedValue(response);
 
     const client = new IpcClient();
 
@@ -27,12 +28,12 @@ describe('IpcClient', () => {
     });
 
     expect(result).toEqual(response);
-    expect(window.ipcRenderer.invoke).toHaveBeenCalledWith('test:channel', { page: 1 });
+    expect(window.api.invoke).toHaveBeenCalledWith('test:channel', { page: 1 });
   });
 
   it('lanza el error cuando el backend responde ok: false', async () => {
     const errorResponse = { ok: false, error: { message: 'Error de prueba', code: 'TEST_ERROR' } };
-    vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(errorResponse);
+    vi.mocked(window.api.invoke).mockResolvedValue(errorResponse);
 
     const client = new IpcClient();
 
@@ -45,7 +46,7 @@ describe('IpcClient', () => {
 
   it('ejecuta callbacks onUnauthorized cuando ocurre un error SESSION_EXPIRED', async () => {
     const errorResponse = { ok: false, error: { message: 'Expiró', code: 'SESSION_EXPIRED' } };
-    vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(errorResponse);
+    vi.mocked(window.api.invoke).mockResolvedValue(errorResponse);
 
     const onUnauthorized = vi.fn();
     const client = new IpcClient({ onUnauthorized });
@@ -59,7 +60,7 @@ describe('IpcClient', () => {
 
   it('devuelve el objeto si la respuesta no tiene el formato {ok, data, error}', async () => {
     const rawResponse = { someOtherFormat: true };
-    vi.mocked(window.ipcRenderer.invoke).mockResolvedValue(rawResponse);
+    vi.mocked(window.api.invoke).mockResolvedValue(rawResponse);
 
     const client = new IpcClient();
 
@@ -68,3 +69,4 @@ describe('IpcClient', () => {
     expect(result).toEqual(rawResponse);
   });
 });
+

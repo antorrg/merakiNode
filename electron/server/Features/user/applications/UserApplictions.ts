@@ -18,7 +18,7 @@ export class UserApplications{
   static Role(prop:string){
     if(!prop || typeof(prop) !== 'string') throw new Error('Missing or invalid role')
     const role = prop.trim().toUpperCase()
-     const allowed = ['PROPIETARIO', 'ADMIN', 'USER']
+     const allowed = ['PROPIETARIO', 'PROFESIONAL', 'SECRETARIO']
      if(!allowed.includes(role)){
       throw new Error('Invalid role')
     }

@@ -2,19 +2,20 @@ import { ipcMain } from "electron";
 import { wrapIpcHandler } from '../Configs/Errors/ErrorHandler.js';
 import { withAuth } from "../Shared/Middlewares/sessionMiddleware.js";
 import entry from '../Features/history/historyEntry.index.js';
+import { ENTRY_CHANNELS } from '../../white-list.js';
+
+export { ENTRY_CHANNELS };
 
 export function historyEntryIpc() {
     ipcMain.handle(
         'entry:add',
         wrapIpcHandler(
-            withAuth(async (_event: any, data: any) => {
-                // Inyectar el professionalId directamente desde la sesión para máxima seguridad
-                // Así el Frontend no puede falsificar quién firmó la evolución.
+            withAuth(async (_event: unknown, data: any) => {//eslint-disable-line
                 if (data.sessionClient && data.sessionClient.userId) {
                     data.professionalId = data.sessionClient.userId;
                 }
                 return entry.addEntry(data);
-            }),
+            }, 'PROFESIONAL'),
             'entry:add'
         )
     );
@@ -22,9 +23,9 @@ export function historyEntryIpc() {
     ipcMain.handle(
         'entry:update',
         wrapIpcHandler(
-            withAuth(async (_event: any, data: any) => {
+            withAuth(async (_event: unknown, data: unknown) => {
                 return entry.updateEntry(data);
-            }),
+            }, 'PROFESIONAL'),
             'entry:update'
         )
     );
@@ -32,9 +33,9 @@ export function historyEntryIpc() {
     ipcMain.handle(
         'entry:delete',
         wrapIpcHandler(
-            withAuth(async (_event: any, data: any) => {
+            withAuth(async (_event: unknown, data: unknown) => {
                 return entry.deleteEntry(data);
-            }),
+            }, 'PROFESIONAL'),
             'entry:delete'
         )
     );
@@ -42,18 +43,16 @@ export function historyEntryIpc() {
     ipcMain.handle(
         'entry:getByPatient',
         wrapIpcHandler(
-            withAuth(async (_event: any, data: any) => {
+            withAuth(async (_event: unknown, data: any) => {//eslint-disable-line
                 const role = data.sessionClient?.role;
                 const userId = data.sessionClient?.userId;
                 
-                // Si NO es PROPIETARIO, forzamos que solo vea los suyos
-                // Si es PROPIETARIO, no inyectamos professionalId para que traiga todos (auditoría)
                 if (role !== 'PROPIETARIO') {
                     data.professionalId = userId;
                 }
                 
                 return entry.getPatientEntries(data);
-            }),
+            }, 'PROFESIONAL'),
             'entry:getByPatient'
         )
     );

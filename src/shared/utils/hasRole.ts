@@ -1,8 +1,8 @@
 import { Role } from '../../types'
 
 const roleLevel: Record<Role, number> = {
-  [Role.USER]: 1,
-  [Role.ADMIN]: 2,
+  [Role.SECRETARIO]: 1,
+  [Role.PROFESIONAL]: 2,
   [Role.PROPIETARIO]: 3,
 }; 
 

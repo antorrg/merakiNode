@@ -15,7 +15,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   </React.StrictMode>,
 )
 
-// Use contextBridge
-window.ipcRenderer.on('main-process-message', (_event, message) => {
+// Use contextBridge via secure window.api
+window.api.on('main-process-message', (message) => {
   console.log(message)
 })
+

@@ -44,7 +44,7 @@ describe('TreatmentService (SQLite Integration)', () => {
       userEmail: 'dr_treat@test.com',
       userName:'Dr. Orchestrator',
       password: '123',
-      role: 'ADMIN'
+      role: 'PROFESIONAL'
     });
     
     const patientResult = patientService.registerPatient({

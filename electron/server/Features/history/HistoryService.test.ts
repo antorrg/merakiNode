@@ -51,7 +51,7 @@ describe('HistoryService (Orchestrator)', () => {
       userEmail: 'dr_orchestrator@test.com',
       password: '123',
       userName: 'Dr. Orchestrator',
-      role: 'ADMIN'
+      role: 'PROFESIONAL'
     });
 
     await userService.updateProfile(userResult.userId, {

@@ -41,7 +41,7 @@ describe('HistoryEntryService (SQLite Integration)', () => {
       userEmail: 'dr@test.com',
       userName: 'tester',
       password: '123',
-      role: 'ADMIN'
+      role: 'PROFESIONAL'
     };
     const userResult = await userService.createUser(proData);
     testProfessionalId = userResult.userId;

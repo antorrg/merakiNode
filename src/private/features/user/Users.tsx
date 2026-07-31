@@ -74,8 +74,8 @@ const Users = () => {
                     <td>{user.nickname}</td>
                     <td>{user.userEmail}</td>
                     <td>
-                      <span className={`badge ${user.role === 'ADMIN' ? 'bg-danger' : (user.role === 'PROPIETARIO' ? 'bg-warning text-dark' : 'bg-primary')}`}>
-                        {user.role}
+                      <span className={`badge ${user.role === 'PROFESIONAL' ? 'bg-danger' : (user.role === 'PROPIETARIO' ? 'bg-warning text-dark' : 'bg-primary')}`}>
+                        {user.role === 'PROFESIONAL' ? 'Profesional' : (user.role === 'PROPIETARIO' ? 'Propietario' : 'Secretario/a')}
                       </span>
                     </td>
                     <td>

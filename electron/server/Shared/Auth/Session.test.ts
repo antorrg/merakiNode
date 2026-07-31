@@ -7,7 +7,7 @@ describe('Session', () => {
     const validSessionData: SessionData = {
         userId: validUserId,
         userName: 'Tony Stark',
-        role: 'ADMIN'
+        role: 'PROFESIONAL'
     }
 
     beforeEach(() => {
@@ -29,7 +29,7 @@ describe('Session', () => {
             const clientData = session.toClient()
             expect(clientData.userId).toBe(validUserId)
             expect(clientData.userName).toBe('Tony Stark')
-            expect(clientData.role).toBe('ADMIN')
+            expect(clientData.role).toBe('PROFESIONAL')
             
             const dbData = session.toJSON()
             expect(dbData.rolling).toBe(false)
@@ -90,17 +90,17 @@ describe('Session', () => {
 
     describe('hasAccess (Validación de Roles)', () => {
         it('debería dar acceso si el rol es mayor o igual al requerido', () => {
-            const adminSession = Session.createSession({ ...validSessionData, role: 'ADMIN' })
+            const adminSession = Session.createSession({ ...validSessionData, role: 'PROFESIONAL' })
             expect(adminSession.hasAccess('PROPIETARIO')).toBe(false)
-            expect(adminSession.hasAccess('ADMIN')).toBe(true)
-            expect(adminSession.hasAccess('USER')).toBe(true)
+            expect(adminSession.hasAccess('PROFESIONAL')).toBe(true)
+            expect(adminSession.hasAccess('SECRETARIO')).toBe(true)
         })
 
         it('debería denegar el acceso si el usuario tiene un nivel menor al requerido', () => {
-            const userSession = Session.createSession({ ...validSessionData, role: 'USER' })
+            const userSession = Session.createSession({ ...validSessionData, role: 'SECRETARIO' })
             expect(userSession.hasAccess('PROPIETARIO')).toBe(false)
-            expect(userSession.hasAccess('ADMIN')).toBe(false)
-            expect(userSession.hasAccess('USER')).toBe(true)
+            expect(userSession.hasAccess('PROFESIONAL')).toBe(false)
+            expect(userSession.hasAccess('SECRETARIO')).toBe(true)
         })
     })
     

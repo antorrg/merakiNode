@@ -108,8 +108,8 @@ export class Session{
     }
     static LevelRoles: Record<string, number> = Object.freeze({
         PROPIETARIO: 9,
-        ADMIN: 3,
-        USER: 1
+        PROFESIONAL: 3,
+        SECRETARIO: 1
     })
 
     static #convertRole(p: number | string): number {
@@ -119,7 +119,7 @@ export class Session{
 
         const key = p.trim()
         const val = Session.LevelRoles[key]
-        return typeof val === 'number' ? val : Session.LevelRoles.USER
+        return typeof val === 'number' ? val : Session.LevelRoles.SECRETARIO
     }
 
 }

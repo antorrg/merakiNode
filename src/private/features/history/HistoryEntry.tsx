@@ -71,7 +71,7 @@ const HistoryEntry = ({ patientId }: HistoryEntryProps) => {
 
   return (
     <>
-    {hasRole(user?.role, Role.ADMIN)===false ?
+    {hasRole(user?.role, Role.PROFESIONAL)===false ?
       <HistoryNotAuthorized/>
       :
     <div className="bg-white p-4 rounded shadow-sm border border-light">

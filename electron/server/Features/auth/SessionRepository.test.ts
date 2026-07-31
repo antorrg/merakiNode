@@ -33,7 +33,7 @@ describe('SessionRepository', () => {
     // Insertar un usuario dummy para cumplir con el FOREIGN KEY de sessions
     db.db.prepare(`
       INSERT INTO users (user_id, user_email, password, role)
-      VALUES ('f47ac10b-58cc-4372-a567-0e02b2c3d470', 'test@test.com', 'password1234567890123', 'ADMIN')
+      VALUES ('f47ac10b-58cc-4372-a567-0e02b2c3d470', 'test@test.com', 'password1234567890123', 'PROFESIONAL')
     `).run();
   })
 
@@ -54,7 +54,7 @@ describe('SessionRepository', () => {
       sessionId: id,
       userId: 'f47ac10b-58cc-4372-a567-0e02b2c3d470',
       userName: 'testuser',
-      role: 'ADMIN',
+      role: 'PROFESIONAL',
       createdAt: Date.now(),
       expiresAt: expiresAt,
       rolling: true

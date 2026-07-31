@@ -16,7 +16,7 @@ const UserCreate: React.FC<UserCreateProps> = ({ onHide }) => {
     userName: '',
     nickname: '',
     password: '',
-    role: 'USER'
+    role: 'SECRETARIO'
   });
 
   const handleChange = (e: any) => {
@@ -59,8 +59,8 @@ const UserCreate: React.FC<UserCreateProps> = ({ onHide }) => {
       <Form.Group className="mb-3">
         <Form.Label>Rol</Form.Label>
         <Form.Select name="role" value={formData.role} onChange={handleChange}>
-          <option value="USER">USER</option>
-          <option value="ADMIN">ADMIN</option>
+          <option value="SECRETARIO">Secretario/a</option>
+          <option value="PROFESIONAL">Profesional</option>
         </Form.Select>
       </Form.Group>
 

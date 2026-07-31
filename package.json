@@ -7,11 +7,12 @@
   "type": "module",
   "scripts": {
     "dev": "cross-env NODE_ENV=development vite",
-    "build": "tsc && vite build && electron-builder",
+    "build": "tsc -p tsconfig.build.json && vite build && electron-builder",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "postinstall": "electron-builder install-app-deps",
-    "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run"
+    "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run",
+    "test:e2e": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run electron/server/server.e2e.test.ts"
   },
   "dependencies": {
     "@tiptap/extension-underline": "^3.28.0",

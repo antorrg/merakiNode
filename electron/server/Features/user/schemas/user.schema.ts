@@ -46,7 +46,7 @@ export const createUserSchema: Schema = {
   },
     role: {
     type: "string",
-    default: 'USER',
+    default: 'SECRETARIO',
     sanitize: {
       trim: true
     }

@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, type ReactNode }
 import { toast } from '../shared/components/toast/toastManager';
 import { type IUser } from '../types';
 import { subscribeUnauthorized, subscribeForbidden } from '../shared/api/base/IpcClient';
+
 export interface LoginUser {
     email: string;
     password?: string;
@@ -13,6 +14,7 @@ export interface AuthState {
     loading: boolean;
     isLoggingOut: boolean;
 }
+
 interface AuthContextType extends AuthState {
     login: (credentials: LoginUser) => Promise<void>;
     logout: () => Promise<void>;
@@ -22,6 +24,13 @@ interface AuthContextType extends AuthState {
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+const getIpcApi = () => {
+  if (typeof window !== 'undefined') {
+    return window.api || (window as any).ipcRenderer;
+  }
+  return undefined;
+};
 
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
     const [state, setState] = useState<AuthState>({
@@ -55,7 +64,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   // ======================================================
   const login = async (credentials: LoginUser) => {
       try {
-        const response = await window.ipcRenderer.invoke('auth:login', credentials);
+        const ipc = getIpcApi();
+        if (!ipc || typeof ipc.invoke !== 'function') {
+          throw new Error('API IPC de Electron no disponible. Abre la app desde Electron.');
+        }
+
+        const response: any = await ipc.invoke('auth:login', credentials);
         
         if (!response?.ok) {
             throw response?.error || new Error('Error desconocido en backend');
@@ -82,7 +96,12 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const createOwner = async (data: { email: string; username: string }) => {
       try {
-        const response = await window.ipcRenderer.invoke('auth:create-initial-owner', data);
+        const ipc = getIpcApi();
+        if (!ipc || typeof ipc.invoke !== 'function') {
+          throw new Error('API IPC de Electron no disponible. Abre la app desde Electron.');
+        }
+
+        const response: any = await ipc.invoke('auth:create-initial-owner', data);
         if (!response?.ok) {
             throw response?.error || new Error('No se pudo crear el propietario');
         }
@@ -109,8 +128,11 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     if (sessionId) {
       try {
-        const response = await window.ipcRenderer.invoke('auth:logout', sessionId);
-        if (!response?.ok) throw response?.error;
+        const ipc = getIpcApi();
+        if (ipc && typeof ipc.invoke === 'function') {
+          const response: any = await ipc.invoke('auth:logout', sessionId);
+          if (!response?.ok) throw response?.error;
+        }
       } catch (error) {
         console.warn('Logout falló en backend. Limpieza local finalizada', error);
       }
@@ -124,12 +146,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const sessionId = localStorage.getItem('sessionId');
     if (!sessionId) return;
     try {
-      const response = await window.ipcRenderer.invoke('auth:getSession', sessionId);
-      if (response?.ok && response.data) {
-          const data = response.data;
-          if (data.sessionId) {
-              startSession(data.user || data, sessionId);
-          }
+      const ipc = getIpcApi();
+      if (ipc && typeof ipc.invoke === 'function') {
+        const response: any = await ipc.invoke('auth:getSession', sessionId);
+        if (response?.ok && response.data) {
+            const data = response.data;
+            if (data.sessionId) {
+                startSession(data.user || data, sessionId);
+            }
+        }
       }
     } catch (error) {
        console.warn('Error al refrescar la sesión:', error);
@@ -152,12 +177,17 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const attemptHydration = async () => {
       // 1. Verificamos si existen usuarios en la DB para el flujo de "primer inicio"
       try {
-        const checkUsersResponse = await window.ipcRenderer.invoke('auth:check-users');
-        if (checkUsersResponse?.ok && checkUsersResponse.data === false) {
-           setHasOwner(false);
-           toast.warning('No hay usuarios registrados. Por favor, crea el usuario propietario.', 'Atención');
+        const ipc = getIpcApi();
+        if (ipc && typeof ipc.invoke === 'function') {
+          const checkUsersResponse: any = await ipc.invoke('auth:check-users');
+          if (checkUsersResponse?.ok && checkUsersResponse.data === false) {
+             setHasOwner(false);
+             toast.warning('No hay usuarios registrados. Por favor, crea el usuario propietario.', 'Atención');
+          } else {
+             setHasOwner(true);
+          }
         } else {
-           setHasOwner(true);
+          setHasOwner(true);
         }
       } catch (error) {
         console.error('Error verificando usuarios iniciales:', error);
@@ -173,17 +203,20 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
 
       try {
-        const response = await window.ipcRenderer.invoke('auth:getSession', sessionId);
-        
-        if (!response?.ok) {
-            throw response?.error;
-        }
+        const ipc = getIpcApi();
+        if (ipc && typeof ipc.invoke === 'function') {
+          const response: any = await ipc.invoke('auth:getSession', sessionId);
+          
+          if (!response?.ok) {
+              throw response?.error;
+          }
 
-        const data = response.data;
-        if (data && data.sessionId) {
-            startSession(data.user || data, sessionId);
-        } else {
-            cleanSession();
+          const data = response.data;
+          if (data && data.sessionId) {
+              startSession(data.user || data, sessionId);
+          } else {
+              cleanSession();
+          }
         }
       } catch (error) {
          console.warn('Sesión inválida o expirada:', error);
@@ -199,17 +232,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     };
   }, []);
 
-    return (
-        <AuthContext.Provider value={{ ...state, hasOwner, login, logout, createOwner, refreshSession }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider
+      value={{
+        ...state,
+        login,
+        logout,
+        createOwner,
+        refreshSession,
+        hasOwner,
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (context === undefined) {
-        throw new Error('useAuth must be used within an AuthProvider');
-    }
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
+  }
+  return context;
 };

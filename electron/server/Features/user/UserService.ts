@@ -62,7 +62,7 @@ export class UserService {
         userName: userData.userName ?? 'User',
         nickname: userData.nickname,
         password: hashedPassword,
-        role: userData.role? userData.role : 'USER'
+        role: userData.role? userData.role : 'SECRETARIO'
       });
 
       await this.userRepository.create(user.toPersistence());

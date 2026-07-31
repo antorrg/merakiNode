@@ -25,7 +25,7 @@ const Histories = ({ patientId }: HistoriesProps) => {
     <div className="bg-white p-4 rounded shadow-sm border border-light">
       <h4 className="mb-4 text-primary">Historial Clínico</h4>
       
-      {(hasRole(user?.role, Role.ADMIN)===false)?
+      {(hasRole(user?.role, Role.PROFESIONAL)===false)?
       <HistoryNotAuthorized/>
       : isLoading && entries.length === 0 ? (
         <div className="text-center p-5">

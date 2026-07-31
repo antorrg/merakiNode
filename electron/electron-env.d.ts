@@ -21,7 +21,12 @@ declare namespace NodeJS {
   }
 }
 
-// Used in Renderer process, expose in `preload.ts`
+// Used in Renderer process, exposed in `preload.ts`
 interface Window {
-  ipcRenderer: import('electron').IpcRenderer
+  api: {
+    invoke<T = any>(channel: import('./white-list.js').AllowedInvokeChannel | (string & {}), payload?: unknown): Promise<T> //eslint-disable-line
+    on(channel: import('./white-list.js').AllowedListenChannel | (string & {}), listener: (...args: unknown[]) => void): () => void //eslint-disable-line
+  }
 }
+
+

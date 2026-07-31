@@ -1,8 +1,8 @@
 import { db } from '../../Configs/database.js';
 import { BaseRepository } from '../../Shared/Repositories/BaseRepository.js';
 import { Session, SessionProp } from '../../Shared/Auth/Session.js';
-
 import { Sessions } from '../../dbTypes/db.types.js';
+
 
 export class SessionRepository {
   // Composición: SessionRepository "tiene un" BaseRepository en lugar de "ser un" BaseRepository
@@ -55,12 +55,12 @@ export class SessionRepository {
     // Si no está localmente, buscar en la base de datos
     if (!result) {
       const response = this.base.getById(sessionId);
-      const dbResult = response.results as any;
+      const dbResult = response.results as any; //eslint-disable-line
 
       if (dbResult) {
         result = {
           ...dbResult,
-          userName: dbResult.username
+          userName: dbResult.username 
         } as SessionProp;
         this.#sessionStore.set(result.sessionId, result);
       }

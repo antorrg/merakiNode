@@ -44,7 +44,7 @@ const getStatusBadge = (status: DiagnosisStatus) => {
 const Diagnostics: React.FC<DiagnosticsProps> = ({ patientId }) => {
   const { user }=useAuth()
  // const authorized = hasRole(user.role)
- console.log('hasRole: ',hasRole(user?.role, Role.ADMIN))
+ console.log('hasRole: ',hasRole(user?.role, Role.PROFESIONAL))
   const { 
     activeDiagnosesByPatient, 
     isLoading, 
@@ -165,12 +165,12 @@ const Diagnostics: React.FC<DiagnosticsProps> = ({ patientId }) => {
           <h4 className="text-primary mb-1">Diagnósticos del Paciente</h4>
           <p className="text-muted small mb-0">Gestión y seguimiento de diagnósticos activos, crónicos y resueltos.</p>
         </div>
-        <Button variant="primary" size="sm" onClick={handleOpenCreate} disabled={hasRole(user?.role, Role.ADMIN)===false}>
+        <Button variant="primary" size="sm" onClick={handleOpenCreate} disabled={hasRole(user?.role, Role.PROFESIONAL)===false}>
           + Nuevo Diagnóstico
         </Button>
       </div>
 
-      { hasRole(user?.role, Role.ADMIN)===false ? (
+      { hasRole(user?.role, Role.PROFESIONAL)===false ? (
         <div className="p-5 text-center text-muted bg-light rounded border border-dashed" style={{ borderStyle: 'dashed' }}>
           <h6 className="text-secondary mb-2">Sin visibilidad de diagnósticos</h6>
           <p className="small mb-3">Usted no cuenta con autorización para acceder a esta sección.</p>
@@ -179,7 +179,7 @@ const Diagnostics: React.FC<DiagnosticsProps> = ({ patientId }) => {
         <div className="text-center py-5">
           <Spinner animation="border" variant="primary" />
         </div>
-      ) : diagnoses.length === 0 || hasRole(user?.role, Role.ADMIN) ? (
+      ) : diagnoses.length === 0 || hasRole(user?.role, Role.PROFESIONAL) ? (
         <div className="p-5 text-center text-muted bg-light rounded border border-dashed" style={{ borderStyle: 'dashed' }}>
           <h6 className="text-secondary mb-2">No hay diagnósticos registrados</h6>
           <p className="small mb-3">Haga clic en el botón superior para registrar el primer diagnóstico del paciente.</p>

@@ -8,7 +8,7 @@ export const users: Table = {
     password TEXT NOT NULL,
     nickname TEXT,
     user_name TEXT,
-    role TEXT NOT NULL DEFAULT 'USER',
+    role TEXT NOT NULL DEFAULT 'SECRETARIO',
     enabled BOOLEAN DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

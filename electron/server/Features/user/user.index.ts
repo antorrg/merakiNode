@@ -16,8 +16,8 @@ createUser: async(data: unknown)=>{
 getUsers: ()=> {
     return userService.getAll()
 },
-getUserById: (userId:string)=>{
-    const validId = NodeValidator.paramId({userId}, 'userId', UuidHandler.regexUuid)
+getUserById: (data:unknown)=>{
+    const validId = NodeValidator.paramId(data, 'userId', UuidHandler.regexUuid)
     return userService.getById(validId)
 },
 updateUserProfile: (data: unknown)=>{

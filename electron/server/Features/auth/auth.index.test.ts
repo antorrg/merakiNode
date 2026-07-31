@@ -42,7 +42,7 @@ describe('auth.index integration tests', () => {
       userEmail: 'login@meraki.com',
       userName: 'loginUser',
       password: 'password123456',
-      role: 'ADMIN'
+      role: 'PROFESIONAL'
     });
 
     const loginResponse = await authIndex.login({

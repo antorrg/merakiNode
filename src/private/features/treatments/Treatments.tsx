@@ -110,10 +110,10 @@ const Treatments: React.FC<TreatmentsProps> = ({ patientId }) => {
 
       <TreatmentHeader
        run={()=> setShowCreateModal(true)}
-       authorized={hasRole(user?.role, Role.ADMIN)}
+       authorized={hasRole(user?.role, Role.PROFESIONAL)}
        />
 
-      {(hasRole(user?.role, Role.ADMIN)===false)?
+      {(hasRole(user?.role, Role.PROFESIONAL)===false)?
       <TreatmentViewNotAuthorized/>
       :isLoading && treatments.length === 0 ? (
         <div className="text-center py-5">

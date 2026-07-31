@@ -135,7 +135,7 @@ async function bootstrap (){
     await app.whenReady()
     registerAllIpc()
     createWindow()
-    console.log('todo bien')
+    
   } catch (error) {
     console.error(error)
     app.quit()

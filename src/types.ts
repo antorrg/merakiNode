@@ -1,7 +1,7 @@
 
 export enum Role {
-  USER = "USER",
-  ADMIN = "ADMIN",
+  SECRETARIO = "SECRETARIO",
+  PROFESIONAL = "PROFESIONAL",
   PROPIETARIO = "PROPIETARIO",
 }
 export interface IUser {
