@@ -46,7 +46,7 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
     address: '',
     city: '',
     postalCode: '',
-    relationshipType: 'Padre/Madre',
+    relationshipType: 'Padre',
     isPrimaryContact: true
   });
 
@@ -318,7 +318,8 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
                   value={formData.relationshipType} 
                   onChange={handleChange}
                 >
-                  <option value="Padre/Madre">Padre/Madre</option>
+                  <option value="Padre">Padre</option>
+                  <option value="Madre">Madre</option>
                   <option value="Tutor Legal">Tutor Legal</option>
                   <option value="Familiar">Familiar</option>
                   <option value="Otro">Otro</option>

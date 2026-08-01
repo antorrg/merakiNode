@@ -97,6 +97,7 @@ describe('patient.index integration tests', () => {
     });
 
     const updated = patientIndex.updateContactData({
+      ...created,
       patientId: created.patientId,
       phone: '9999999999',
       address: 'Nueva Calle 456'

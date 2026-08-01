@@ -31,7 +31,7 @@ const TutorSearchBarSelect: React.FC<TutorSearchBarSelectProps> = ({
   const [hasSearched, setHasSearched] = useState(false);
 
   const [selectedPatientId, setSelectedPatientId] = useState('');
-  const [relationshipType, setRelationshipType] = useState('Padre/Madre');
+  const [relationshipType, setRelationshipType] = useState('Padre');
   const [isPrimaryContact, setIsPrimaryContact] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -189,7 +189,8 @@ const TutorSearchBarSelect: React.FC<TutorSearchBarSelectProps> = ({
                 value={relationshipType}
                 onChange={(e) => setRelationshipType(e.target.value)}
               >
-                <option value="Padre/Madre">Padre/Madre</option>
+                <option value="Padre">Padre</option>
+                <option value="Madre">Madre</option>
                 <option value="Tutor Legal">Tutor Legal</option>
                 <option value="Familiar">Familiar</option>
                 <option value="Otro">Otro</option>

@@ -30,7 +30,6 @@ export const TREATMENT_CHANNELS = [
 
 export const USER_CHANNELS = [
   'user:create',
-  'users.getAll',
   'users:getAll',
   'user:getById',
   'user:updateProfile',

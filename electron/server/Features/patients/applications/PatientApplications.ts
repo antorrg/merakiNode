@@ -49,4 +49,12 @@ export class PatientApplications {
     }
     return prop
   }
+
+  static relationshipType(prop?: string | null): string {
+    if (!prop || typeof prop !== 'string' || prop.trim() === '') {
+      return 'Otro';
+    }
+    const clean = prop.trim();
+    return clean.charAt(0).toUpperCase() + clean.slice(1);
+  }
 }

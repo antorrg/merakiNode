@@ -1,4 +1,4 @@
-import type { Schema } from "req-valid-express";
+import type { Schema  } from "req-valid-express";
 
 export const registerPatientSchema: Schema = {
   email: { type: "string", default: null },
@@ -15,18 +15,26 @@ export const registerPatientSchema: Schema = {
 };
 
 export const updateContactSchema: Schema = {
-  patientId: { type: "string" },
-  firstName: { type: "string", default: null, sanitize: { trim: true } },
-  lastName: { type: "string", default: null, sanitize: { trim: true } },
-  typeDoc: { type: "string", default: null },
-  identityCode: { type: "string", default: null },
-  birthDate: { type: "string", default: null },
-  phone: { type: "string", default: null },
-  email: { type: "string", default: null },
-  address: { type: "string", default: null },
-  city: { type: "string", default: null },
-  postalCode: { type: "string", default: null },
-  guardians: { type: "array", default: null }
+  patientId: { type: "string", sanitize: { trim: true } },
+  firstName: { type: "string", sanitize: { trim: true } },
+  lastName: { type: "string", sanitize: { trim: true } },
+  typeDoc: { type: "string", sanitize: { trim: true } },
+  identityCode: { type: "string", sanitize: { trim: true } },
+  birthDate: { type: "string", sanitize: { trim: true } },
+  phone: { type: "string", default: null, sanitize: { trim: true } },
+  email: { type: "string", default: null, sanitize: { trim: true } },
+  address: { type: "string", sanitize: { trim: true } },
+  city: { type: "string", sanitize: { trim: true } },
+  postalCode: { type: "string", sanitize: { trim: true } },
+  guardians: [
+    {
+      relationId: { type: "string", default: null, sanitize: { trim: true } },
+      guardianId: { type: "string", sanitize: { trim: true } },
+      relationshipType: { type: "string", default: null, sanitize: { trim: true } },
+      relationship: { type: "string", default: null, sanitize: { trim: true } },
+      isPrimaryContact: { type: "boolean", default: false }
+    }
+  ]
 };
 
 export const getByIdSchema: Schema = {

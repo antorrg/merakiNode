@@ -24,7 +24,7 @@ export default {
     const validData = NodeValidator.validateBody(data, sch.updateContactSchema);
     const { patientId, rest } = NodeValidator.splitObjectProps(validData, ['patientId']);
     const validId = NodeValidator.paramId({patientId},'patientId',UuidHandler.regexUuid);
-    return patientService.updatePatientContact(validId, rest as any);//eslint-disable-line
+    return patientService.updatePatientContact(validId, rest as Record<string, unknown>);
   },
 
   deletePatient: (data: unknown) => {

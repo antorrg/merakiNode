@@ -89,14 +89,12 @@ export class PatientRepository {
       const { relationId, relationshipType, isPrimaryContact, ...guardianRawData } = row;
       const guardianData = CaseConverter.mapKeysToCamelCase<PatientProps>(guardianRawData);
       
-      const pepe ={
+      return {
         relationId,
         relationshipType,
         isPrimaryContact: Boolean(isPrimaryContact),
         guardian: guardianData
       };
-
-      return pepe
     });
 
     patientProps.guardians = guardians;

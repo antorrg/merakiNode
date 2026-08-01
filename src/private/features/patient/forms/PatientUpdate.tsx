@@ -161,6 +161,7 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
         relationId: g.relationId,
         guardianId: g.guardianId,
         relationshipType: g.relationship,
+        relationship: g.relationship,
         isPrimaryContact: g.isPrimary
       }))
     };

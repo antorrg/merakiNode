@@ -6,6 +6,7 @@ export interface GuardianRelation {
   relationId: string;
   guardian: PatientProps; 
   relationshipType: string;
+  relationship?: string;
   isPrimaryContact: boolean;
 }
 
@@ -25,6 +26,20 @@ export interface PatientProps {
   deletedAt?: string | null;
   guardians?: GuardianRelation[];
 }
+
+export interface GuardianInput {
+  relationId?: string;
+  guardianId?: string;
+  guardian?: PatientProps;
+  relationshipType?: string;
+  relationship?: string;
+  isPrimaryContact?: boolean;
+  isPrimary?: boolean;
+}
+
+export type PatientUpdateInput = Partial<Omit<PatientProps, 'patientId' | 'age'>> & {
+  guardians?: GuardianInput[];
+};
 
 export type PatientCreate = Omit<PatientProps, 'patientId' | 'deletedAt' | 'age'>;
 
@@ -57,7 +72,14 @@ export class Patient {
     this.address = props.address;
     this.city = props.city;
     this.postalCode = props.postalCode;
-    this.guardians = props.guardians || []; 
+    this.guardians = (props.guardians || []).map(g => {
+      const rel = PatientApplications.relationshipType(g.relationshipType || g.relationship);
+      return {
+        ...g,
+        relationshipType: rel,
+        relationship: rel
+      };
+    });
   }
 
   static validateName(prop: string): string {
@@ -104,12 +126,47 @@ export class Patient {
     }
   }
 
+  static readonly #FIELD_PARSERS: Partial<Record<keyof PatientProps, (v: unknown) => unknown>> = {
+  email: (v) => PatientApplications.Email(v as string | null),
+  phone: (v) => PatientApplications.Phone(v as string | null),
+  firstName: (v) => Patient.validateName(v as string),
+  lastName: (v) => Patient.validateName(v as string),
+  typeDoc: (v) => PatientApplications.typeDoc(v as string),
+  identityCode: (v) => PatientApplications.identityCode(v as string),
+  birthDate: (v) => PatientApplications.birthDate(v as string),
+   };
+
+
+  update(changes: Record<string, unknown>): boolean {
+
+  const self = this as unknown as Record<string, unknown>;
+  let hasChanges = false;
+
+  for (const [key, rawValue] of Object.entries(changes)) {
+    if (!(key in self)) continue;
+    const parser = Patient.#FIELD_PARSERS[key as keyof PatientProps];
+    const newValue = parser ? parser(rawValue) : rawValue;
+    if (self[key] !== newValue) {
+      self[key] = newValue;
+      hasChanges = true;
+    }
+  }
+    if (hasChanges) {
+      this.age = Patient.calculateAge(this.birthDate);
+      Patient.validateAgeRequirements(this.age, this.phone, this.guardians);
+    }
+
+    return hasChanges;
+  }
+
   updateContactData(phone: string, email: string | null) {
     const currentAge = Patient.calculateAge(this.birthDate);
-    Patient.validateAgeRequirements(currentAge, phone, this.guardians);
+    const parsedPhone = PatientApplications.Phone(phone);
+    const parsedEmail = email ? PatientApplications.Email(email) : null;
+    Patient.validateAgeRequirements(currentAge, parsedPhone, this.guardians);
     
-    this.phone = PatientApplications.Phone(phone);
-    this.email = email ? PatientApplications.Email(email) : null;
+    this.phone = parsedPhone;
+    this.email = parsedEmail;
     this.age = currentAge;
   }
 
@@ -178,7 +235,7 @@ export class Patient {
       guardians: this.guardians.map(g => ({
         relationId: g.relationId,
         guardianId: g.guardian.patientId,
-        relationship: g.relationshipType,
+        relationship: g.relationshipType || g.relationship || 'Otro',
         isPrimary: g.isPrimaryContact,
         name: `${g.guardian.firstName} ${g.guardian.lastName}`,
         phone: g.guardian.phone

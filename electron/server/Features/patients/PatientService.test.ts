@@ -110,6 +110,8 @@ describe('PatientService (SQLite Integration)', () => {
     expect(minorResult.guardians[0].relationship).toBe('Padre');
   });
 
+
+
   it('debería obtener un paciente por ID con sus relaciones hidratadas', () => {
     // Obtenemos todos para agarrar el ID del menor
     const all = service.getAllPatients();
@@ -167,8 +169,8 @@ describe('PatientService (SQLite Integration)', () => {
       patientId: adult!.patientId,
       firstName: 'Juan Carlos',
       lastName: 'Pérez Modificado',
-      typeDoc: 'Pasaporte',
-      identityCode: 'PAS123456',
+      typeDoc: 'PASSPORT',
+      identityCode: '12345678',
       birthDate: '10/10/1985',
       phone: '999888777',
       email: null,
@@ -181,8 +183,8 @@ describe('PatientService (SQLite Integration)', () => {
     const updated = patientIndex.updateContactData(payload);
     expect(updated.firstName).toBe('Juan Carlos');
     expect(updated.lastName).toBe('Pérez Modificado');
-    expect(updated.typeDoc).toBe('Pasaporte');
-    expect(updated.identityCode).toBe('PAS123456');
+    expect(updated.typeDoc).toBe('PASSPORT');
+    expect(updated.identityCode).toBe('12345678');
     expect(updated.birthDate).toBe('10/10/1985');
     expect(updated.phone).toBe('999888777');
   });
@@ -204,6 +206,11 @@ describe('PatientService (SQLite Integration)', () => {
     // Creamos el payload con 2 tutores: el existente + Juan como segundo tutor
     const payload = {
       patientId: fullMinor.patientId,
+      firstName: fullMinor.firstName,
+      lastName: fullMinor.lastName,
+      typeDoc: fullMinor.typeDoc,
+      identityCode: fullMinor.identityCode,
+      birthDate: fullMinor.birthDate,
       phone: fullMinor.ownPhone,
       email: fullMinor.ownEmail,
       address: fullMinor.address,
@@ -234,6 +241,65 @@ describe('PatientService (SQLite Integration)', () => {
     expect(fetchedInDb.guardians).toHaveLength(2);
     expect(fetchedInDb.ownEmail).toBeNull();
     expect(fetchedInDb.email).toBe('tutor@test.com');
+  });
+
+  it('debería registrar un paciente menor de edad con 2 tutores (Padre y Madre)', () => {
+    const padre = service.registerPatient({
+      email: 'padre@test.com',
+      firstName: 'Carlos',
+      lastName: 'Padre',
+      typeDoc: 'DNI',
+      identityCode: '44444444',
+      birthDate: '01/01/1982',
+      phone: '111222333',
+      address: 'Calle 10',
+      city: 'Ciudad',
+      postalCode: '1000'
+    });
+
+    const madre = service.registerPatient({
+      email: 'madre@test.com',
+      firstName: 'María',
+      lastName: 'Madre',
+      typeDoc: 'DNI',
+      identityCode: '55555555',
+      birthDate: '01/01/1985',
+      phone: '444555666',
+      address: 'Calle 10',
+      city: 'Ciudad',
+      postalCode: '1000'
+    });
+
+    const minorWithBoth = service.registerPatient({
+      email: null,
+      firstName: 'Sofia',
+      lastName: 'Hija',
+      typeDoc: 'DNI',
+      identityCode: '66666666',
+      birthDate: '01/01/2018',
+      phone: null,
+      address: 'Calle 10',
+      city: 'Ciudad',
+      postalCode: '1000',
+      guardians: [
+        {
+          relationId: UuidHandler.idCreator(),
+          guardian: { ...padre, patientId: padre.patientId },
+          relationshipType: 'padre',
+          isPrimaryContact: true
+        },
+        {
+          relationId: UuidHandler.idCreator(),
+          guardian: { ...madre, patientId: madre.patientId },
+          relationshipType: 'madre',
+          isPrimaryContact: false
+        }
+      ]
+    });
+
+    expect(minorWithBoth.guardians).toHaveLength(2);
+    expect(minorWithBoth.guardians[0].relationship).toBe('Padre');
+    expect(minorWithBoth.guardians[1].relationship).toBe('Madre');
   });
 
   it('debería borrar un paciente', () => {

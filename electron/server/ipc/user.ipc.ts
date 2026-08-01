@@ -17,15 +17,6 @@ export function userIpc() {
         )
     );
     ipcMain.handle(
-        'users.getAll',
-        wrapIpcHandler(
-            withAuth(async (_event: unknown) => {//eslint-disable-line
-                return await user.getUsers();
-            }),
-            'users:getAll'
-        )
-    );
-    ipcMain.handle(
         'users:getAll',
         wrapIpcHandler(
             withAuth(async (_event: unknown) => {//eslint-disable-line

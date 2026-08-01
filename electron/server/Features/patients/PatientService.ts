@@ -1,13 +1,15 @@
-import { Patient, PatientCreate, PatientProps, GuardianRelation } from './Patient.js';
+import { Patient, PatientCreate, PatientProps, GuardianRelation, GuardianInput, PatientUpdateInput } from './Patient.js';
 import { PatientRepository } from './PatientRepository.js';
 import { Patients } from '../../dbTypes/db.types.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
+import { PatientApplications } from './applications/PatientApplications.js';
+
 
 export class PatientService {
   private repository: PatientRepository;
 
-  constructor() {
-    this.repository = new PatientRepository();
+  constructor(repository: PatientRepository = new PatientRepository()) {
+    this.repository = repository;
   }
 
   registerPatient(data: PatientCreate) {
@@ -15,7 +17,8 @@ export class PatientService {
     if (data.guardians) {
       data.guardians = data.guardians.map(g => ({
         ...g,
-        relationId: g.relationId || UuidHandler.idCreator()
+        relationId: g.relationId || UuidHandler.idCreator(),
+        relationshipType: PatientApplications.relationshipType(g.relationshipType || g.relationship)
       }));
     }
 
@@ -47,44 +50,30 @@ export class PatientService {
     return response;
   }
 
-  updatePatientContact(id: string, data: any, emailArg?: string | null) {
-    let firstName: string | undefined;
-    let lastName: string | undefined;
-    let typeDoc: string | undefined;
-    let identityCode: string | undefined;
-    let birthDate: string | undefined;
-    let phone: string | undefined;
-    let email: string | null | undefined;
-    let address: string | undefined;
-    let city: string | undefined;
-    let postalCode: string | undefined;
-    let guardiansData: any[] | undefined;
+  updatePatientContact(id: string, data: PatientUpdateInput | string, emailArg?: string | null) {
+    let payload: Record<string, unknown> = {};
 
     if (typeof data === 'string') {
-      phone = data;
-      email = emailArg;
+      if (data) payload.phone = data;
+      if (emailArg !== undefined) payload.email = emailArg;
     } else if (data && typeof data === 'object') {
-      firstName = data.firstName;
-      lastName = data.lastName;
-      typeDoc = data.typeDoc;
-      identityCode = data.identityCode;
-      birthDate = data.birthDate;
-      phone = data.phone;
-      email = data.email;
-      address = data.address;
-      city = data.city;
-      postalCode = data.postalCode;
-      guardiansData = data.guardians;
+      payload = { ...data };
     }
 
     const patientProps = this.repository.getById(id);
     if (!patientProps) throw new Error('Patient not found');
 
+    const patient = new Patient(patientProps);
+
+    if (Object.keys(payload).length === 0) {
+      return patient.toDTO();
+    }
+
     let updatedGuardians: GuardianRelation[] | undefined;
-    if (Array.isArray(guardiansData)) {
-      updatedGuardians = guardiansData.map((g: any) => {
+    if (Array.isArray(payload.guardians)) {
+      updatedGuardians = (payload.guardians as GuardianInput[]).map((g) => {
         let guardianProps: PatientProps;
-        const gId = g.guardianId || g.guardian?.patientId || g.guardianId;
+        const gId = g.guardianId || g.guardian?.patientId;
         if (gId) {
           const found = this.repository.getById(gId);
           if (!found) throw new Error(`Guardian patient ${gId} not found`);
@@ -95,36 +84,23 @@ export class PatientService {
           throw new Error('Guardian information missing');
         }
 
+        const relType = PatientApplications.relationshipType(g.relationshipType || g.relationship);
         return {
           relationId: g.relationId || UuidHandler.idCreator(),
           guardian: guardianProps,
-          relationshipType: g.relationshipType || g.relationship || 'Otro',
+          relationshipType: relType,
+          relationship: relType,
           isPrimaryContact: Boolean(g.isPrimaryContact ?? g.isPrimary)
         };
       });
+      payload.guardians = updatedGuardians;
     }
 
-    const effectiveGuardians = updatedGuardians !== undefined ? updatedGuardians : (patientProps.guardians || []);
+    const hasChanges = patient.update(payload);
 
-    const updatedPropsForEntity: PatientProps = {
-      ...patientProps,
-      firstName: (firstName !== undefined && firstName !== null) ? firstName : patientProps.firstName,
-      lastName: (lastName !== undefined && lastName !== null) ? lastName : patientProps.lastName,
-      typeDoc: (typeDoc !== undefined && typeDoc !== null) ? typeDoc : patientProps.typeDoc,
-      identityCode: (identityCode !== undefined && identityCode !== null) ? identityCode : patientProps.identityCode,
-      birthDate: (birthDate !== undefined && birthDate !== null) ? birthDate : patientProps.birthDate,
-      phone: phone !== undefined ? phone : patientProps.phone,
-      email: email !== undefined ? email : patientProps.email,
-      address: (address !== undefined && address !== null) ? address : patientProps.address,
-      city: (city !== undefined && city !== null) ? city : patientProps.city,
-      postalCode: (postalCode !== undefined && postalCode !== null) ? postalCode : patientProps.postalCode,
-      guardians: effectiveGuardians
-    };
-
-    const patient = new Patient(updatedPropsForEntity);
-
-    // Validar requerimientos de edad del dominio
-    Patient.validateAgeRequirements(patient.toPersistence().age, patient.toPersistence().phone, effectiveGuardians);
+    if (!hasChanges) {
+      return patient.toDTO();
+    }
 
     const persistenceData = patient.toPersistence() as Partial<Patients>;
 
@@ -142,7 +118,7 @@ export class PatientService {
       postal_code: persistenceData.postal_code
     }, updatedGuardians);
 
-    return this.getPatientById(id);
+    return patient.toDTO();
   }
 
   deletePatient(id: string) {

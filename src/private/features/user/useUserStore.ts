@@ -30,7 +30,7 @@ export const useUserStore = create<UserState>((set, get) => ({
     set({ isLoading: true, error: null });
     
     await adminApi.execute<IUser[]>({
-      request: { channel: 'users.getAll' },
+      request: { channel: 'users:getAll' },
       reject: (err: any) => {
         set({ error: err?.message || 'Error al obtener usuarios', isLoading: false });
       }
