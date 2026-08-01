@@ -106,7 +106,7 @@ Para garantizar la máxima seguridad en aplicaciones Electron:
 | **Estilos & Componentes UI** | Bootstrap 5 + [React-Bootstrap](https://react-bootstrap.github.io/) + Sass/SCSS (Dart Sass) + [React Big Calendar](https://github.com/jquense/react-big-calendar) |
 | **Motor de Base de Datos** | [Better-SQLite3](https://github.com/WiseLibs/better-sqlite3) |
 | **Encriptación de Claves** | [Argon2](https://github.com/ranisalt/node-argon2) |
-| **Validación de Esquemas** | `req-valid-express` |
+| **Validación de Esquemas** | [req-valid-express](https://github.com/antorrg/req-valid-express) |
 | **Framework de Testing** | [Vitest](https://vitest.dev/) |
 
 ---
@@ -168,5 +168,7 @@ merakiNode/
 ---
 
 ## 📄 Licencia
+
+[MIT © 2026 - antorrg-software](./LICENSE)
 
 Desarrollado para el Centro Integral **Meraki**. Todos los derechos reservados.
