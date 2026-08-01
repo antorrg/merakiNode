@@ -1,19 +1,21 @@
+import React from 'react';
+import { PatientAppointmentsTab } from '../patient/components/PatientAppointmentsTab';
 
-type PatientCalendarProps = {
-    patientId:string
+interface PatientCalendarProps {
+  patientId: string;
 }
 
-const PatientCalendar = ({patientId}:PatientCalendarProps) => {
-    console.log(patientId)
+const PatientCalendar: React.FC<PatientCalendarProps> = ({ patientId }) => {
   return (
-   <div className="bg-white p-4 rounded shadow-sm border border-light">
-      <h4 className="mb-4 text-primary">Calendario de sesiones</h4>
-       <div className="p-5 text-center text-muted bg-light rounded border">
-          <h5 className="text-secondary">Sin Entradas Previas</h5>
-          <p>Este paciente aún no tiene fechas ni horarios registrados.</p>
-        </div>
-    </div>
-  )
-}
+    <div className="bg-white p-4 rounded shadow-sm border border-light">
+      <h4 className="mb-2 text-primary fw-bold">Agenda y Turnos del Paciente</h4>
+      <p className="text-muted small mb-3">
+        Historial completo de turnos agendados, confirmados y cancelados para este paciente.
+      </p>
 
-export default PatientCalendar
+      <PatientAppointmentsTab patientId={patientId} />
+    </div>
+  );
+};
+
+export default PatientCalendar;

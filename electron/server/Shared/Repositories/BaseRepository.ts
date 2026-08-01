@@ -2,7 +2,7 @@ import { db } from "../../Configs/database.js";
 import { IBaseRepository, IResponse } from "../Interfaces/base.interface.js";
 import { CaseConverter } from "../Utils/CaseConverter.js";
 
-
+//eslint-disable-next-line
 export class BaseRepository<TEntity, TCreate extends Record<string, any>, TUpdate extends Record<string, any>> implements IBaseRepository<TEntity, TCreate, TUpdate> {
   private readonly modelName: string;
   private readonly pkColumn: string;

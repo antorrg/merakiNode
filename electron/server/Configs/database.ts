@@ -9,7 +9,7 @@ const nameOfDb = (): string => {
   return parts[parts.length - 1] || 'unknown'
 }
 
-import { users, patients, patient_relations, history_entry,  diagnosis, treatment, sessions, log, entry_diagnoses } from '../Schema/schema.js'
+import { users, patients, patient_relations, history_entry,  diagnosis, treatment, sessions, log, entry_diagnoses, appointments } from '../Schema/schema.js'
 
 // Aquí puedes definir tus esquemas de tabla para auto-crearse si no existen
 const initialTables: Table[] = [
@@ -21,7 +21,8 @@ const initialTables: Table[] = [
   treatment,
   sessions,
   log,
-  entry_diagnoses
+  entry_diagnoses,
+  appointments
 ]
 
 // Calculamos la ruta. Si estamos en test usamos memoria RAM pura para mayor velocidad.

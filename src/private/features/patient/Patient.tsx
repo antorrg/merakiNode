@@ -18,7 +18,7 @@ const Patient = ({ patientId }: PatientProps) => {
 
   const [showFormModal, setShowFormModal] = useState(false);
   const [showConfirmAlert, setShowConfirmAlert] = useState(false);
-  const [pendingPayload, setPendingPayload] = useState<any>(null);//eslint-disable-line
+  const [pendingPayload, setPendingPayload] = useState<any>(null); //eslint-disable-line
 
   useEffect(() => {
     getPatientById(patientId);
@@ -73,9 +73,9 @@ const Patient = ({ patientId }: PatientProps) => {
           </div>
         ) : (
           <>
-          <PatientViewer patientDetail={patientDetail!}/>
+            <PatientViewer patientDetail={patientDetail!} />
             {hasGuardians && (
-            <PatientGuardians guardiansList={guardiansList}/>
+              <PatientGuardians guardiansList={guardiansList} />
             )}
           </>
         )}

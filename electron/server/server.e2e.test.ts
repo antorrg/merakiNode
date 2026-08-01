@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { db, startUp, closeDatabase } from './Configs/database.js';
-import { users, patients, patient_relations, diagnosis, history_entry, treatment, sessions } from './Schema/schema.js';
+import { users, patients, patient_relations, diagnosis, history_entry, treatment, sessions, appointments } from './Schema/schema.js';
 
 import authIndex from './Features/auth/auth.index.js';
 import userIndex from './Features/user/user.index.js';
@@ -9,7 +9,9 @@ import diagnosisIndex from './Features/diagnosis/diagnosis.index.js';
 import historyEntryIndex from './Features/history/historyEntry.index.js';
 import treatmentIndex from './Features/treatment/treatment.index.js';
 import historyIndex from './Features/history/history.index.js';
+import appointmentIndex from './Features/appointments/appointment.index.js';
 import { DiagnosisStatus } from './Features/diagnosis/Diagnosis.js';
+import { AppointmentStatus } from './Features/appointments/Appointment.js';
 
 describe('Server End-to-End & Integration Suite (e2e.server)', () => {
   beforeAll(async () => {
@@ -22,8 +24,10 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
     db.db.exec(diagnosis.sql);
     db.db.exec(history_entry.sql);
     db.db.exec(treatment.sql);
+    db.db.exec(appointments.sql);
 
     // Limpieza inicial
+    db.db.exec('DELETE FROM appointments;');
     db.db.exec('DELETE FROM treatment;');
     db.db.exec('DELETE FROM history_entry;');
     db.db.exec('DELETE FROM diagnosis;');
@@ -301,7 +305,7 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
   });
 
   // =========================================================================
-  // 6. Flujo Integral de Historia Clínica (End-to-End)
+  // 6. Flujo Integral de Historia Clínica (history:getFull)
   // =========================================================================
   describe('6. Flujo Integral de Historia Clínica (history:getFull)', () => {
     it('debería consolidar el expediente clínico completo del paciente con múltiples profesionales', async () => {
@@ -397,6 +401,100 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
       const timelineBeta = fullHistory.timeline.find((t: any) => t.entryId === entryBeta.entryId);
       expect(timelineBeta).toBeDefined();
       expect(timelineBeta!.professional.name).toBe('DrBetaE2E');
+    });
+  });
+
+  // =========================================================================
+  // 7. Módulo Appointments (Gestión de Turnos)
+  // =========================================================================
+  describe('7. Módulo Appointments (Gestión de Turnos)', () => {
+    let patientId: string;
+    let professionalId: string;
+    let appointmentId: string;
+
+    beforeAll(async () => {
+      const prof = await userIndex.createUser({
+        userEmail: 'dr.turno@meraki.com',
+        userName: 'DrTurnos',
+        password: 'password123',
+        role: 'PROFESIONAL'
+      });
+      professionalId = prof.userId;
+
+      const p = patientIndex.registerPatient({
+        email: 'paciente.turno@test.com',
+        firstName: 'Lucas',
+        lastName: 'Martinez',
+        typeDoc: 'DNI',
+        identityCode: '44556677',
+        birthDate: '12/12/1993',
+        phone: '1122446688',
+        address: 'Calle Turno 100',
+        city: 'Mendoza',
+        postalCode: '5500'
+      });
+      patientId = p.patientId;
+    });
+
+    it('debería agendar un nuevo turno correctamente (createAppointment)', async () => {
+      const newApp = appointmentIndex.createAppointment({
+        patientId,
+        professionalId,
+        service: 'Consulta de Control',
+        startTime: '2026-08-01T09:00:00.000Z',
+        endTime: '2026-08-01T09:30:00.000Z',
+        notes: 'Paciente requiere confirmación telefónica',
+        createdBy: professionalId
+      });
+
+      expect(newApp).toBeDefined();
+      expect(newApp.appointmentId).toBeDefined();
+      expect(newApp.status).toBe(AppointmentStatus.CONFIRMED);
+      expect(newApp.service).toBe('Consulta de Control');
+
+      appointmentId = newApp.appointmentId;
+    });
+
+    it('debería rechazar un turno que se solape con el mismo profesional en el mismo horario', async () => {
+      expect(() => {
+        appointmentIndex.createAppointment({
+          patientId,
+          professionalId,
+          service: 'Consulta Solapada',
+          startTime: '2026-08-01T09:15:00.000Z',
+          endTime: '2026-08-01T09:45:00.000Z',
+          createdBy: professionalId
+        });
+      }).toThrow();
+    });
+
+    it('debería consultar turnos por rango de fechas (getAppointmentsByRange)', async () => {
+      const list = appointmentIndex.getAppointmentsByRange({
+        startDate: '2026-08-01T00:00:00.000Z',
+        endDate: '2026-08-01T23:59:59.000Z',
+        professionalId
+      });
+
+      expect(Array.isArray(list)).toBe(true);
+      expect(list.length).toBe(1);
+      expect(list[0].patientName).toBe('Lucas Martinez');
+      expect(list[0].professionalName).toBe('DrTurnos');
+    });
+
+    it('debería cancelar un turno y conservar el registro en la DB (updateAppointmentStatus a CANCELLED)', async () => {
+      const updated = appointmentIndex.updateAppointmentStatus({
+        appointmentId,
+        status: AppointmentStatus.CANCELLED,
+        notes: 'Cancelado por el paciente con aviso previo'
+      });
+
+      expect(updated).toBeDefined();
+      expect(updated.status).toBe(AppointmentStatus.CANCELLED);
+
+      // El turno debe seguir figurando en el historial del paciente
+      const patientApps = appointmentIndex.getAppointmentsByPatient({ patientId });
+      expect(patientApps.length).toBe(1);
+      expect(patientApps[0].status).toBe(AppointmentStatus.CANCELLED);
     });
   });
 });

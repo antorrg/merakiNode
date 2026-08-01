@@ -118,3 +118,18 @@ export interface EntryDiagnoses {
   created_at: string
 }
 
+export interface Appointments {
+  appointment_id?: string | null
+  patient_id: string
+  professional_id: string
+  service: string
+  status: string
+  start_time: string
+  end_time: string
+  notes?: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+  deleted_at?: string | null
+}
+

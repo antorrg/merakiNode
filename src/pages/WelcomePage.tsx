@@ -25,7 +25,7 @@ export default function WelcomePage() {
        <div className="p-5 text-center text-muted bg-light rounded border">
             {/* FONDO / CONTENIDO POR DEFECTO DEL PANEL ADMIN */}
             <div className="text-center" style={{ zIndex: 1 }}>
-                <h1 className="display-4 fw-bold text-primary mb-3">Meraki Node</h1>
+                <h1 className="display-4 fw-bold text-primary mb-3">Meraki Centro Integral</h1>
                 <h3 className="h5 text-secondary">Bienvenido a la plataforma de administración</h3>
                 {isAuthenticated && (
                    <p className="mt-4 text-success">¡Sesión iniciada correctamente!</p>

@@ -67,6 +67,14 @@ export const LOGGER_CHANNELS = [
   'logs.deleteAll',
 ] as const
 
+export const APPOINTMENT_CHANNELS = [
+  'appointment:create',
+  'appointment:getByRange',
+  'appointment:getByPatient',
+  'appointment:updateStatus',
+  'appointment:delete',
+] as const
+
 // Lista blanca de canales permitidos para invocación (invoke)
 export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...AUTH_CHANNELS,
@@ -77,6 +85,7 @@ export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...HISTORY_CHANNELS,
   ...ENTRY_CHANNELS,
   ...LOGGER_CHANNELS,
+  ...APPOINTMENT_CHANNELS,
 ])
 
 // Lista blanca de canales permitidos para eventos de escucha (on)
@@ -94,5 +103,6 @@ export type AllowedInvokeChannel =
   | typeof HISTORY_CHANNELS[number]
   | typeof ENTRY_CHANNELS[number]
   | typeof LOGGER_CHANNELS[number]
+  | typeof APPOINTMENT_CHANNELS[number]
 
 export type AllowedListenChannel = 'main-process-message'

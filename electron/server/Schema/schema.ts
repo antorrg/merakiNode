@@ -78,77 +78,78 @@ export const history_entry: Table = {
   deps: ['patients', 'users']
 };
 
-export const diagnosis:Table = {
+export const diagnosis: Table = {
   name: 'diagnosis',
-  sql:`CREATE TABLE IF NOT EXISTS diagnosis (
-  diagnosis_id TEXT PRIMARY KEY,
-  patient_id TEXT NOT NULL,
-  title TEXT,
-  description TEXT,
-  start_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  end_date DATETIME,
-  status TEXT,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  deleted_at DATETIME DEFAULT NULL,
-  FOREIGN KEY(patient_id) REFERENCES patients(patient_id) ON UPDATE CASCADE
+  sql: `CREATE TABLE IF NOT EXISTS diagnosis (
+    diagnosis_id TEXT PRIMARY KEY,
+    patient_id TEXT NOT NULL,
+    title TEXT,
+    description TEXT,
+    start_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end_date DATETIME,
+    status TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL,
+    FOREIGN KEY(patient_id) REFERENCES patients(patient_id) ON UPDATE CASCADE
   );`,
-  deps : ['patients']
-}
+  deps: ['patients']
+};
 
 export const treatment: Table = {
   name: 'treatment',
   sql: `CREATE TABLE IF NOT EXISTS treatment (
-  treatment_id TEXT PRIMARY KEY,
-  entry_id TEXT NOT NULL,
-  name TEXT,
-  description TEXT,
-  frequency TEXT,
-  objective TEXT,
-  start_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  end_date DATETIME,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  deleted_at DATETIME DEFAULT NULL,
-  FOREIGN KEY(entry_id) REFERENCES history_entry(entry_id) ON UPDATE CASCADE
+    treatment_id TEXT PRIMARY KEY,
+    entry_id TEXT NOT NULL,
+    name TEXT,
+    description TEXT,
+    frequency TEXT,
+    objective TEXT,
+    start_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    end_date DATETIME,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL,
+    FOREIGN KEY(entry_id) REFERENCES history_entry(entry_id) ON UPDATE CASCADE
   );`,
   deps: ['history_entry']
-}
+};
 
 export const sessions: Table = {
   name: 'sessions',
   sql: `CREATE TABLE IF NOT EXISTS sessions (
-  session_id TEXT PRIMARY KEY,
-  user_id TEXT NOT NULL,
-  username TEXT,
-  role TEXT NOT NULL,
-  created_at INTEGER, 
-  expires_at INTEGER,
-  rolling BOOLEAN DEFAULT 1,
-  FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
+    session_id TEXT PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    username TEXT,
+    role TEXT NOT NULL,
+    created_at INTEGER, 
+    expires_at INTEGER,
+    rolling BOOLEAN DEFAULT 1,
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON DELETE CASCADE
   );`,
   deps: ['users']
-}
+};
+
 export const log: Table = {
   name: 'logs',
   sql: `CREATE TABLE IF NOT EXISTS logs (
-  id INTEGER PRIMARY KEY,
-  level_name TEXT NOT NULL,
-  level_code INTEGER,
-  message TEXT NOT NULL,
-  type TEXT,
-  status INTEGER,
-  stack TEXT,
-  contexts TEXT DEFAULT '[]',
-  pid INTEGER NOT NULL,
-  time INTEGER,
-  hostname TEXT,
-  keep BOOLEAN DEFAULT 0,
-  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    id INTEGER PRIMARY KEY,
+    level_name TEXT NOT NULL,
+    level_code INTEGER,
+    message TEXT NOT NULL,
+    type TEXT,
+    status INTEGER,
+    stack TEXT,
+    contexts TEXT DEFAULT '[]',
+    pid INTEGER NOT NULL,
+    time INTEGER,
+    hostname TEXT,
+    keep BOOLEAN DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
   );`,
   deps: []
-}
+};
 
 export const entry_diagnoses: Table = {
   name: 'entry_diagnoses',
@@ -161,4 +162,26 @@ export const entry_diagnoses: Table = {
     FOREIGN KEY(diagnosis_id) REFERENCES diagnosis(diagnosis_id) ON DELETE CASCADE ON UPDATE CASCADE
   );`,
   deps: ['history_entry', 'diagnosis']
+};
+
+export const appointments: Table = {
+  name: 'appointments',
+  sql: `CREATE TABLE IF NOT EXISTS appointments (
+    appointment_id TEXT PRIMARY KEY,
+    patient_id TEXT NOT NULL,
+    professional_id TEXT NOT NULL,
+    service TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'PENDING',
+    start_time TEXT NOT NULL,
+    end_time TEXT NOT NULL,
+    notes TEXT,
+    created_by TEXT NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME DEFAULT NULL,
+    FOREIGN KEY(patient_id) REFERENCES patients(patient_id) ON UPDATE CASCADE,
+    FOREIGN KEY(professional_id) REFERENCES users(user_id) ON UPDATE CASCADE,
+    FOREIGN KEY(created_by) REFERENCES users(user_id) ON UPDATE CASCADE
+  );`,
+  deps: ['patients', 'users']
 };

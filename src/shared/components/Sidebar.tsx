@@ -8,6 +8,7 @@ import ConfirmModal from './modalComponents/ConfirmModal';
 import { hasRole } from '../utils/hasRole';
 import { Role } from '../../types'
 import ProfileModal from '../../private/features/user/forms/ProfileModal';
+import { NavDropdown } from 'react-bootstrap';
 
 function Sidebar() {
   const { user, logout } = useAuth();
@@ -67,10 +68,13 @@ function Sidebar() {
           <Nav className="flex-column gap-2 mt-auto mb-0">
                         {/* Ejemplo de enlace oculto según el rol del usuario */}
             {hasRole(user?.role, Role.PROPIETARIO)? (
-              <>
-              <Nav.Link as={Link} to="/dashboard/users" onClick={handleClose} className="text-success">Usuarios</Nav.Link>
-              <Nav.Link as={Link} to="/dashboard/admin" onClick={handleClose} className="text-warning">Administración</Nav.Link>
-              </>
+              <NavDropdown
+              title="Administración"
+              >
+              <NavDropdown.Item as={Link} to="/dashboard/users" onClick={handleClose} className="text-primary">Usuarios</NavDropdown.Item>
+               <NavDropdown.Item as={Link} to="/dashboard/admin" onClick={handleClose} className="text-secondary">Historia Clínica</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/dashboard/admin" onClick={handleClose} className="text-success">Configuración</NavDropdown.Item>
+              </NavDropdown>
             ):null}
             <Nav.Link as={Link} to="#" onClick={() => { handleClose(); setShowProfileModal(true); }} className="text-primary">Mi Perfil</Nav.Link>
             <Nav.Link as={Link} to="#" onClick={()=>setAlert(true)} className="text-danger">Cerrar sesión</Nav.Link>
