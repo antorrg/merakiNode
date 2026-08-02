@@ -133,3 +133,14 @@ export interface Appointments {
   deleted_at?: string | null
 }
 
+export interface PdfExports {
+  id?: string | null
+  patient_id: string
+  user_id: string
+  file_name: string
+  relative_path: string
+  visit_ids: string
+  document_type?: string | null
+  created_at: string
+}
+

@@ -66,14 +66,16 @@ export default function GeneralCalendar() {
     loadAppointments();
   }, [date, view, selectedProfessionalId,user]);//eslint-disable-line
 
-  // Mapear turnos backend a eventos de react-big-calendar
-  const events: CalendarEvent[] = appointments.map(app => ({
-    id: app.appointmentId,
-    title: `${app.patientName || 'Paciente'} - ${app.service}${app.professionalName ? ` (Dr. ${app.professionalName})` : ''}`,
-    start: new Date(app.startTime),
-    end: new Date(app.endTime),
-    resource: app
-  }));
+  // Mapear turnos backend a eventos de react-big-calendar (los turnos cancelados se liberan de la agenda general)
+  const events: CalendarEvent[] = appointments
+    .filter(app => app.status !== 'CANCELLED')
+    .map(app => ({
+      id: app.appointmentId,
+      title: `${app.patientName || 'Paciente'} - ${app.service}${app.professionalName ? ` (Dr. ${app.professionalName})` : ''}`,
+      start: new Date(app.startTime),
+      end: new Date(app.endTime),
+      resource: app
+    }));
 
   // Crear turno al hacer clic en un slot libre
   const handleSelectSlot = ({ start, end }: { start: Date; end: Date }) => {

@@ -185,3 +185,20 @@ export const appointments: Table = {
   );`,
   deps: ['patients', 'users']
 };
+
+export const pdf_exports: Table = {
+  name: 'pdf_exports',
+  sql: `CREATE TABLE IF NOT EXISTS pdf_exports (
+    id TEXT PRIMARY KEY,
+    patient_id TEXT NOT NULL,
+    user_id TEXT NOT NULL,
+    file_name TEXT NOT NULL,
+    relative_path TEXT NOT NULL,
+    visit_ids TEXT NOT NULL,
+    document_type TEXT DEFAULT 'medical-history',
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(patient_id) REFERENCES patients(patient_id) ON UPDATE CASCADE,
+    FOREIGN KEY(user_id) REFERENCES users(user_id) ON UPDATE CASCADE
+  );`,
+  deps: ['patients', 'users']
+};

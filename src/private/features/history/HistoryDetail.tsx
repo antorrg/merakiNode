@@ -1,11 +1,14 @@
-import { Accordion, Badge, Button } from 'react-bootstrap';
+import { Accordion, Badge, Button, Form } from 'react-bootstrap';
 import { IHistoryEntry, VisitType } from '../../../types';
 import { useHistoryEntryStore } from './useHistoryEntryStore';
 import { useWorkspaceStore } from '../workspace/useWorkspaceStore';
+import { useHistoryPdfStore } from '../pdfExport/useHistoryPdfStore';
+import { useDiagnosisStore } from '../diagnostic/useDiagnosisStore';
 
 interface HistoryDetailProps {
   entry: IHistoryEntry;
   eventKey: string;
+  showCheck: boolean;
 }
 
 const getVisitTypeBadge = (type: VisitType) => {
@@ -18,9 +21,25 @@ const getVisitTypeBadge = (type: VisitType) => {
   }
 };
 
-const HistoryDetail = ({ entry, eventKey }: HistoryDetailProps) => {
+const translateDiagnosisStatus = (status: string): string => {
+  switch (status) {
+    case 'ACTIVE': return 'ACTIVO';
+    case 'CHRONIC': return 'CRÓNICO';
+    case 'RESOLVED': return 'RESUELTO';
+    case 'SUSPENDED': return 'SUSPENDIDO';
+    default: return status || 'ACTIVO';
+  }
+};
+
+const HistoryDetail = ({ entry, eventKey, showCheck= false }: HistoryDetailProps) => {
   const { loadEntryForEdit } = useHistoryEntryStore();
-  
+  const { selectedEntryIds, toggleSelectEntry } = useHistoryPdfStore();
+  const { activeDiagnosesByPatient } = useDiagnosisStore();
+
+  const isSelected = !!selectedEntryIds[entry.entryId];
+  const activeDiagnoses = activeDiagnosesByPatient[entry.patientId] || [];
+  const linkedDiagnoses = activeDiagnoses.filter((d) => entry.diagnosisIds?.includes(d.diagnosisId));
+
   const formattedDate = new Date(entry.visitDate).toLocaleDateString('es-ES', {
     day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'
   });
@@ -35,12 +54,26 @@ const HistoryDetail = ({ entry, eventKey }: HistoryDetailProps) => {
     <Accordion.Item eventKey={eventKey}>
       <Accordion.Header>
         <div className="d-flex w-100 justify-content-between align-items-center me-3">
-          <div>
-            <strong>{formattedDate}</strong> - {entry.reason}
+          <div className="d-flex align-items-center gap-2">
+            {showCheck === true?
+            <Form.Check
+              type="checkbox"
+              id={`select-entry-${entry.entryId}`}
+              checked={isSelected}
+              onChange={(e) => {
+                e.stopPropagation();
+                toggleSelectEntry(entry.entryId);
+              }}
+              onClick={(e) => e.stopPropagation()}
+              title="Seleccionar para exportación PDF"
+            />
+            :null}
+            <span>
+              <strong>{formattedDate}</strong> - {entry.reason}
+            </span>
           </div>
           <div className="d-flex align-items-center gap-3">
             {getVisitTypeBadge(entry.visitType)}
-
           </div>
         </div>
       </Accordion.Header>
@@ -61,10 +94,21 @@ const HistoryDetail = ({ entry, eventKey }: HistoryDetailProps) => {
           )}
         </div>
 
-        {entry.diagnosisSummary && (
+        {(entry.diagnosisSummary || linkedDiagnoses.length > 0) && (
           <div className="mb-4">
-            <h6 className="text-secondary border-bottom pb-2">Resumen de Diagnóstico</h6>
-            <div dangerouslySetInnerHTML={{ __html: entry.diagnosisSummary }} />
+            <h6 className="text-secondary border-bottom pb-2">Diagnóstico / Diagnósticos Asociados</h6>
+            {linkedDiagnoses.length > 0 && (
+              <div className="d-flex flex-wrap gap-2 mb-2">
+                {linkedDiagnoses.map((d) => (
+                  <Badge key={d.diagnosisId} bg="info" className="py-1 px-2">
+                    🏷️ {d.title} ({translateDiagnosisStatus(d.status)})
+                  </Badge>
+                ))}
+              </div>
+            )}
+            {entry.diagnosisSummary && (
+              <div dangerouslySetInnerHTML={{ __html: entry.diagnosisSummary }} />
+            )}
           </div>
         )}
 

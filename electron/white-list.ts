@@ -74,6 +74,11 @@ export const APPOINTMENT_CHANNELS = [
   'appointment:delete',
 ] as const
 
+export const PDF_EXPORT_CHANNELS = [
+  'pdf:generate',
+  'pdf:getByPatient',
+] as const
+
 // Lista blanca de canales permitidos para invocación (invoke)
 export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...AUTH_CHANNELS,
@@ -85,6 +90,7 @@ export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...ENTRY_CHANNELS,
   ...LOGGER_CHANNELS,
   ...APPOINTMENT_CHANNELS,
+  ...PDF_EXPORT_CHANNELS,
 ])
 
 // Lista blanca de canales permitidos para eventos de escucha (on)
@@ -103,5 +109,6 @@ export type AllowedInvokeChannel =
   | typeof ENTRY_CHANNELS[number]
   | typeof LOGGER_CHANNELS[number]
   | typeof APPOINTMENT_CHANNELS[number]
+  | typeof PDF_EXPORT_CHANNELS[number]
 
 export type AllowedListenChannel = 'main-process-message'

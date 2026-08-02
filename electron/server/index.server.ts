@@ -7,6 +7,7 @@ import { diagnosisIpc } from "./ipc/diagnosis.ipc.js"
 import { historyEntryIpc } from "./ipc/historyEntry.ipc.js"
 import { treatmentIpc } from "./ipc/treatment.ipc.js"
 import { appointmentIpc } from "./ipc/appointment.ipc.js"
+import { pdfExportIpc } from "./ipc/pdfExport.ipc.js"
 
 const modules = [
   authIpc,
@@ -18,6 +19,7 @@ const modules = [
   historyEntryIpc,
   treatmentIpc,
   appointmentIpc,
+  pdfExportIpc,
 ]
 
 export function registerAllIpc() {

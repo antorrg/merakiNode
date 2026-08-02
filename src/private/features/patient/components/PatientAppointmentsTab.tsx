@@ -90,7 +90,7 @@ export const PatientAppointmentsTab: React.FC<PatientAppointmentsTabProps> = ({ 
                             : 'bg-warning text-dark'
                         }`}
                       >
-                        {app.status === 'CANCELLED' ? 'CANCELADO (En Rojo)' : app.status}
+                        {app.status === 'CANCELLED' ? 'CANCELADO' : app.status}
                       </span>
                     </td>
                     <td>

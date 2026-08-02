@@ -51,7 +51,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
     if (!isOpen) return;
 
     const timer = setTimeout(() => {
-      adminApi.execute<any>({
+      adminApi.execute<any>({ //eslint-disable-line
         request: {
           channel: 'patient:getAll',
           payload: { search: patientSearch.trim(), limit: 25 }
@@ -110,7 +110,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
       setStartTimeStr(start.format('HH:mm'));
       setEndTimeStr(end.format('HH:mm'));
     }
-  }, [isOpen, existingAppointment, initialStart, initialEnd, fixedPatientId, user, isProfessional, isOwner]);
+  }, [isOpen, existingAppointment, initialStart, initialEnd, fixedPatientId, user, isProfessional, isOwner]);//eslint-disable-line
 
   if (!isOpen) return null;
 
@@ -183,15 +183,27 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
     onSuccess();
     onClose();
   };
+  const handleReasonsCancel = async() => {
+    if (!existingAppointment) return;
+    const newStatus = 'CANCELLED'
+    await updateAppointmentStatus(existingAppointment.appointmentId, newStatus, notes);
+    onSuccess();
+    onClose();
+  }
 
   const handleDelete = async () => {
     if (!existingAppointment) return;
+    if (existingAppointment.status === 'CANCELLED') {
+      toast.error('No se puede eliminar un turno cancelado. Debe conservarse la constancia en el historial del paciente.');
+      return;
+    }
     if (window.confirm('¿Está seguro de eliminar permanentemente este turno?')) {
       await deleteAppointment(existingAppointment.appointmentId);
       onSuccess();
       onClose();
     }
   };
+  const dontDelete = (existingAppointment!.status === 'CANCELLED')? true : false
 
   return (
     <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
@@ -214,11 +226,11 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                     existingAppointment.status === 'CANCELLED' ? 'bg-danger' :
                     existingAppointment.status === 'COMPLETED' ? 'bg-primary' : 'bg-warning'
                   }`}>
-                    {existingAppointment.status}
+                    {existingAppointment.status === 'CANCELLED' ? 'CANCELADO' : existingAppointment.status}
                   </span>
                   {existingAppointment.status === 'CANCELLED' && (
-                    <div className="mt-1 text-danger small">
-                      * Este turno se encuentra cancelado. Su franja horaria está disponible para sobreescritura.
+                    <div className="mt-1 text-danger small fw-bold">
+                      * Este turno fue CANCELADO. Se liberó de la agenda general y se conserva como constancia en el historial del paciente (no se puede eliminar).
                     </div>
                   )}
                 </div>
@@ -380,14 +392,14 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
 
             <div className="modal-footer d-flex justify-content-between">
               <div>
-                {existingAppointment && (
+                {existingAppointment && existingAppointment.status !== 'CANCELLED' && (
                   <button
                     type="button"
                     className="btn btn-outline-danger btn-sm"
                     onClick={handleDelete}
-                    disabled={isLoading}
+                    disabled={isLoading || dontDelete}
                   >
-                    Eliminar
+                    Eliminar Turno
                   </button>
                 )}
               </div>
@@ -412,7 +424,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                         type="button"
                         className="btn btn-success"
                         onClick={() => handleStatusChange('CONFIRMED')}
-                        disabled={isLoading}
+                        disabled={isLoading || dontDelete}
                       >
                         Confirmar
                       </button>
@@ -422,7 +434,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                         type="button"
                         className="btn btn-info text-white"
                         onClick={() => handleStatusChange('COMPLETED')}
-                        disabled={isLoading}
+                        disabled={isLoading|| dontDelete}
                       >
                         Completar
                       </button>
@@ -435,6 +447,16 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
                         disabled={isLoading}
                       >
                         Cancelar Turno
+                      </button>
+                    )}
+                    {existingAppointment.status === 'CANCELLED' && (
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() => handleReasonsCancel()}
+                        disabled={isLoading}
+                      >
+                        Guardar cambios
                       </button>
                     )}
                   </>

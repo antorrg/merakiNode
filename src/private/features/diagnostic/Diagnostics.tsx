@@ -179,7 +179,7 @@ const Diagnostics: React.FC<DiagnosticsProps> = ({ patientId }) => {
         <div className="text-center py-5">
           <Spinner animation="border" variant="primary" />
         </div>
-      ) : diagnoses.length === 0 || hasRole(user?.role, Role.PROFESIONAL) ? (
+      ) : diagnoses.length === 0 ? (
         <div className="p-5 text-center text-muted bg-light rounded border border-dashed" style={{ borderStyle: 'dashed' }}>
           <h6 className="text-secondary mb-2">No hay diagnósticos registrados</h6>
           <p className="small mb-3">Haga clic en el botón superior para registrar el primer diagnóstico del paciente.</p>

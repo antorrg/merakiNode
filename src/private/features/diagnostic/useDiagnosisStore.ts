@@ -46,7 +46,7 @@ export const useDiagnosisStore = create<DiagnosisState>((set, get) => ({
       });
       
       if (!response) throw new Error('Respuesta vacía del servidor');
-      
+      console.log('estoy en diagnostic: ', response)
       set((state) => ({
         activeDiagnosesByPatient: {
           ...state.activeDiagnosesByPatient,
