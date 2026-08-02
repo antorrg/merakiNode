@@ -54,7 +54,7 @@ const Histories = ({ patientId }: HistoriesProps) => {
   return (
     <div className="bg-white p-4 rounded shadow-sm border border-light">
       <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h4 className="text-primary mb-0">Historial Clínico</h4>
+        <h4 className="text-primary mb-0">Historial</h4>
 
         {hasRole(user?.role, Role.PROFESIONAL) && entries.length > 0 && (
           <div className="d-flex align-items-center gap-3">
