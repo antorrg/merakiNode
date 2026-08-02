@@ -21,6 +21,7 @@ export type Guardian = {
   name: string;
   phone: string;
   relationship: string;
+  isPatient?: boolean;
 }
 export interface IPatient {
     patientId:string
@@ -38,6 +39,7 @@ export interface IPatient {
     ownEmail?: string | null
     ownPhone?: string | null
     postalCode?: string
+    isPatient?: boolean
 }
 
 export enum VisitType {

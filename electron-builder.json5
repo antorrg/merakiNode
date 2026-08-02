@@ -1,7 +1,7 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "com.antorrg-software.merakinapp",
+  "appId": "com.antorrg-software.merakiapp",
   "asar": true,
   "productName": "MerakiApp",
   "directories": {
@@ -15,6 +15,7 @@
     "target": [
       "dmg"
     ],
+    "icon": "public/merakifav.png",
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
@@ -43,6 +44,7 @@
       "AppImage"
     ],
     "icon": "public/merakifav.png",
-    "artifactName": "${productName}-Linux-${version}.${ext}"
+    "artifactName": "${productName}-Linux-${version}.${ext}",
+    "category": "MedicalSoftware"
   }
 }

@@ -48,6 +48,7 @@ export interface PatientState {
   updatePatientContact: (patientId: string, data: UpdatePatientContactPayload) => Promise<void>;
   deletePatient: (patientId: string) => Promise<void>;
   getPatientById: (patientId: string) => Promise<IPatient>;
+  getPatientByIdentityCode: (identityCode: string) => Promise<IPatient | null>;
 }
 
 export const usePatientStore = create<PatientState>((set, get) => ({
@@ -112,6 +113,18 @@ export const usePatientStore = create<PatientState>((set, get) => ({
       const errorMessage = error?.message || 'Error al obtener paciente';
       set({ error: errorMessage, isLoading: false });
       throw error;
+    }
+  },
+
+  getPatientByIdentityCode: async (identityCode: string) => {
+    try {
+      const response = await adminApi.execute<IPatient | null>({
+        request: { channel: 'patient:getByIdentityCode', payload: { identityCode } },
+        reject: () => null
+      });
+      return response || null;
+    } catch {
+      return null;
     }
   },
 

@@ -19,6 +19,11 @@ export default {
     const response =  patientService.getPatientById(validId);
     return response
   },
+
+  getByIdentityCode: (data: unknown) => {
+    const validData = NodeValidator.validateBody(data, sch.getByIdentityCodeSchema);
+    return patientService.getByIdentityCode(validData.identityCode as string);
+  },
   
   updateContactData: (data: unknown) => {
     const validData = NodeValidator.validateBody(data, sch.updateContactSchema);

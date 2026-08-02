@@ -11,12 +11,15 @@ import QuickGuardianModal from '../modals/QuickGuardianModal';
 import TutorSearchBarSelect from '../components/TutorSearchBarSelect';
 import { normalizeDateInput, validateAndParseBirthDate } from '../../../../shared/utils/dateUtils';
 
+import { usePatientStore } from '../usePatientStore';
+
 interface PatientCreateProps {
   onHide: () => void;
   onRequestConfirm: (action: PatientActionType, data: any) => void;
 }
 
 const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm }) => {
+  const { getPatientByIdentityCode } = usePatientStore();
   const [formData, setFormData] = useState({
     email: '',
     firstName: '',
@@ -35,6 +38,28 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
   const [showQuickGuardianModal, setShowQuickGuardianModal] = useState(false);
   const [quickModalSearchQuery, setQuickModalSearchQuery] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [existingTutor, setExistingTutor] = useState<IPatient | null>(null);
+
+  const handleIdentityCodeBlur = async () => {
+    const code = formData.identityCode.trim();
+    if (!code) return;
+    try {
+      const found = await getPatientByIdentityCode(code);
+      if (found) {
+        if (found.isPatient) {
+          setErrorMsg(`Ya existe un paciente activo registrado con el N° de Documento ${code}.`);
+          setExistingTutor(null);
+        } else {
+          setExistingTutor(found);
+          setErrorMsg(null);
+        }
+      } else {
+        setExistingTutor(null);
+      }
+    } catch {
+      setExistingTutor(null);
+    }
+  };
 
   const handleQuickGuardianCreated = (newGuardian: Guardian) => {
     setGuardians(prev => {
@@ -58,7 +83,8 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
       name: `${selectedPatient.firstName} ${selectedPatient.lastName}`,
       phone: selectedPatient.phone || 'Sin teléfono',
       relationship: relationshipType,
-      isPrimary: isPrimaryContact || guardians.length === 0
+      isPrimary: isPrimaryContact || guardians.length === 0,
+      isPatient: selectedPatient.isPatient
     };
 
     setGuardians([...updatedGuardians, guardianToAdd]);
@@ -165,10 +191,46 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
         <Col md={8}>
           <Form.Group className="mb-3">
             <Form.Label>Documento</Form.Label>
-            <Form.Control type="text" name="identityCode" value={formData.identityCode} onChange={handleChange} required />
+            <Form.Control 
+              type="text" 
+              name="identityCode" 
+              value={formData.identityCode} 
+              onChange={handleChange} 
+              onBlur={handleIdentityCodeBlur} 
+              required 
+            />
           </Form.Group>
         </Col>
       </Row>
+
+      {existingTutor && (
+        <Alert variant="info" className="d-flex justify-content-between align-items-center py-2 px-3 mb-3">
+          <div className="small">
+            <i className="bi bi-info-circle-fill me-2"></i>
+            <strong>Tutor registrado encontrado:</strong> {existingTutor.firstName} {existingTutor.lastName}. Al guardar se activará como paciente.
+          </div>
+          <Button 
+            variant="outline-info" 
+            size="sm"
+            type="button"
+            onClick={() => {
+              setFormData(prev => ({
+                ...prev,
+                firstName: existingTutor.firstName || prev.firstName,
+                lastName: existingTutor.lastName || prev.lastName,
+                birthDate: existingTutor.birthDate || prev.birthDate,
+                phone: existingTutor.ownPhone || existingTutor.phone || prev.phone,
+                email: existingTutor.ownEmail || existingTutor.email || prev.email,
+                address: existingTutor.address || prev.address,
+                city: existingTutor.city || prev.city,
+                postalCode: existingTutor.postalCode || prev.postalCode,
+              }));
+            }}
+          >
+            Cargar datos del tutor
+          </Button>
+        </Alert>
+      )}
 
       <Row>
         <Col md={6}>
@@ -275,6 +337,7 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
           <thead className="table-light">
             <tr>
               <th>Nombre</th>
+              <th>Tipo de Registro</th>
               <th>Relación</th>
               <th>Teléfono</th>
               <th>Contacto Principal</th>
@@ -285,6 +348,13 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
             {guardians.map((g, idx) => (
               <tr key={g.guardianId || idx}>
                 <td>{g.name}</td>
+                <td>
+                  {g.isPatient !== false ? (
+                    <span className="badge bg-info text-dark">Paciente</span>
+                  ) : (
+                    <span className="badge bg-secondary">Solo Tutor</span>
+                  )}
+                </td>
                 <td>{g.relationship}</td>
                 <td>{g.phone}</td>
                 <td>

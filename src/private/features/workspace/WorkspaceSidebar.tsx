@@ -19,7 +19,7 @@ const WorkspaceSidebar: React.FC<SidebarProps> = ({ activeSection, onSelectSecti
     { id: 'history', label: 'Visitas Anteriores', icon: '🕰️' },
     { id: 'treatments', label: 'Tratamientos', icon: '🗣️' },
     { id: 'diagnostic', label: 'Diagnóstico', icon: '🩺' },
-    { id: 'patient', label: 'Detalle paciente', icon: '👤' },
+    { id: 'patient', label: 'Datos del paciente', icon: '👤' },
     { id: 'pat_calendar', label: 'Agenda', icon: '📆​'}
   ];
 

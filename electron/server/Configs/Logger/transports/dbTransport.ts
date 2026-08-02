@@ -17,7 +17,15 @@ export interface PinoLog {
   [key: string]: unknown;
 }
 
-const repo = new BaseRepository<Logs, Omit<Logs, 'id'|'created_at'|'updated_at'>, Partial<Logs>>('logs', 'id', false, false)
+let repo: BaseRepository<Logs, Omit<Logs, 'id'|'created_at'|'updated_at'>, Partial<Logs>> | null = null;
+
+function getRepo() {
+  if (!repo) {
+    repo = new BaseRepository<Logs, Omit<Logs, 'id'|'created_at'|'updated_at'>, Partial<Logs>>('logs', 'id', false, false);
+  }
+  return repo;
+}
+
 function dbTransport () {
   return async function saveToDb (logObject: string | PinoLog) {
     try {
@@ -28,7 +36,7 @@ function dbTransport () {
 
       // Filtramos logs de error / fatal (>= 50)
       if (obj?.level >= 50) {
-        repo.create(normalizedLog(obj))
+        getRepo().create(normalizedLog(obj))
       }
     } catch (error) {
       console.error('Error guardando log en DB:', error)

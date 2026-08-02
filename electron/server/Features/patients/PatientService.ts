@@ -12,8 +12,32 @@ export class PatientService {
     this.repository = repository;
   }
 
+  getByIdentityCode(identityCode: string) {
+    const patientProps = this.repository.getByIdentityCode(identityCode);
+    if (!patientProps) return null;
+    const patient = new Patient(patientProps);
+    return patient.toDTO();
+  }
+
   registerPatient(data: PatientCreate) {
-    // 1. Generar relationId para los tutores si no viene desde el frontend
+    // 1. Verificar si ya existe una persona registrada con este DNI/documento
+    if (data.identityCode) {
+      const existingProps = this.repository.getByIdentityCode(data.identityCode);
+      if (existingProps) {
+        const isExistingPatient = existingProps.isPatient !== undefined ? Boolean(existingProps.isPatient) : true;
+        if (isExistingPatient) {
+          throw new Error('Un paciente con este número de documento ya existe.');
+        } else {
+          // Es un tutor registrado (is_patient = 0). Promoverlo a paciente activo (is_patient = 1)
+          return this.updatePatientContact(existingProps.patientId, {
+            ...data,
+            isPatient: true
+          });
+        }
+      }
+    }
+
+    // 2. Generar relationId para los tutores si no viene desde el frontend
     if (data.guardians) {
       data.guardians = data.guardians.map(g => ({
         ...g,
@@ -22,14 +46,14 @@ export class PatientService {
       }));
     }
 
-    // 2. Instanciar y validar con el Modelo de Dominio
+    // 3. Instanciar y validar con el Modelo de Dominio
     const patient = Patient.register(data);
     const persistenceData = patient.toPersistence() as Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>;
     
-    // 3. Persistir en la base de datos (con transacciones)
+    // 4. Persistir en la base de datos (con transacciones)
     this.repository.create(persistenceData, data.guardians || []);
 
-    // 4. Retornar el DTO seguro para el frontend
+    // 5. Retornar el DTO seguro para el frontend
     return patient.toDTO();
   }
 
@@ -115,7 +139,8 @@ export class PatientService {
       email: persistenceData.email,
       address: persistenceData.address,
       city: persistenceData.city,
-      postal_code: persistenceData.postal_code
+      postal_code: persistenceData.postal_code,
+      is_patient: persistenceData.is_patient
     }, updatedGuardians);
 
     return patient.toDTO();

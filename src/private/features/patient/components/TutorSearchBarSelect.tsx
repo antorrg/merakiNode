@@ -52,7 +52,7 @@ const TutorSearchBarSelect: React.FC<TutorSearchBarSelectProps> = ({
     try {
       setIsSearching(true);
       const response = await adminApi.execute<ApiResponse<IPatient[]>>({
-        request: { channel: 'patient:getAll', payload: { page: 1, limit: 20, search: searchTerm.trim() } }
+        request: { channel: 'patient:getAll', payload: { page: 1, limit: 20, search: searchTerm.trim(), includeNonPatients: true } }
       });
 
       if (response && response.data) {
@@ -174,7 +174,7 @@ const TutorSearchBarSelect: React.FC<TutorSearchBarSelectProps> = ({
                 <option value="">-- Seleccionar adulto --</option>
                 {results.map((p) => (
                   <option key={p.patientId} value={p.patientId}>
-                    {p.firstName} {p.lastName} - DNI: {p.identityCode}
+                    {p.firstName} {p.lastName} - DNI: {p.identityCode} ({p.isPatient ? 'Paciente' : 'Solo Tutor'})
                   </option>
                 ))}
               </Form.Select>

@@ -17,6 +17,7 @@ interface FindPatientsOptions {
   search?: string;
   searchField?: string;
   deletedAt?: string | null;
+  includeNonPatients?: boolean;
 }
 export type PatientResult = Partial<PatientProps>
 interface PaginatedResult<T> {
@@ -35,6 +36,15 @@ export class PatientRepository {
 
   constructor() {
     this.baseRepo = new BaseRepository<PatientProps, Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>, Partial<Patients>>('patients', 'patient_id', true);
+  }
+
+  getByIdentityCode(identityCode: string): PatientProps | null {
+    const row = db.db.prepare(`
+      SELECT * FROM patients WHERE identity_code = ? AND deleted_at IS NULL
+    `).get(identityCode) as Record<string, unknown> | undefined;
+
+    if (!row) return null;
+    return CaseConverter.mapKeysToCamelCase<PatientProps>(row);
   }
 
   create(patientData: Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>, relations: GuardianRelation[]): string {
@@ -147,26 +157,18 @@ export class PatientRepository {
       offset,
     };
 
-    if (options.search?.trim()) {
-      if (options.searchField) {
-        const allowedSearchFields: Record<string, string> = {
-          'first_name': 'p.first_name',
-          'last_name': 'p.last_name',
-          'identity_code': 'p.identity_code',
-          'firstName': 'p.first_name',
-          'lastName': 'p.last_name',
-          'identityCode': 'p.identity_code',
-        };
-        const searchField = allowedSearchFields[options.searchField];
-        if (searchField) {
-          where.push(`${searchField} LIKE @search COLLATE NOCASE`);
-        } else {
-          where.push(`(p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR (p.first_name || ' ' || p.last_name) LIKE @search COLLATE NOCASE OR p.identity_code LIKE @search COLLATE NOCASE)`);
-        }
-      } else {
+    if (options.includeNonPatients) {
+      if (options.search?.trim()) {
         where.push(`(p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR (p.first_name || ' ' || p.last_name) LIKE @search COLLATE NOCASE OR p.identity_code LIKE @search COLLATE NOCASE)`);
+        params.search = `%${options.search.trim()}%`;
       }
-      params.search = `%${options.search.trim()}%`;
+    } else {
+      if (options.search?.trim()) {
+        where.push(`(p.identity_code LIKE @search COLLATE NOCASE OR ((p.first_name LIKE @search COLLATE NOCASE OR p.last_name LIKE @search COLLATE NOCASE OR (p.first_name || ' ' || p.last_name) LIKE @search COLLATE NOCASE) AND (p.is_patient = 1 OR p.is_patient IS NULL)))`);
+        params.search = `%${options.search.trim()}%`;
+      } else {
+        where.push('(p.is_patient = 1 OR p.is_patient IS NULL)');
+      }
     }
 
     if (options.deletedAt !== undefined) {
@@ -194,6 +196,7 @@ export class PatientRepository {
         p.last_name,
         p.type_doc,
         p.identity_code,
+        p.is_patient,
         p.deleted_at
       FROM patients as p
       ${whereClause}
@@ -228,7 +231,13 @@ export class PatientRepository {
         totalItems,
         totalPages
       },
-      data: rowsArr.map(patient => CaseConverter.mapKeysToCamelCase<PatientResult>(patient))
+      data: rowsArr.map(patient => {
+        const camel = CaseConverter.mapKeysToCamelCase<PatientResult>(patient);
+        if (camel.isPatient !== undefined && camel.isPatient !== null) {
+          camel.isPatient = Boolean(camel.isPatient);
+        }
+        return camel;
+      })
     };
   }
 }

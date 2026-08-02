@@ -11,34 +11,32 @@ export const registerPatientSchema: Schema = {
   address: { type: "string" },
   city: { type: "string" },
   postalCode: { type: "string" },
+  isPatient: { type: "boolean", default: true },
   guardians: { type: "array", default: [] }
 };
 
 export const updateContactSchema: Schema = {
   patientId: { type: "string", sanitize: { trim: true } },
-  firstName: { type: "string", sanitize: { trim: true } },
-  lastName: { type: "string", sanitize: { trim: true } },
-  typeDoc: { type: "string", sanitize: { trim: true } },
-  identityCode: { type: "string", sanitize: { trim: true } },
-  birthDate: { type: "string", sanitize: { trim: true } },
+  firstName: { type: "string", default: undefined, sanitize: { trim: true } },
+  lastName: { type: "string", default: undefined, sanitize: { trim: true } },
+  typeDoc: { type: "string", default: undefined, sanitize: { trim: true } },
+  identityCode: { type: "string", default: undefined, sanitize: { trim: true } },
+  birthDate: { type: "string", default: undefined, sanitize: { trim: true } },
   phone: { type: "string", default: null, sanitize: { trim: true } },
   email: { type: "string", default: null, sanitize: { trim: true } },
-  address: { type: "string", sanitize: { trim: true } },
-  city: { type: "string", sanitize: { trim: true } },
-  postalCode: { type: "string", sanitize: { trim: true } },
-  guardians: [
-    {
-      relationId: { type: "string", default: null, sanitize: { trim: true } },
-      guardianId: { type: "string", sanitize: { trim: true } },
-      relationshipType: { type: "string", default: null, sanitize: { trim: true } },
-      relationship: { type: "string", default: null, sanitize: { trim: true } },
-      isPrimaryContact: { type: "boolean", default: false }
-    }
-  ]
+  address: { type: "string", default: undefined, sanitize: { trim: true } },
+  city: { type: "string", default: undefined, sanitize: { trim: true } },
+  postalCode: { type: "string", default: undefined, sanitize: { trim: true } },
+  isPatient: { type: "boolean", default: undefined },
+  guardians: { type: "array", default: undefined }
 };
 
 export const getByIdSchema: Schema = {
   patientId: { type: "string" }
+};
+
+export const getByIdentityCodeSchema: Schema = {
+  identityCode: { type: "string" }
 };
 
 export const deleteSchema: Schema = {

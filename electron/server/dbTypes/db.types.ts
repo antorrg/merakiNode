@@ -29,6 +29,7 @@ export interface Patients {
   created_at: string
   updated_at: string
   deleted_at?: string | null
+  is_patient?: boolean | null
 }
 
 export interface PatientRelations {

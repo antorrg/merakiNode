@@ -47,7 +47,8 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
     city: '',
     postalCode: '',
     relationshipType: 'Padre',
-    isPrimaryContact: true
+    isPrimaryContact: true,
+    isAlsoPatient: false
   });
 
   React.useEffect(() => {
@@ -131,6 +132,7 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
         address: formData.address.trim(),
         city: formData.city.trim(),
         postalCode: formData.postalCode.trim(),
+        isPatient: formData.isAlsoPatient,
         guardians: []
       });
 
@@ -140,7 +142,8 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
           name: `${createdTutor.firstName} ${createdTutor.lastName}`,
           phone: createdTutor.phone || 'Sin teléfono',
           relationship: formData.relationshipType,
-          isPrimary: formData.isPrimaryContact
+          isPrimary: formData.isPrimaryContact,
+          isPatient: formData.isAlsoPatient
         };
         onGuardianCreated(newGuardian);
         onHide();
@@ -334,7 +337,16 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
                 label="Definir como Contacto Principal"
                 checked={formData.isPrimaryContact}
                 onChange={handleChange}
-                className="mt-3"
+                className="mt-2"
+              />
+              <Form.Check 
+                type="checkbox" 
+                id="isAlsoPatientCheck"
+                name="isAlsoPatient"
+                label="Registrar también como paciente activo de la clínica"
+                checked={formData.isAlsoPatient}
+                onChange={handleChange}
+                className="mt-2 text-primary fw-semibold"
               />
             </Col>
           </Row>

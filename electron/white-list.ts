@@ -10,6 +10,7 @@ export const PATIENT_CHANNELS = [
   'patient:register',
   'patient:getAll',
   'patient:getById',
+  'patient:getByIdentityCode',
   'patient:updateContact',
   'patient:delete',
 ] as const

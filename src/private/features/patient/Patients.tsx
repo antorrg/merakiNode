@@ -46,7 +46,7 @@ const Patients = () => {
     setShowConfirmAlert(true);
   };
 
-  const handleRequestConfirm = (action: PatientActionType, data: any) => {
+  const handleRequestConfirm = (action: PatientActionType, data: unknown) => {
     setPendingAction({ type: action, payload: data });
     setShowFormModal(false);
     setShowConfirmAlert(true);
@@ -62,7 +62,7 @@ const Patients = () => {
       await createPatient(pendingAction.payload);
       setCurrentPage(1);
       await fetchPatients(1, limit, searchTerm);
-    }
+    } 
     
     setPendingAction({ type: null });
   };
@@ -125,6 +125,9 @@ const Patients = () => {
                       >
                         {patient.firstName} {patient.lastName}
                       </Button>
+                      {patient.isPatient === false && (
+                        <span className="badge bg-secondary ms-2">Solo Tutor</span>
+                      )}
                     </td>
                     <td>{patient.typeDoc}: {patient.identityCode}</td>
                     <td className="text-center">
@@ -178,7 +181,8 @@ const Patients = () => {
       <PatientForms 
         show={showFormModal}
         onHide={handleCloseFormModal}
-        mode="CREATE"
+        mode={pendingAction.type === 'UPDATE' ? 'UPDATE' : 'CREATE'}
+        selectedPatientId={pendingAction.payload?.patientId}
         onRequestConfirm={handleRequestConfirm}
       />
 

@@ -38,6 +38,16 @@ export function patientsIpc() {
     );
 
     ipcMain.handle(
+        'patient:getByIdentityCode',
+        wrapIpcHandler(
+            withAuth(async (_event: unknown, data: unknown) => {
+                return patient.getByIdentityCode(data);
+            }),
+            'patient:getByIdentityCode'
+        )
+    );
+
+    ipcMain.handle(
         'patient:updateContact',
         wrapIpcHandler(
             withAuth(async (_event: unknown, data: unknown) => {

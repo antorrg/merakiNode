@@ -32,6 +32,7 @@ export const patients: Table = {
     address TEXT,
     city TEXT,
     postal_code TEXT,
+    is_patient BOOLEAN DEFAULT 1,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     deleted_at DATETIME DEFAULT NULL

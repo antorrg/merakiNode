@@ -32,7 +32,8 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
     phone: '',
     address: '',
     city: '',
-    postalCode: ''
+    postalCode: '',
+    isPatient: true
   });
 
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -63,7 +64,8 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
       name: `${selectedPatient.firstName} ${selectedPatient.lastName}`,
       phone: selectedPatient.phone || 'Sin teléfono',
       relationship: relationshipType,
-      isPrimary: isPrimaryContact || guardians.length === 0
+      isPrimary: isPrimaryContact || guardians.length === 0,
+      isPatient: selectedPatient.isPatient
     };
 
     setGuardians([...updatedGuardians, guardianToAdd]);
@@ -81,7 +83,8 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
         phone: patient.ownPhone !== undefined ? (patient.ownPhone || '') : '',
         address: patient.address || '',
         city: patient.city || '',
-        postalCode: patient.postalCode || ''
+        postalCode: patient.postalCode || '',
+        isPatient: patient.isPatient !== false
       });
 
       if (patient.guardians && Array.isArray(patient.guardians)) {
@@ -93,7 +96,9 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
   }, [patient]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const target = e.target;
+    const value = target.type === 'checkbox' ? (target as HTMLInputElement).checked : target.value;
+    setFormData({ ...formData, [target.name]: value });
     setErrorMsg(null);
   };
 
@@ -157,6 +162,7 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
       address: formData.address.trim(),
       city: formData.city.trim(),
       postalCode: formData.postalCode.trim(),
+      isPatient: formData.isPatient,
       guardians: guardians.map(g => ({
         relationId: g.relationId,
         guardianId: g.guardianId,
@@ -170,10 +176,24 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
   };
 
   const computedAge = dateValidation.age !== null ? dateValidation.age : 99;
-
+  const optionPatient = formData.isPatient === true ? 
+      "Es paciente activo de la clínica (desmarcar si esta persona debe ser solo Tutor)"
+      : "Es solo tutor (marcar si esta persona debe figurar como paciente)"
   return (
     <Form onSubmit={handleSubmit}>
       {errorMsg && <Alert variant="danger" onClose={() => setErrorMsg(null)} dismissible>{errorMsg}</Alert>}
+
+      <div className="bg-light p-3 rounded border mb-3">
+        <Form.Check 
+          type="checkbox"
+          id="isPatientActiveCheck"
+          name="isPatient"
+          label={optionPatient}
+          checked={formData.isPatient}
+          onChange={handleChange}
+          className="fw-bold text-primary mb-0"
+        />
+      </div>
 
       <h6 className="fw-bold text-secondary mb-3">Datos Identificatorios</h6>
       
@@ -367,6 +387,7 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
           <thead className="table-light">
             <tr>
               <th>Nombre</th>
+              <th>Tipo de Registro</th>
               <th>Relación</th>
               <th>Teléfono</th>
               <th>Contacto Principal</th>
@@ -377,6 +398,13 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
             {guardians.map((g, idx) => (
               <tr key={g.relationId || g.guardianId || idx}>
                 <td>{g.name}</td>
+                <td>
+                  {g.isPatient !== false ? (
+                    <span className="badge bg-info text-dark">Paciente</span>
+                  ) : (
+                    <span className="badge bg-secondary">Solo Tutor</span>
+                  )}
+                </td>
                 <td>{g.relationship}</td>
                 <td>{g.phone}</td>
                 <td>

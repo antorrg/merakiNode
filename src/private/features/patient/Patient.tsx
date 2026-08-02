@@ -57,7 +57,7 @@ const Patient = ({ patientId }: PatientProps) => {
   return (
     <div className="bg-white p-4 rounded shadow-sm border border-light">
       <div className="d-flex justify-content-between align-items-center mb-4">
-        <h4 className="text-primary mb-0">Detalle del paciente</h4>
+        <h4 className="text-primary mb-0">Datos del paciente</h4>
         <button
           className="btn btn-sm btn-outline-primary"
           onClick={handleEdit}

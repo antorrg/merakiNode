@@ -23,6 +23,7 @@ export interface PatientProps {
   address: string;
   city: string;
   postalCode: string;
+  isPatient?: boolean;
   deletedAt?: string | null;
   guardians?: GuardianRelation[];
 }
@@ -56,6 +57,7 @@ export class Patient {
   protected address: string;
   protected city: string;
   protected postalCode: string;
+  protected isPatient: boolean;
   protected guardians: GuardianRelation[];
 
   constructor(props: PatientProps) {
@@ -72,6 +74,7 @@ export class Patient {
     this.address = props.address;
     this.city = props.city;
     this.postalCode = props.postalCode;
+    this.isPatient = props.isPatient !== undefined ? Boolean(props.isPatient) : true;
     this.guardians = (props.guardians || []).map(g => {
       const rel = PatientApplications.relationshipType(g.relationshipType || g.relationship);
       return {
@@ -143,6 +146,7 @@ export class Patient {
   let hasChanges = false;
 
   for (const [key, rawValue] of Object.entries(changes)) {
+    if (rawValue === undefined) continue;
     if (!(key in self)) continue;
     const parser = Patient.#FIELD_PARSERS[key as keyof PatientProps];
     const newValue = parser ? parser(rawValue) : rawValue;
@@ -205,7 +209,8 @@ export class Patient {
       phone: this.phone,
       address: this.address,
       city: this.city,
-      postal_code: this.postalCode
+      postal_code: this.postalCode,
+      is_patient: this.isPatient ? 1 : 0
     }
   }
 
@@ -222,6 +227,7 @@ export class Patient {
       address: this.address,
       city: this.city,
       postalCode: this.postalCode,
+      isPatient: this.isPatient,
       
       // Datos propios (reales del paciente)
       ownEmail: this.email,
@@ -237,6 +243,7 @@ export class Patient {
         guardianId: g.guardian.patientId,
         relationship: g.relationshipType || g.relationship || 'Otro',
         isPrimary: g.isPrimaryContact,
+        isPatient: g.guardian.isPatient !== undefined ? Boolean(g.guardian.isPatient) : true,
         name: `${g.guardian.firstName} ${g.guardian.lastName}`,
         phone: g.guardian.phone
       }))

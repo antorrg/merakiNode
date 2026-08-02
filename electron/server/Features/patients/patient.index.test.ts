@@ -8,8 +8,10 @@ describe('patient.index integration tests', () => {
   });
 
   beforeEach(() => {
+    db.db.exec('PRAGMA foreign_keys = OFF;');
     db.db.exec('DELETE FROM patient_relations;');
     db.db.exec('DELETE FROM patients;');
+    db.db.exec('PRAGMA foreign_keys = ON;');
   });
 
   afterAll(async () => {

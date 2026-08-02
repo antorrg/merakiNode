@@ -3,7 +3,7 @@ import { db } from '../../Configs/database.js';
 import { patients, patient_relations } from '../../Schema/schema.js';
 import { PatientService } from './PatientService.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
-import { PatientCreate } from './Patient.js';
+import { PatientCreate, PatientProps } from './Patient.js';
 import patientIndex from './patient.index.js';
 
 vi.mock('../../Configs/envConfig.js', () => ({
@@ -190,7 +190,7 @@ describe('PatientService (SQLite Integration)', () => {
   });
 
   it('debería agregar un SEGUNDO tutor a un paciente menor de edad', () => {
-    const all = service.getAllPatients();
+    const all = service.getAllPatients({ limit: 50 });
     const minor = all.data.find(p => p.firstName === 'Niño');
     const adultJuan = all.data.find(p => p.firstName?.includes('Juan'));
     const adultTutor = all.data.find(p => p.firstName === 'Tutor');
@@ -284,13 +284,13 @@ describe('PatientService (SQLite Integration)', () => {
       guardians: [
         {
           relationId: UuidHandler.idCreator(),
-          guardian: { ...padre, patientId: padre.patientId },
+          guardian: padre as unknown as PatientProps,
           relationshipType: 'padre',
           isPrimaryContact: true
         },
         {
           relationId: UuidHandler.idCreator(),
-          guardian: { ...madre, patientId: madre.patientId },
+          guardian: madre as unknown as PatientProps,
           relationshipType: 'madre',
           isPrimaryContact: false
         }
