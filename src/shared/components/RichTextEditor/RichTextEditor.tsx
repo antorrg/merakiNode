@@ -3,7 +3,7 @@ import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Underline from '@tiptap/extension-underline';
 import { ButtonGroup, Button } from 'react-bootstrap';
-import './RichTextEditor.css';
+import './RichTextEditor.scss';
 
 interface RichTextEditorProps {
   content: string;

@@ -11,7 +11,7 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "postinstall": "electron-builder install-app-deps",
-    "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run",
+    "test": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run --fileParallelism=false",
     "test:e2e": "cross-env NODE_ENV=test ELECTRON_RUN_AS_NODE=true electron node_modules/vitest/vitest.mjs --run electron/server/server.e2e.test.ts"
   },
   "dependencies": {
@@ -35,6 +35,8 @@
     "zustand": "^5.0.14"
   },
   "devDependencies": {
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/react": "^18.2.64",
     "@types/react-big-calendar": "^1.16.3",
@@ -48,6 +50,7 @@
     "eslint": "^8.57.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "happy-dom": "^20.11.1",
     "sass-embedded": "^1.100.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.6",

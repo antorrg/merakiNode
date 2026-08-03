@@ -37,7 +37,10 @@ export class UserService {
   async checkUsers(){
     return await this.userRepository.checkUsers()
   }
+  
   async createInitalOwner(userData:{email: string, username:string}){
+    const exists = await this.userRepository.checkUsers()
+      if (exists === true ) { throwError('Owner already exists', ErrorCode.DATA_CONFLICT) }
     const newPassword = InitialUser.generatePassword(12)
     const userMsg = `email: ${userData.email}\n\nNombre de usuario: ${userData.username}\n\nContrasena: ${newPassword}\n\nSu rol es 'PROPIETARIO'\n\n\nNo pierda este archivo, sin el no tendra\nacceso a la aplicacion.`
     const hashedNewPassword = await Hasher.hash(newPassword)
@@ -51,6 +54,7 @@ export class UserService {
       await InitialUser.writePassword(userMsg, 'meraki-propietario')
       return newInitialUser.toDTO();
   }
+
   async createUser(userData: { userEmail: string; userName:string, nickname?: string|undefined, password?: string, role?:string }) {
       const record = await this.userRepository.findByEmail(userData.userEmail);
       if(record) throwError('Email is already registered',ErrorCode.DATA_CONFLICT);

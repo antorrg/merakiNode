@@ -1,7 +1,9 @@
 import { ipcMain } from 'electron';
 import { wrapIpcHandler } from '../Configs/Errors/ErrorHandler.js';
+import { withAuth } from '../Shared/Middlewares/sessionMiddleware.js';
 import { LoggerServiceSqlite } from '../Configs/Logger/LoggerServiceSqlite.js';
 import { LOGGER_CHANNELS } from '../../white-list.js';
+import type { IPagesOptions, ILogger, LoggerUpdate } from '../Configs/Logger/Logger.interfaces.js';
 
 const service = new LoggerServiceSqlite();
 
@@ -11,7 +13,11 @@ export function loggerIpc() {
   ipcMain.handle(
     'logs.getAll',
     wrapIpcHandler(
-      async (_event, query) => service.getAll(query ?? {}),
+      withAuth(async (_event: unknown, data: unknown) => {
+        const payload = (data ?? {}) as Record<string, unknown>;
+        const query = (payload.query ?? payload) as IPagesOptions<ILogger>;
+        return service.getAll(query);
+      }, 'PROPIETARIO'),
       'logs.getAll'
     )
   );
@@ -19,7 +25,11 @@ export function loggerIpc() {
   ipcMain.handle(
     'logs.getById',
     wrapIpcHandler(
-      async (_event, id) => service.getById(Number(id)),
+      withAuth(async (_event: unknown, data: unknown) => {
+        const payload = (data ?? {}) as Record<string, unknown>;
+        const id = payload.id ?? payload;
+        return service.getById(Number(id));
+      }, 'PROPIETARIO'),
       'logs.getById'
     )
   );
@@ -27,7 +37,12 @@ export function loggerIpc() {
   ipcMain.handle(
     'logs.update',
     wrapIpcHandler(
-      async (_event, { id, data }) => service.update(Number(id), data),
+      withAuth(async (_event: unknown, data: unknown) => {
+        const payload = (data ?? {}) as Record<string, unknown>;
+        const id = payload.id;
+        const updateData = (payload.data ?? payload) as LoggerUpdate;
+        return service.update(Number(id), updateData);
+      }, 'PROPIETARIO'),
       'logs.update'
     )
   );
@@ -35,7 +50,11 @@ export function loggerIpc() {
   ipcMain.handle(
     'logs.delete',
     wrapIpcHandler(
-      async (_event, id) => service.delete(Number(id)),
+      withAuth(async (_event: unknown, data: unknown) => {
+        const payload = (data ?? {}) as Record<string, unknown>;
+        const id = payload.id ?? payload;
+        return service.delete(Number(id));
+      }, 'PROPIETARIO'),
       'logs.delete'
     )
   );
@@ -43,7 +62,7 @@ export function loggerIpc() {
   ipcMain.handle(
     'logs.deleteAll',
     wrapIpcHandler(
-      async () => service.deleteAll(),
+      withAuth(async () => service.deleteAll(), 'PROPIETARIO'),
       'logs.deleteAll'
     )
   );

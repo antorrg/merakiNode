@@ -6,11 +6,12 @@ import authIndex from './auth.index.js';
 describe('auth.index integration tests', () => {
   beforeAll(async () => {
     await startUp(true);
+    db.db.exec("PRAGMA foreign_keys = OFF; DELETE FROM logs; DELETE FROM sessions; DELETE FROM history_entry; DELETE FROM diagnosis; DELETE FROM treatment; DELETE FROM patient_relations; DELETE FROM patients; DELETE FROM users; PRAGMA foreign_keys = ON;");
   });
 
   beforeEach(() => {
-    db.db.exec('DELETE FROM sessions;');
-    db.db.exec('DELETE FROM users;');
+    db.db.exec("DELETE FROM sessions WHERE user_id IN (SELECT user_id FROM users WHERE user_email IN ('owner@meraki.com', 'login@meraki.com'));");
+    db.db.exec("DELETE FROM users WHERE user_email IN ('owner@meraki.com', 'login@meraki.com');");
   });
 
   afterAll(async () => {

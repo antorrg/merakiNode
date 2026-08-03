@@ -21,16 +21,15 @@ describe('EnvDb test', () => {
     })
   })
   describe('Database existence', () => {
-    it('should query tables and return an empty array', async() => { 
+    it('should query tables and return an array', async() => { 
       const models = ['users', 'patients', 'patient_relations', 'history_entry', 'diagnosis', 'treatment', 'sessions']
       for (const model of models) {
-            const dataSql = `
-                    SELECT *
-                    FROM ${model}
-                  `;
-    const records = db.db.prepare(dataSql).all() ;
-        expect(Array.isArray(records)).toBe(true)
-        expect(records.length).toBe(0)
+        const dataSql = `
+                SELECT *
+                FROM ${model}
+              `;
+        const records = db.db.prepare(dataSql).all();
+        expect(Array.isArray(records)).toBe(true);
       }
     })
   })

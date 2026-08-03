@@ -6,7 +6,7 @@ import { IPatient, VisitType } from '../../../types';
 import RichTextEditor from '../../../shared/components/RichTextEditor/RichTextEditor';
 import { adminApi } from '../../../shared/api/api';
 import { toast } from '../../../shared/components/toast/toastManager';
-import './HistoryPdfExportModal.css';
+import './HistoryPdfExportModal.scss';
 
 interface HistoryPdfExportModalProps {
   patient: IPatient | null;
@@ -324,7 +324,7 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
             No se han seleccionado visitas para incluir en el reporte.
           </div>
         ) : (
-          draftEntries.map((entry) => {//eslint-disable-line
+          draftEntries.map((entry) => {
             const formattedVisitDate = new Date(entry.visitDate).toLocaleDateString('es-ES', {
               day: '2-digit',
               month: 'short',
