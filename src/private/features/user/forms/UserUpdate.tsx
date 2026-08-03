@@ -3,6 +3,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import { useUserStore } from '../useUserStore';
 
+
 interface UserUpdateProps {
   onHide: () => void;
   userId?: string;
@@ -10,7 +11,6 @@ interface UserUpdateProps {
 
 const UserUpdate: React.FC<UserUpdateProps> = ({ onHide, userId }) => {
   const { users, updateUser, isLoading } = useUserStore();
-  
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -34,7 +34,7 @@ const UserUpdate: React.FC<UserUpdateProps> = ({ onHide, userId }) => {
     }
   }, [userId, users]);
 
-  const handleChange = (e: any) => {
+  const handleChange = (e: any) => { 
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
       const checked = (e.target as HTMLInputElement).checked;
