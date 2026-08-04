@@ -58,7 +58,7 @@ export class IpcMiddlewares {
         shouldInject = userRole !== 'PROPIETARIO';
         break;
       case 'ifRole':
-        shouldInject = userRole === role && !target[field];
+        shouldInject = userRole === role;
         break;
     }
 

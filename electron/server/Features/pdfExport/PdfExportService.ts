@@ -5,6 +5,19 @@ import crypto from 'node:crypto';
 import { PdfExportRepository } from './PdfExportRepository.js';
 import { GeneratePdfPayload, PdfExportProps } from './PdfExport.js';
 
+function escapeHTML(str: unknown): string {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#x27;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/\//g, '&#x2F;')
+    .replace(/\\/g, '&#x5C;')
+    .replace(/`/g, '&#96;');
+}
+
 export class PdfExportService {
   private repository: PdfExportRepository;
 
@@ -33,10 +46,11 @@ export class PdfExportService {
 
     const fullAddress = [patientData.address, patientData.city, patientData.postalCode]
       .filter(Boolean)
+      .map(val => escapeHTML(val))
       .join(', ');
 
     const guardiansText = patientData.guardians && patientData.guardians.length > 0
-      ? patientData.guardians.map(g => `${g.name}${g.relationship ? ` (${g.relationship})` : ''}`).join(', ')
+      ? patientData.guardians.map(g => `${escapeHTML(g.name)}${g.relationship ? ` (${escapeHTML(g.relationship)})` : ''}`).join(', ')
       : 'Sin registrar';
 
     let logoSrc = '';
@@ -73,7 +87,7 @@ export class PdfExportService {
         <div class="visit-card">
           <div class="visit-header">
             <span class="visit-title">Visita día ${formattedDate}</span>
-            <span class="badge badge-visit">${this.translateVisitType(entry.visitType)}</span>
+            <span class="badge badge-visit">${escapeHTML(this.translateVisitType(entry.visitType))}</span>
           </div>
 
           <div class="visit-body">
@@ -94,7 +108,7 @@ export class PdfExportService {
             ${pdfConfig.showLinkedDiagnoses !== false && entry.linkedDiagnosesText ? `
               <div class="section-block">
                 <div class="section-title">Diagnósticos Asociados del Paciente:</div>
-                <div class="section-content"><strong>${entry.linkedDiagnosesText}</strong></div>
+                <div class="section-content"><strong>${escapeHTML(entry.linkedDiagnosesText)}</strong></div>
               </div>
             ` : ''}
 
@@ -135,7 +149,7 @@ export class PdfExportService {
       <html lang="es">
       <head>
         <meta charset="UTF-8" />
-        <title>Historia Clínica - ${patientData.firstName} ${patientData.lastName}</title>
+        <title>Historia Clínica - ${escapeHTML(patientData.firstName)} ${escapeHTML(patientData.lastName)}</title>
         <style>
           * { box-sizing: border-box; }
           body {
@@ -263,8 +277,8 @@ export class PdfExportService {
                   <td style="width: 35%; padding-right: 10px;">
                     <div class="info-box">
                       <div class="info-title">👨‍⚕️ Profesional</div>
-                      <div><strong>Dr/a:</strong> ${professionalData.userName || 'Profesional'}</div>
-                      <div><strong>Email:</strong> ${professionalData.userEmail || 'N/A'}</div>
+                      <div><strong>Dr/a:</strong> ${escapeHTML(professionalData.userName || 'Profesional')}</div>
+                      <div><strong>Email:</strong> ${escapeHTML(professionalData.userEmail || 'N/A')}</div>
                     </div>
                   </td>
                   <td style="width: 65%;">
@@ -272,15 +286,15 @@ export class PdfExportService {
                       <div class="info-title">👤 Datos del Paciente</div>
                       <table style="width: 100%; font-size: 11px;">
                         <tr>
-                          <td><strong>Nombre:</strong> ${patientData.firstName} ${patientData.lastName}</td>
-                          <td><strong>${patientData.typeDoc || 'Doc'}:</strong> ${patientData.identityCode || 'N/A'}</td>
+                          <td><strong>Nombre:</strong> ${escapeHTML(patientData.firstName)} ${escapeHTML(patientData.lastName)}</td>
+                          <td><strong>${escapeHTML(patientData.typeDoc || 'Doc')}:</strong> ${escapeHTML(patientData.identityCode || 'N/A')}</td>
                         </tr>
                         <tr>
-                          <td><strong>Nacimiento:</strong> ${patientData.birthDate || 'N/A'} (${patientData.age ? `${patientData.age} años` : ''})</td>
-                          <td><strong>Teléfono:</strong> ${patientData.phone || 'Sin registrar'}</td>
+                          <td><strong>Nacimiento:</strong> ${escapeHTML(patientData.birthDate || 'N/A')} (${patientData.age ? `${escapeHTML(patientData.age)} años` : ''})</td>
+                          <td><strong>Teléfono:</strong> ${escapeHTML(patientData.phone || 'Sin registrar')}</td>
                         </tr>
                         <tr>
-                          <td><strong>Email:</strong> ${patientData.email || 'Sin registrar'}</td>
+                          <td><strong>Email:</strong> ${escapeHTML(patientData.email || 'Sin registrar')}</td>
                           <td><strong>Domicilio:</strong> ${fullAddress || 'Sin registrar'}</td>
                         </tr>
                         ${patientData.guardians && patientData.guardians.length > 0 ? `
@@ -305,7 +319,7 @@ export class PdfExportService {
 
         ${pdfConfig.customHeaderNotes ? `
           <div class="custom-notes">
-            ℹ️ <strong>Aclaración:</strong> ${pdfConfig.customHeaderNotes}
+            ℹ️ <strong>Aclaración:</strong> ${escapeHTML(pdfConfig.customHeaderNotes)}
           </div>
         ` : ''}
 

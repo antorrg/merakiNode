@@ -16,12 +16,7 @@ export type SessionData = {
     role: string
 
 }
-/*/*  sessionClient: {
-    sessionId: '6ebab21b-bb36-44fe-91b8-aef802a6892a',
-    userId: '019f5dc0-f686-769e-9902-118cfa453925',
-    userName: 'Pedro del Madero',
-    role: 'PROPIETARIO'
-  }*/
+
 export class Session{
     protected readonly sessionId: string
     protected readonly userId: string
@@ -79,8 +74,8 @@ export class Session{
 
     // 3. Validación por roles: Verifica si el nivel del usuario es mayor o igual al requerido
     hasAccess(requiredRole: string): boolean {
-        const userLevel = Number(Session.#convertRole(this.role))
-        const requiredLevel = Number(Session.#convertRole(requiredRole))
+        const userLevel = Session.#convertRole(this.role, 0)
+        const requiredLevel = Session.#convertRole(requiredRole, Infinity)
 
         return userLevel >= requiredLevel
     }
@@ -118,14 +113,18 @@ export class Session{
         SECRETARIO: 1
     })
 
-    static #convertRole(p: number | string): number {
+    static #convertRole(p: number | string, fallback: number = 0): number {
         if (typeof p === 'number') {
             return p
         }
 
+        if (!p || typeof p !== 'string') {
+            return fallback
+        }
+
         const key = p.trim()
         const val = Session.LevelRoles[key]
-        return typeof val === 'number' ? val : Session.LevelRoles.SECRETARIO
+        return typeof val === 'number' ? val : fallback
     }
 
 }

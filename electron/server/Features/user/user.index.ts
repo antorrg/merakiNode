@@ -21,7 +21,6 @@ getUserById: (data:unknown)=>{
     return userService.getById(validId)
 },
 updateUserProfile: (data: unknown)=>{
-    console.log('datos de update', data)
     const validData = NodeValidator.validateBody(data, sch.updateProfileSchema)
     const {userId, email, name, nickname} = NodeValidator.splitObjectProps(validData, ['userId', 'email', 'name','nickname'])
     const validId = NodeValidator.paramId({userId}, 'userId', UuidHandler.regexUuid)

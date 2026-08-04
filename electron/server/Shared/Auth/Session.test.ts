@@ -102,6 +102,21 @@ describe('Session', () => {
             expect(userSession.hasAccess('PROFESIONAL')).toBe(false)
             expect(userSession.hasAccess('SECRETARIO')).toBe(true)
         })
+
+        it('debería denegar todo acceso si el rol del usuario es desconocido o inválido (fallback a nivel 0)', () => {
+            const session = Session.createSession(validSessionData)
+            // Simular un rol no válido o corrupto en la sesión
+            ;(session as unknown as { role: string }).role = 'ROL_DESCONOCIDO'
+            
+            expect(session.hasAccess('SECRETARIO')).toBe(false)
+            expect(session.hasAccess('PROFESIONAL')).toBe(false)
+            expect(session.hasAccess('PROPIETARIO')).toBe(false)
+        })
+
+        it('debería denegar acceso si se solicita un rol requerido no existente o inválido', () => {
+            const adminSession = Session.createSession({ ...validSessionData, role: 'PROPIETARIO' })
+            expect(adminSession.hasAccess('ROL_INEXISTENTE')).toBe(false)
+        })
     })
     
     describe('toClient & toJSON exports', () => {
