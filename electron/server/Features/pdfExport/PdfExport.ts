@@ -41,14 +41,16 @@ export interface GeneratePdfPayload {
   };
   draftEntries: {
     entryId: string;
+    patientId?: string;
+    professionalId?: string;
     visitType: string;
     visitDate: string;
-    reason: string;
+    reason?: string;
     linkedDiagnosesText?: string;
-    evolution: string;
-    diagnosisSummary: string;
-    observations: string;
-    treatmentPlan: string;
-    recommendations: string;
+    evolution?: string;
+    diagnosisSummary?: string;
+    observations?: string;
+    treatmentPlan?: string;
+    recommendations?: string;
   }[];
 }
