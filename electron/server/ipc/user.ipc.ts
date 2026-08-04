@@ -1,7 +1,15 @@
 import { ipcMain } from "electron";
 import { wrapIpcHandler } from '../Configs/Errors/ErrorHandler.js';
-import { withAuth } from "../Shared/Middlewares/sessionMiddleware.js";
+import { IpcMiddlewares } from "../Shared/Middlewares/IpcMiddlewares.js";
 import user from '../Features/user/user.index.js';
+import type {
+  CreateUserPayload,
+  GetUserByIdPayload,
+  UpdateUserProfilePayload,
+  UpdateUserStatusPayload,
+  UpdateUserPasswordPayload,
+  DeleteUserPayload
+} from "./ipc.types.js";
 import { USER_CHANNELS } from '../../white-list.js';
 
 export { USER_CHANNELS };
@@ -10,7 +18,7 @@ export function userIpc() {
     ipcMain.handle(
         'user:create',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: CreateUserPayload) => {
                 return await user.createUser(data);
             }, 'PROFESIONAL'),
             'user:create'
@@ -19,7 +27,7 @@ export function userIpc() {
     ipcMain.handle(
         'users:getAll',
         wrapIpcHandler(
-            withAuth(async (_event: unknown) => {//eslint-disable-line
+            IpcMiddlewares.withAuth(async () => {
                 return await user.getUsers();
             }),
             'users:getAll'
@@ -28,7 +36,7 @@ export function userIpc() {
     ipcMain.handle(
         'user:getById',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: string) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: GetUserByIdPayload) => {
                 return await user.getUserById(data);
             }),
             'user:getById'
@@ -37,8 +45,9 @@ export function userIpc() {
     ipcMain.handle(
         'user:updateProfile',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
-                return await user.updateUserProfile(data);
+            IpcMiddlewares.withAuth(async (_event: unknown, data: UpdateUserProfilePayload) => {
+                
+                return await user.updateUserProfile(IpcMiddlewares.selfGuard(data));
             }),
             'user:updateProfile'
         )
@@ -46,7 +55,7 @@ export function userIpc() {
     ipcMain.handle(
         'user:updateStatus',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: UpdateUserStatusPayload) => {
                 return await user.updateStatusUser(data);
             }, 'PROFESIONAL'),
             'user:updateStatus'
@@ -55,7 +64,8 @@ export function userIpc() {
     ipcMain.handle(
         'user:updatePassword',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: UpdateUserPasswordPayload) => {
+                IpcMiddlewares.selfGuard(data);
                 return await user.updatePasswordUser(data);
             }),
             'user:updatePassword'
@@ -64,8 +74,8 @@ export function userIpc() {
     ipcMain.handle(
         'user:delete',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: string) => {
-                return await user.deleteUser(data);
+            IpcMiddlewares.withAuth(async (_event: unknown, data: DeleteUserPayload) => {
+                return await user.deleteUser(data as unknown as string);
             }, 'PROFESIONAL'),
             'user:delete'
         )

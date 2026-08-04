@@ -1,7 +1,15 @@
 import { ipcMain } from "electron";
 import { wrapIpcHandler } from '../Configs/Errors/ErrorHandler.js';
-import { withAuth } from "../Shared/Middlewares/sessionMiddleware.js";
+import { IpcMiddlewares } from "../Shared/Middlewares/IpcMiddlewares.js";
 import patient from '../Features/patients/patient.index.js';
+import type {
+  RegisterPatientPayload,
+  GetPatientsPayload,
+  GetPatientByIdPayload,
+  GetByIdentityCodePayload,
+  UpdatePatientContactPayload,
+  DeletePatientPayload
+} from "./ipc.types.js";
 import { PATIENT_CHANNELS } from '../../white-list.js';
 
 export { PATIENT_CHANNELS };
@@ -10,7 +18,7 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:register',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: RegisterPatientPayload) => {
                 return patient.registerPatient(data);
             }),
             'patient:register'
@@ -20,7 +28,7 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:getAll',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: GetPatientsPayload) => {
                 return patient.getPatients(data);
             }),
             'patient:getAll'
@@ -30,7 +38,7 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:getById',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: GetPatientByIdPayload) => {
                 return patient.getPatientById(data);
             }),
             'patient:getById'
@@ -40,7 +48,7 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:getByIdentityCode',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: GetByIdentityCodePayload) => {
                 return patient.getByIdentityCode(data);
             }),
             'patient:getByIdentityCode'
@@ -50,7 +58,7 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:updateContact',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: UpdatePatientContactPayload) => {
                 return patient.updateContactData(data);
             }),
             'patient:updateContact'
@@ -60,7 +68,7 @@ export function patientsIpc() {
     ipcMain.handle(
         'patient:delete',
         wrapIpcHandler(
-            withAuth(async (_event: unknown, data: unknown) => {
+            IpcMiddlewares.withAuth(async (_event: unknown, data: DeletePatientPayload) => {
                 return patient.deletePatient(data);
             }, 'PROFESIONAL'),
             'patient:delete'

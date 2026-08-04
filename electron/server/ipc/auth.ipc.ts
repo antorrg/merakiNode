@@ -1,6 +1,7 @@
 import { ipcMain } from "electron";
 import { wrapIpcHandler } from '../Configs/Errors/ErrorHandler.js';
 import auth from '../Features/auth/auth.index.js';
+import type { AuthLoginParams, AuthCreateInitialOwnerParams } from "./ipc.types.js";
 import { AUTH_CHANNELS } from '../../white-list.js';
 
 export { AUTH_CHANNELS };
@@ -9,35 +10,35 @@ export function authIpc() {
     ipcMain.handle(
         'auth:login',
         wrapIpcHandler(
-            (_event, data) => auth.login(data),
+            (_event, data: AuthLoginParams) => auth.login(data),
             'auth:login'
         )
     );
     ipcMain.handle(
         'auth:getSession',
         wrapIpcHandler(
-            (_event, sessionId) => auth.getSession(sessionId),
+            (_event, sessionId: string) => auth.getSession(sessionId),
             'auth:getSession'
         )
     );
     ipcMain.handle(
         'auth:logout',
         wrapIpcHandler(
-            (_event, sessionId) => auth.logout(sessionId),
+            (_event, sessionId: string) => auth.logout(sessionId),
             'auth:logout'
         )
     );
     ipcMain.handle(
         'auth:check-users',
         wrapIpcHandler(
-            (_event) => auth.checkUsers(),//eslint-disable-line
+            () => auth.checkUsers(),
             'auth:check-users'
         )
     );
     ipcMain.handle(
         'auth:create-initial-owner',
         wrapIpcHandler(
-            (_event, data) => auth.createInitialOwner(data),
+            (_event, data: AuthCreateInitialOwnerParams) => auth.createInitialOwner(data),
             'auth:create-initial-owner'
         )
     );

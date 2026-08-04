@@ -1,21 +1,8 @@
 import { IpcClient, type IpcRequestConfig } from './IpcClient'
-// import { type SweetAlertOptions } from 'sweetalert2';
-// import { MySwal } from '../../utils/sweetalert';
 import { toast } from '../../components/toast/toastManager';
 
-//export type ConfirmFn = (options: SweetAlertOptions) => Promise<boolean>;
 
-/*
-const ConfirmModal = ({
-  isOpen, 
-  onCancel, 
-  onConfirm, 
-  title = "¿Estás seguro?", 
-  message = " ¿Deseas continuar?", 
-  confirmText = "Sí, continuar", 
-  cancelText = "No, volver"
-}: ConfirmModalProps) => {
-*/
+
 
 export type NotifyFn = {
   success(message: string): void;
@@ -33,18 +20,6 @@ interface ExecuteOptions<T> {
   success?: (data: T) => void;
   reject?: (error: unknown) => void;
 }
-//* SweetAler y toastify
-
-// const defaultConfirm: ConfirmFn = async (options) => {
-//   const result = await MySwal.fire({
-//     icon: 'warning',
-//     showCancelButton: true,
-//     confirmButtonText: 'Sí',
-//     cancelButtonText: 'Cancelar',
-//     ...options,
-//   });
-//   return result.isConfirmed;
-// };
 
 const defaultNotify: NotifyFn = {
   success: (msg) => toast.success(msg, 'Acción exitosa'),
@@ -67,7 +42,6 @@ export class AdminApi {
     hasMessage,
     successMessage,
     errorMessage,
-    //success,
     reject,
   }: ExecuteOptions<T>): Promise<T | void> {
     try {

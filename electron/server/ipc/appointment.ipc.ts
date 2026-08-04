@@ -1,7 +1,14 @@
 import { ipcMain } from "electron";
 import { wrapIpcHandler } from '../Configs/Errors/ErrorHandler.js';
-import { withAuth } from "../Shared/Middlewares/sessionMiddleware.js";
+import { IpcMiddlewares } from "../Shared/Middlewares/IpcMiddlewares.js";
 import appointment from '../Features/appointments/appointment.index.js';
+import type {
+  CreateAppointmentPayload,
+  GetAppointmentsByRangePayload,
+  GetAppointmentsByPatientPayload,
+  UpdateAppointmentStatusPayload,
+  DeleteAppointmentPayload
+} from "./ipc.types.js";
 import { APPOINTMENT_CHANNELS } from '../../white-list.js';
 
 export { APPOINTMENT_CHANNELS };
@@ -10,7 +17,7 @@ export function appointmentIpc() {
   ipcMain.handle(
     'appointment:create',
     wrapIpcHandler(
-      withAuth(async (_event: unknown, data: any) => {
+      IpcMiddlewares.withAuth(async (_event: unknown, data: CreateAppointmentPayload) => {
         return appointment.createAppointment(data);
       }),
       'appointment:create'
@@ -20,16 +27,8 @@ export function appointmentIpc() {
   ipcMain.handle(
     'appointment:getByRange',
     wrapIpcHandler(
-      withAuth(async (_event: unknown, data: any) => {
-        const role = data.sessionClient?.role;
-        const userId = data.sessionClient?.userId;
-
-        // Si es PROFESIONAL, forzamos que solo vea su propia agenda a menos que pida explícitamente la general si el negocio lo permite.
-        // Si no envía professionalId y el rol es PROFESIONAL, inyectamos su userId.
-        if (role === 'PROFESIONAL' && !data.professionalId) {
-          data.professionalId = userId;
-        }
-
+      IpcMiddlewares.withAuth(async (_event: unknown, data: GetAppointmentsByRangePayload) => {
+        IpcMiddlewares.injectSessionUserId(data, { condition: 'ifRole', role: 'PROFESIONAL' });
         return appointment.getAppointmentsByRange(data);
       }),
       'appointment:getByRange'
@@ -39,7 +38,7 @@ export function appointmentIpc() {
   ipcMain.handle(
     'appointment:getByPatient',
     wrapIpcHandler(
-      withAuth(async (_event: unknown, data: unknown) => {
+      IpcMiddlewares.withAuth(async (_event: unknown, data: GetAppointmentsByPatientPayload) => {
         return appointment.getAppointmentsByPatient(data);
       }),
       'appointment:getByPatient'
@@ -49,7 +48,7 @@ export function appointmentIpc() {
   ipcMain.handle(
     'appointment:updateStatus',
     wrapIpcHandler(
-      withAuth(async (_event: unknown, data: unknown) => {
+      IpcMiddlewares.withAuth(async (_event: unknown, data: UpdateAppointmentStatusPayload) => {
         return appointment.updateAppointmentStatus(data);
       }),
       'appointment:updateStatus'
@@ -59,7 +58,7 @@ export function appointmentIpc() {
   ipcMain.handle(
     'appointment:delete',
     wrapIpcHandler(
-      withAuth(async (_event: unknown, data: unknown) => {
+      IpcMiddlewares.withAuth(async (_event: unknown, data: DeleteAppointmentPayload) => {
         return appointment.deleteAppointment(data);
       }),
       'appointment:delete'

@@ -16,6 +16,12 @@ export type SessionData = {
     role: string
 
 }
+/*/*  sessionClient: {
+    sessionId: '6ebab21b-bb36-44fe-91b8-aef802a6892a',
+    userId: '019f5dc0-f686-769e-9902-118cfa453925',
+    userName: 'Pedro del Madero',
+    role: 'PROPIETARIO'
+  }*/
 export class Session{
     protected readonly sessionId: string
     protected readonly userId: string

@@ -48,7 +48,7 @@ export class PatientService {
 
     // 3. Instanciar y validar con el Modelo de Dominio
     const patient = Patient.register(data);
-    const persistenceData = patient.toPersistence() as Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>;
+    const persistenceData = patient.toPersistence() as unknown as Omit<Patients, 'created_at'|'updated_at'|'deleted_at'>;
     
     // 4. Persistir en la base de datos (con transacciones)
     this.repository.create(persistenceData, data.guardians || []);
@@ -126,7 +126,7 @@ export class PatientService {
       return patient.toDTO();
     }
 
-    const persistenceData = patient.toPersistence() as Partial<Patients>;
+    const persistenceData = patient.toPersistence() as unknown as Partial<Patients>;
 
     this.repository.update(id, {
       first_name: persistenceData.first_name,

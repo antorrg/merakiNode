@@ -34,7 +34,7 @@ const db = new SqliteDb(dbPath, initialTables)
 async function startUp (syncing: boolean= false, reset: boolean = false){
   const messageRestart:string = `🔄 Restarting database "${nameOfDb()}" for testing...`
   const messageExec:string = '🧪  Database testing setup executed'
-  const messageSuccess:string = `🟢 Database SQLite initialized successfully at ${dbPath}!!`
+  const messageSuccess:string = `🟢 Database SQLite initialized successfully at ${nameOfDb()}!!`
   try {
     if(syncing=== true && reset === true){
       logger.info(messageRestart)
@@ -72,6 +72,3 @@ export {
     startUp,
     closeDatabase
 }
-/*  // 1. validar DB
-  await pool.query('SELECT 1')
-  console.log('🟢 Database ready')*/
