@@ -72,7 +72,8 @@ describe('HistoryService (Orchestrator)', () => {
       phone: '123123123',
       address: 'Calle Falsa 123',
       city: 'Springfield',
-      postalCode: '1234'
+      obraSocial: 'OSDE',
+      escolaridad: 'Universitario'
     });
     testPatientId = patientResult.patientId;
 

@@ -58,7 +58,8 @@ describe('TreatmentService (SQLite Integration)', () => {
       phone: '1234567890',
       address: 'Calle 1',
       city: 'Ciudad',
-      postalCode: '1000'
+      obraSocial: 'OSDE',
+      escolaridad: 'Secundaria'
     });
 
     const entryResult = entryService.addEntry({

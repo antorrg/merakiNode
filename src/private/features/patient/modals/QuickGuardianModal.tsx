@@ -13,7 +13,7 @@ import { validateAndParseBirthDate } from '../../../../shared/utils/dateUtils';
 interface DefaultAddress {
   address?: string;
   city?: string;
-  postalCode?: string;
+  obraSocial?: string;
 }
 
 interface QuickGuardianModalProps {
@@ -45,7 +45,8 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
     email: '',
     address: '',
     city: '',
-    postalCode: '',
+    obraSocial: '',
+    escolaridad: '',
     relationshipType: 'Padre',
     isPrimaryContact: true,
     isAlsoPatient: false
@@ -84,7 +85,7 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
         ...prev,
         address: defaultAddress.address || prev.address,
         city: defaultAddress.city || prev.city,
-        postalCode: defaultAddress.postalCode || prev.postalCode
+        obraSocial: defaultAddress.obraSocial || prev.obraSocial
       }));
     }
   };
@@ -113,8 +114,8 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
       return;
     }
 
-    if (!formData.address.trim() || !formData.city.trim() || !formData.postalCode.trim()) {
-      setErrorMsg('La dirección completa (calle, ciudad y código postal) es obligatoria.');
+    if (!formData.address.trim() || !formData.city.trim()) {
+      setErrorMsg('La dirección completa (calle y ciudad) es obligatoria.');
       return;
     }
 
@@ -131,7 +132,8 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
         email: formData.email.trim() || undefined,
         address: formData.address.trim(),
         city: formData.city.trim(),
-        postalCode: formData.postalCode.trim(),
+        obraSocial: formData.obraSocial.trim() || undefined,
+        escolaridad: formData.escolaridad.trim() || undefined,
         isPatient: formData.isAlsoPatient,
         guardians: []
       });
@@ -273,13 +275,12 @@ const QuickGuardianModal: React.FC<QuickGuardianModalProps> = ({
             </Col>
             <Col md={3}>
               <Form.Group className="mb-3">
-                <Form.Label>Cód. Postal *</Form.Label>
+                <Form.Label>Obra Social</Form.Label>
                 <Form.Control 
                   type="text" 
-                  name="postalCode" 
-                  value={formData.postalCode} 
+                  name="obraSocial" 
+                  value={formData.obraSocial} 
                   onChange={handleChange} 
-                  required 
                 />
               </Form.Group>
             </Col>

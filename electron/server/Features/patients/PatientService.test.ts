@@ -45,7 +45,8 @@ describe('PatientService (SQLite Integration)', () => {
       phone: '1234567890',
       address: 'Calle 1',
       city: 'Ciudad',
-      postalCode: '1000'
+      obraSocial: 'OSDE',
+      escolaridad: 'Secundaria'
     };
 
     const result = service.registerPatient(adultData);
@@ -67,7 +68,8 @@ describe('PatientService (SQLite Integration)', () => {
       phone: '0987654321',
       address: 'Calle 2',
       city: 'Ciudad',
-      postalCode: '2000'
+      obraSocial: 'Swiss Medical',
+      escolaridad: 'Primaria'
     };
 
     const guardianResult = service.registerPatient(guardianData);
@@ -83,7 +85,8 @@ describe('PatientService (SQLite Integration)', () => {
       phone: null,
       address: 'Calle 2',
       city: 'Ciudad',
-      postalCode: '2000',
+      obraSocial: 'Swiss Medical',
+      escolaridad: 'Primaria',
       guardians: [
         {
           relationId: UuidHandler.idCreator(),

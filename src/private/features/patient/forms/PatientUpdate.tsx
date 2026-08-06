@@ -32,7 +32,8 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
     phone: '',
     address: '',
     city: '',
-    postalCode: '',
+    obraSocial: '',
+    escolaridad: '',
     isPatient: true
   });
 
@@ -83,7 +84,8 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
         phone: patient.ownPhone !== undefined ? (patient.ownPhone || '') : '',
         address: patient.address || '',
         city: patient.city || '',
-        postalCode: patient.postalCode || '',
+        obraSocial: patient.obraSocial || '',
+        escolaridad: patient.escolaridad || '',
         isPatient: patient.isPatient !== false
       });
 
@@ -161,7 +163,8 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
       phone: formData.phone.trim(),
       address: formData.address.trim(),
       city: formData.city.trim(),
-      postalCode: formData.postalCode.trim(),
+      obraSocial: formData.obraSocial.trim(),
+      escolaridad: formData.escolaridad.trim() || null,
       isPatient: formData.isPatient,
       guardians: guardians.map(g => ({
         relationId: g.relationId,
@@ -330,19 +333,31 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
         </Col>
         <Col md={3}>
           <Form.Group className="mb-3">
-            <Form.Label>Código Postal</Form.Label>
+            <Form.Label>Obra Social</Form.Label>
             <Form.Control 
               type="text" 
-              name="postalCode" 
-              value={formData.postalCode} 
+              name="obraSocial" 
+              value={formData.obraSocial} 
               onChange={handleChange} 
-              required 
+              placeholder="Ej: OSDE..."
             />
           </Form.Group>
         </Col>
       </Row>
 
-      <hr className="my-4" />
+      <Form.Group className="mb-3">
+        <Form.Label>Escolaridad</Form.Label>
+        <Form.Control 
+          as="textarea" 
+          rows={2} 
+          name="escolaridad" 
+          value={formData.escolaridad} 
+          onChange={handleChange} 
+          placeholder="Ingrese detalles sobre la escolaridad (opcional)" 
+        />
+      </Form.Group>
+
+      <hr className="my-3" />
 
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -383,7 +398,7 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
       )}
 
       {guardians.length > 0 ? (
-        <Table striped bordered hover size="sm" className="align-middle">
+        <Table responsive striped bordered hover size="sm" className="align-middle">
           <thead className="table-light">
             <tr>
               <th>Nombre</th>
@@ -442,7 +457,7 @@ const PatientUpdate: React.FC<PatientUpdateProps> = ({ patientId, onHide, onRequ
         defaultAddress={{
           address: formData.address,
           city: formData.city,
-          postalCode: formData.postalCode
+          obraSocial: formData.obraSocial
         }}
         initialSearchQuery={quickModalSearchQuery}
         onGuardianCreated={handleQuickGuardianCreated}

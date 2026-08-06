@@ -33,7 +33,8 @@ describe('Patient Domain & Service - Tutor vs Patient (is_patient)', () => {
     phone: '1122334455',
     address: 'Av. Siempre Viva 742',
     city: 'Springfield',
-    postalCode: '1234',
+    obraSocial: 'OSDE',
+    escolaridad: 'Secundaria completa',
     isPatient,
     guardians: []
   });

@@ -44,7 +44,7 @@ export class PdfExportService {
       year: 'numeric',
     });
 
-    const fullAddress = [patientData.address, patientData.city, patientData.postalCode]
+    const fullAddress = [patientData.address, patientData.city]
       .filter(Boolean)
       .map(val => escapeHTML(val))
       .join(', ');
@@ -296,6 +296,10 @@ export class PdfExportService {
                         <tr>
                           <td><strong>Email:</strong> ${escapeHTML(patientData.email || 'Sin registrar')}</td>
                           <td><strong>Domicilio:</strong> ${fullAddress || 'Sin registrar'}</td>
+                        </tr>
+                        <tr>
+                          <td><strong>Obra Social:</strong> ${escapeHTML(patientData.obraSocial || 'Sin registrar')}</td>
+                          <td><strong>Escolaridad:</strong> ${escapeHTML(patientData.escolaridad || 'Sin registrar')}</td>
                         </tr>
                         ${patientData.guardians && patientData.guardians.length > 0 ? `
                         <tr>

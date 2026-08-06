@@ -29,7 +29,8 @@ describe('patient.index integration tests', () => {
       phone: '1122334455',
       address: 'Av. Siempre Viva 123',
       city: 'Springfield',
-      postalCode: '1234'
+      obraSocial: 'OSDE',
+      escolaridad: 'Secundaria'
     };
 
     const registered = patientIndex.registerPatient(adultData);
@@ -50,7 +51,8 @@ describe('patient.index integration tests', () => {
       phone: '9988776655',
       address: 'Calle Falsa 123',
       city: 'Cordoba',
-      postalCode: '5000'
+      obraSocial: 'Swiss Medical',
+      escolaridad: 'Universitario'
     };
 
     patientIndex.registerPatient(adultData);

@@ -38,7 +38,8 @@ export interface IPatient {
     phone?: string
     ownEmail?: string | null
     ownPhone?: string | null
-    postalCode?: string
+    obraSocial?: string
+    escolaridad?: string
     isPatient?: boolean
 }
 

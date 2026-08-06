@@ -68,7 +68,8 @@ export interface RegisterPatientParams {
   email?: string;
   address?: string;
   city?: string;
-  postalCode?: string;
+  obraSocial?: string;
+  escolaridad?: string;
   isPatient?: number;
 }
 export type RegisterPatientPayload = AuthenticatedPayload<RegisterPatientParams>;
@@ -96,7 +97,8 @@ export interface UpdatePatientContactParams {
   email?: string;
   address?: string;
   city?: string;
-  postalCode?: string;
+  obraSocial?: string;
+  escolaridad?: string;
   [key: string]: unknown;
 }
 export type UpdatePatientContactPayload = AuthenticatedPayload<UpdatePatientContactParams>;

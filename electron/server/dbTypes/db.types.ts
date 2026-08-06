@@ -30,6 +30,8 @@ export interface Patients {
   updated_at: string
   deleted_at?: string | null
   is_patient?: boolean | null
+  obra_social?: string | null
+  escolaridad?: string | null
 }
 
 export interface PatientRelations {

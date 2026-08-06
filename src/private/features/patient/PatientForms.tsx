@@ -14,7 +14,15 @@ interface PatientFormsProps {
 
 const PatientForms: React.FC<PatientFormsProps> = ({ show, onHide, mode, selectedPatientId, onRequestConfirm }) => {
   return (
-    <Modal show={show} onHide={onHide} centered backdrop="static" size="lg">
+    <Modal 
+      show={show} 
+      onHide={onHide} 
+      centered 
+      backdrop="static" 
+      size="lg" 
+      scrollable
+      style={{ '--bs-modal-width': '920px' } as React.CSSProperties}
+    >
       <Modal.Header closeButton>
         <Modal.Title>
           {mode === 'CREATE' ? 'Registrar Nuevo Paciente' : 'Actualizar Datos del Paciente'}

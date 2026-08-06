@@ -86,7 +86,8 @@ describe('pdfExport.index integration tests', () => {
           email: 'juan@test.com',
           address: 'Av. <Prueba>',
           city: 'Ciudad',
-          postalCode: '1000',
+          obraSocial: 'OSDE',
+          escolaridad: 'Secundaria',
         },
         professionalData: {
           userName: 'Dr. <House>',

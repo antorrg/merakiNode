@@ -44,7 +44,7 @@ describe('PatientCreate Component', () => {
     fireEvent.change(birthDateInput, { target: { value: '15/05/2020' } });
     fireEvent.blur(birthDateInput);
     fireEvent.change(container.querySelector('input[name="city"]')!, { target: { value: 'Cordoba' } });
-    fireEvent.change(container.querySelector('input[name="postalCode"]')!, { target: { value: '5000' } });
+    fireEvent.change(container.querySelector('input[name="obraSocial"]')!, { target: { value: 'OSDE' } });
     fireEvent.change(container.querySelector('input[name="address"]')!, { target: { value: 'Av Colon 123' } });
 
     fireEvent.submit(container.querySelector('form')!);
@@ -63,7 +63,7 @@ describe('PatientCreate Component', () => {
     fireEvent.change(birthDateInput, { target: { value: '15/05/1985' } });
     fireEvent.blur(birthDateInput);
     fireEvent.change(container.querySelector('input[name="city"]')!, { target: { value: 'Cordoba' } });
-    fireEvent.change(container.querySelector('input[name="postalCode"]')!, { target: { value: '5000' } });
+    fireEvent.change(container.querySelector('input[name="obraSocial"]')!, { target: { value: 'OSDE' } });
     fireEvent.change(container.querySelector('input[name="address"]')!, { target: { value: 'Av Colon 123' } });
 
     fireEvent.submit(container.querySelector('form')!);
@@ -83,7 +83,7 @@ describe('PatientCreate Component', () => {
     fireEvent.blur(birthDateInput);
     fireEvent.change(container.querySelector('input[name="phone"]')!, { target: { value: '3511234567' } });
     fireEvent.change(container.querySelector('input[name="city"]')!, { target: { value: 'Cordoba' } });
-    fireEvent.change(container.querySelector('input[name="postalCode"]')!, { target: { value: '5000' } });
+    fireEvent.change(container.querySelector('input[name="obraSocial"]')!, { target: { value: 'OSDE' } });
     fireEvent.change(container.querySelector('input[name="address"]')!, { target: { value: 'Av Colon 123' } });
 
     fireEvent.submit(container.querySelector('form')!);

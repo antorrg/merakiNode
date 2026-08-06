@@ -165,7 +165,8 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
         phone: '1144556677',
         address: 'Av. Corrientes 1000',
         city: 'Buenos Aires',
-        postalCode: '1000'
+        obraSocial: 'OSDE',
+        escolaridad: 'Secundaria'
       });
 
       expect(patient).toBeDefined();
@@ -208,7 +209,8 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
         phone: '1122334455',
         address: 'Calle 10',
         city: 'La Plata',
-        postalCode: '1900'
+        obraSocial: 'OSDE',
+        escolaridad: 'Secundaria'
       });
       patientId = p.patientId;
     });
@@ -273,7 +275,8 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
         phone: '1133557799',
         address: 'Calle 5',
         city: 'Cordoba',
-        postalCode: '5000'
+        obraSocial: 'OSDE',
+        escolaridad: 'Secundaria'
       });
       patientId = patient.patientId;
 
@@ -335,7 +338,8 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
         phone: '1155990011',
         address: 'Av. Siempreviva 742',
         city: 'Springfield',
-        postalCode: '1234'
+        obraSocial: 'OSDE',
+        escolaridad: 'Secundaria'
       });
 
       // 3. Diagnóstico
@@ -431,7 +435,8 @@ describe('Server End-to-End & Integration Suite (e2e.server)', () => {
         phone: '1122446688',
         address: 'Calle Turno 100',
         city: 'Mendoza',
-        postalCode: '5500'
+        obraSocial: 'OSDE',
+        escolaridad: 'Secundaria'
       });
       patientId = p.patientId;
     });

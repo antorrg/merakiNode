@@ -139,7 +139,8 @@ export class PatientService {
       email: persistenceData.email,
       address: persistenceData.address,
       city: persistenceData.city,
-      postal_code: persistenceData.postal_code,
+      obra_social: persistenceData.obra_social,
+      escolaridad: persistenceData.escolaridad,
       is_patient: persistenceData.is_patient
     }, updatedGuardians);
 

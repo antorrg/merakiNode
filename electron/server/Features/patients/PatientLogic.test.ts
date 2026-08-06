@@ -12,7 +12,8 @@ describe('Patient Domain Logic - Age Requirements', () => {
     identityCode: '12345678',
     address: 'Calle Falsa 123',
     city: 'Springfield',
-    postalCode: '1000'
+    obraSocial: 'OSDE',
+    escolaridad: 'Primaria'
   });
 
   const getMinorBirthDate = () => {

@@ -30,7 +30,8 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
     phone: '',
     address: '',
     city: '',
-    postalCode: ''
+    obraSocial: '',
+    escolaridad: ''
   });
 
   const [guardians, setGuardians] = useState<Guardian[]>([]);
@@ -223,7 +224,8 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
                 email: existingTutor.ownEmail || existingTutor.email || prev.email,
                 address: existingTutor.address || prev.address,
                 city: existingTutor.city || prev.city,
-                postalCode: existingTutor.postalCode || prev.postalCode,
+                obraSocial: existingTutor.obraSocial || prev.obraSocial,
+                escolaridad: existingTutor.escolaridad || prev.escolaridad,
               }));
             }}
           >
@@ -282,8 +284,8 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
         </Col>
         <Col md={6}>
           <Form.Group className="mb-3">
-            <Form.Label>Código Postal</Form.Label>
-            <Form.Control type="text" name="postalCode" value={formData.postalCode} onChange={handleChange} required />
+            <Form.Label>Obra Social</Form.Label>
+            <Form.Control type="text" name="obraSocial" value={formData.obraSocial} onChange={handleChange} placeholder="Ej: OSDE, Swiss Medical, Particular..." />
           </Form.Group>
         </Col>
       </Row>
@@ -293,7 +295,19 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
         <Form.Control type="text" name="address" value={formData.address} onChange={handleChange} required />
       </Form.Group>
 
-      <hr className="my-4" />
+      <Form.Group className="mb-3">
+        <Form.Label>Escolaridad</Form.Label>
+        <Form.Control 
+          as="textarea" 
+          rows={2} 
+          name="escolaridad" 
+          value={formData.escolaridad} 
+          onChange={handleChange} 
+          placeholder="Ingrese detalles sobre la escolaridad (opcional)" 
+        />
+      </Form.Group>
+
+      <hr className="my-3" />
       
       <div className="d-flex justify-content-between align-items-center mb-3">
         <div>
@@ -333,7 +347,7 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
       )}
 
       {guardians.length > 0 ? (
-        <Table striped bordered hover size="sm" className="align-middle">
+        <Table responsive striped bordered hover size="sm" className="align-middle">
           <thead className="table-light">
             <tr>
               <th>Nombre</th>
@@ -392,7 +406,7 @@ const PatientCreate: React.FC<PatientCreateProps> = ({ onHide, onRequestConfirm 
         defaultAddress={{
           address: formData.address,
           city: formData.city,
-          postalCode: formData.postalCode
+          obraSocial: formData.obraSocial
         }}
         initialSearchQuery={quickModalSearchQuery}
         onGuardianCreated={handleQuickGuardianCreated}

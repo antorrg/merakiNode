@@ -26,7 +26,8 @@ export type UpdatePatientContactPayload = {
   email?: string;
   address?: string;
   city?: string;
-  postalCode?: string;
+  obraSocial?: string;
+  escolaridad?: string;
   [key: string]: unknown;
 };
 

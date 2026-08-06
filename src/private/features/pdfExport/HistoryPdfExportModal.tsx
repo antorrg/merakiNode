@@ -92,7 +92,8 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
           email: patient.email || patient.ownEmail,
           address: patient.address,
           city: patient.city,
-          postalCode: patient.postalCode,
+          obraSocial: patient.obraSocial,
+          escolaridad: patient.escolaridad,
           guardians: patient.guardians?.map((g) => ({
             name: g.name,
             relationship: g.relationship,
@@ -131,7 +132,7 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
   };
 
   const patientGuardians = patient?.guardians || [];
-  const fullAddress = [patient?.address, patient?.city, patient?.postalCode]
+  const fullAddress = [patient?.address, patient?.city]
     .filter(Boolean)
     .join(', ');
 

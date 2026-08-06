@@ -10,7 +10,8 @@ export const registerPatientSchema: Schema = {
   phone: { type: "string", default: null },
   address: { type: "string" },
   city: { type: "string" },
-  postalCode: { type: "string" },
+  obraSocial: { type: "string", default: null },
+  escolaridad: { type: "string", default: null },
   isPatient: { type: "boolean", default: true },
   guardians: { type: "array", default: [] }
 };
@@ -26,7 +27,8 @@ export const updateContactSchema: Schema = {
   email: { type: "string", default: null, sanitize: { trim: true } },
   address: { type: "string", default: undefined, sanitize: { trim: true } },
   city: { type: "string", default: undefined, sanitize: { trim: true } },
-  postalCode: { type: "string", default: undefined, sanitize: { trim: true } },
+  obraSocial: { type: "string", default: null, sanitize: { trim: true } },
+  escolaridad: { type: "string", default: null, sanitize: { trim: true } },
   isPatient: { type: "boolean", default: undefined },
   guardians: { type: "array", default: undefined }
 };

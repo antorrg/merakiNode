@@ -22,7 +22,8 @@ export interface PatientProps {
   phone: string | null;
   address: string;
   city: string;
-  postalCode: string;
+  obraSocial?: string | null;
+  escolaridad?: string | null;
   isPatient?: boolean;
   deletedAt?: string | null;
   guardians?: GuardianRelation[];
@@ -56,7 +57,8 @@ export class Patient {
   protected phone: string | null;
   protected address: string;
   protected city: string;
-  protected postalCode: string;
+  protected obraSocial: string | null;
+  protected escolaridad: string | null;
   protected isPatient: boolean;
   protected guardians: GuardianRelation[];
 
@@ -73,7 +75,8 @@ export class Patient {
     this.phone = PatientApplications.Phone(props.phone);
     this.address = props.address;
     this.city = props.city;
-    this.postalCode = props.postalCode;
+    this.obraSocial = props.obraSocial || null;
+    this.escolaridad = props.escolaridad || null;
     this.isPatient = props.isPatient !== undefined ? Boolean(props.isPatient) : true;
     this.guardians = (props.guardians || []).map(g => {
       const rel = PatientApplications.relationshipType(g.relationshipType || g.relationship);
@@ -209,7 +212,8 @@ export class Patient {
       phone: this.phone,
       address: this.address,
       city: this.city,
-      postal_code: this.postalCode,
+      obra_social: this.obraSocial,
+      escolaridad: this.escolaridad,
       is_patient: this.isPatient ? 1 : 0
     }
   }
@@ -226,7 +230,8 @@ export class Patient {
       age: this.age,
       address: this.address,
       city: this.city,
-      postalCode: this.postalCode,
+      obraSocial: this.obraSocial,
+      escolaridad: this.escolaridad,
       isPatient: this.isPatient,
       
       // Datos propios (reales del paciente)

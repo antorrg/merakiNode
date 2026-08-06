@@ -22,7 +22,8 @@ export interface GeneratePdfPayload {
     email?: string;
     address?: string;
     city?: string;
-    postalCode?: string;
+    obraSocial?: string;
+    escolaridad?: string;
     guardians?: { name: string; relationship?: string }[];
   };
   professionalData: {
