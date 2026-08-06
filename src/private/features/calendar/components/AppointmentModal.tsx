@@ -203,7 +203,7 @@ export const AppointmentModal: React.FC<AppointmentModalProps> = ({
       onClose();
     }
   };
-  const dontDelete = (existingAppointment!.status === 'CANCELLED')? true : false
+  const dontDelete = existingAppointment?.status === 'CANCELLED';
 
   return (
     <div className="modal show d-block" tabIndex={-1} style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>

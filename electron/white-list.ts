@@ -96,7 +96,8 @@ export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
 
 // Lista blanca de canales permitidos para eventos de escucha (on)
 export const ALLOWED_LISTEN_CHANNELS = new Set<string>([
-  'main-process-message'
+  'main-process-message',
+  'appointment:notification'
 ])
 
 // Tipos TypeScript derivados para autocompletado y seguridad en tiempo de compilación
@@ -112,4 +113,5 @@ export type AllowedInvokeChannel =
   | typeof APPOINTMENT_CHANNELS[number]
   | typeof PDF_EXPORT_CHANNELS[number]
 
-export type AllowedListenChannel = 'main-process-message'
+export type AllowedListenChannel = 'main-process-message' | 'appointment:notification'
+

@@ -8,6 +8,7 @@ import { historyEntryIpc } from "./ipc/historyEntry.ipc.js"
 import { treatmentIpc } from "./ipc/treatment.ipc.js"
 import { appointmentIpc } from "./ipc/appointment.ipc.js"
 import { pdfExportIpc } from "./ipc/pdfExport.ipc.js"
+import { notificationScheduler } from "./Shared/dependencies.js"
 
 const modules = [
   authIpc,
@@ -24,4 +25,6 @@ const modules = [
 
 export function registerAllIpc() {
   modules.forEach(register => register())
+  notificationScheduler.start()
 }
+

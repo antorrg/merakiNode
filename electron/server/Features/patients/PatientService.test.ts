@@ -2,6 +2,7 @@ import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest';
 import { db } from '../../Configs/database.js';
 import { patients, patient_relations } from '../../Schema/schema.js';
 import { PatientService } from './PatientService.js';
+import { PatientRepository } from './PatientRepository.js';
 import { UuidHandler } from '../../Shared/Utils/UuidHandler.js';
 import { PatientCreate, PatientProps } from './Patient.js';
 import patientIndex from './patient.index.js';
@@ -24,7 +25,7 @@ describe('PatientService (SQLite Integration)', () => {
     db.db.exec(patients.sql);
     db.db.exec(patient_relations.sql);
     
-    service = new PatientService();
+    service = new PatientService(new PatientRepository());
   });
 
   afterAll(() => {

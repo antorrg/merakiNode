@@ -21,8 +21,8 @@ function escapeHTML(str: unknown): string {
 export class PdfExportService {
   private repository: PdfExportRepository;
 
-  constructor() {
-    this.repository = new PdfExportRepository();
+  constructor(repository: PdfExportRepository) {
+    this.repository = repository;
   }
 
   private translateVisitType(type: string): string {

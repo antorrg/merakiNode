@@ -73,7 +73,7 @@ describe('pdfExport.index integration tests', () => {
 
   describe('Sanitización de HTML en plantilla PDF (escapeHTML)', () => {
     it('debería escapar caracteres HTML en texto plano y preservar etiquetas en rich-text', () => {
-      const service = new PdfExportService();
+      const service = new PdfExportService(new PdfExportRepository());
       const payload: GeneratePdfPayload = {
         patientId: 'pat-1',
         patientData: {

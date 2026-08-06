@@ -36,7 +36,7 @@ export class Session{
  }
  
     static createSession(sessionData: SessionData, rolling: boolean = false, maxAge?:number): Session {
-       const maxTimeToExpire = maxAge? maxAge : 1800000 // 30 min por defecto
+       const maxTimeToExpire = maxAge? maxAge : 3600000 // 1 hora por defecto
        const id = crypto.randomUUID()
        const created_at = Date.now()
        const timeToExpire = created_at + maxTimeToExpire

@@ -6,7 +6,7 @@ import { ErrorCode } from '../../Configs/Errors/errorCode.js';
 export class AppointmentService {
   private repository: AppointmentRepository;
 
-  constructor(repository: AppointmentRepository = new AppointmentRepository()) {
+  constructor(repository: AppointmentRepository) {
     this.repository = repository;
   }
 

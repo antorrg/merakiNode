@@ -8,7 +8,7 @@ import { PatientApplications } from './applications/PatientApplications.js';
 export class PatientService {
   private repository: PatientRepository;
 
-  constructor(repository: PatientRepository = new PatientRepository()) {
+  constructor(repository: PatientRepository) {
     this.repository = repository;
   }
 

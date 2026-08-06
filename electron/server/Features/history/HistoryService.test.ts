@@ -9,6 +9,7 @@ import { TreatmentRepository } from '../treatment/TreatmentRepository.js';
 import { DiagnosisService } from '../diagnosis/DiagnosisService.js';
 import { DiagnosisRepository } from '../diagnosis/DiagnosisRepository.js';
 import { PatientService } from '../patients/PatientService.js';
+import { PatientRepository } from '../patients/PatientRepository.js';
 import { UserService } from '../user/UserService.js';
 import { UserRepository } from '../user/UserRepository.js';
 import { VisitType } from './HistoryEntry.js';
@@ -39,7 +40,7 @@ describe('HistoryService (Orchestrator)', () => {
     
 
     const userService = new UserService(new UserRepository());
-    const patientService = new PatientService();
+    const patientService = new PatientService(new PatientRepository());
     const diagnosisService = new DiagnosisService(new DiagnosisRepository());
     const entryService = new HistoryEntryService(new HistoryEntryRepository());
     const treatmentService = new TreatmentService(new TreatmentRepository());

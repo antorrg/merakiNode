@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { Link, Outlet } from 'react-router-dom';
+import { Link, Outlet, useLocation } from 'react-router-dom';
 import Button from 'react-bootstrap/Button';
 import Nav from 'react-bootstrap/Nav';
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -9,9 +9,11 @@ import { hasRole } from '../utils/hasRole';
 import { Role } from '../../types'
 import ProfileModal from '../../private/features/user/forms/ProfileModal';
 import { NavDropdown } from 'react-bootstrap';
+import { ErrorBoundary } from './ErrorBoundary';
 
 function Sidebar() {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [show, setShow] = useState<boolean>(false);
   const [alert, setAlert] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
@@ -92,7 +94,9 @@ function Sidebar() {
             cancelText = "No, volver"
           />
           <ProfileModal show={showProfileModal} onHide={() => setShowProfileModal(false)} />
-         <Outlet/>
+          <ErrorBoundary key={location.pathname}>
+            <Outlet/>
+          </ErrorBoundary>
           </>
   );
 }

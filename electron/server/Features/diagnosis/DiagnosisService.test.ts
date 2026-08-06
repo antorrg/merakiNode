@@ -5,6 +5,7 @@ import { DiagnosisService } from './DiagnosisService.js';
 import { DiagnosisRepository } from './DiagnosisRepository.js';
 import { DiagnosisStatus } from './Diagnosis.js';
 import { PatientService } from '../patients/PatientService.js';
+import { PatientRepository } from '../patients/PatientRepository.js';
 
 vi.mock('../../Configs/envConfig.js', () => ({
   default: {
@@ -27,7 +28,7 @@ describe('DiagnosisService (SQLite Integration)', () => {
     db.db.exec(diagnosis.sql);
     
     diagnosisService = new DiagnosisService(new DiagnosisRepository());
-    patientService = new PatientService();
+    patientService = new PatientService(new PatientRepository());
 
     // Crear un paciente de prueba para asociarle los diagnósticos
     const patientData = {

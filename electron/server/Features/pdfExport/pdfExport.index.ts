@@ -1,20 +1,12 @@
-import { PdfExportService } from './PdfExportService.js';
 import { GeneratePdfPayload } from './PdfExport.js';
+import { pdfExportService } from '../../Shared/dependencies.js';
 
-class PdfExportModule {
-  private service: PdfExportService;
+export default {
+  generatePdf: async (payload: GeneratePdfPayload, userId: string) => {
+    return pdfExportService.generatePdf(payload, userId);
+  },
 
-  constructor() {
-    this.service = new PdfExportService();
+  getByPatientId: (patientId: string) => {
+    return pdfExportService.getByPatientId(patientId);
   }
-
-  async generatePdf(payload: GeneratePdfPayload, userId: string) {
-    return this.service.generatePdf(payload, userId);
-  }
-
-  getByPatientId(patientId: string) {
-    return this.service.getByPatientId(patientId);
-  }
-}
-
-export default new PdfExportModule();
+};

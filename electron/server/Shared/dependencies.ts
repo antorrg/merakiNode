@@ -11,7 +11,11 @@ import { TreatmentService } from '../Features/treatment/TreatmentService.js';
 import { PatientRepository } from '../Features/patients/PatientRepository.js';
 import { PatientService } from '../Features/patients/PatientService.js';
 import { HistoryService } from '../Features/history/HistoryService.js';
-
+import { AppointmentRepository } from '../Features/appointments/AppointmentRepository.js';
+import { AppointmentService } from '../Features/appointments/AppointmentService.js';
+import { NotificationScheduler } from '../Features/notifications/NotificationScheduler.js';
+import { PdfExportRepository } from '../Features/pdfExport/PdfExportRepository.js';
+import { PdfExportService } from '../Features/pdfExport/PdfExportService.js';
 
 // --- Repositories ---
 export const userRepository = new UserRepository();
@@ -19,7 +23,9 @@ export const sessionRepository = new SessionRepository();
 export const diagnosisRepository = new DiagnosisRepository();
 export const historyEntryRepository = new HistoryEntryRepository();
 export const treatmentRepository = new TreatmentRepository();
-export const patientRepository = new PatientRepository()
+export const patientRepository = new PatientRepository();
+export const appointmentRepository = new AppointmentRepository();
+export const pdfExportRepository = new PdfExportRepository();
 
 // --- Services ---
 export const userService = new UserService(userRepository);
@@ -29,4 +35,8 @@ export const historyEntryService = new HistoryEntryService(historyEntryRepositor
 export const treatmentService = new TreatmentService(treatmentRepository);
 export const patientService = new PatientService(patientRepository);
 export const historyService = new HistoryService(patientService, diagnosisService, historyEntryService, treatmentService, userService);
+export const appointmentService = new AppointmentService(appointmentRepository);
+export const notificationScheduler = new NotificationScheduler(appointmentRepository);
+export const pdfExportService = new PdfExportService(pdfExportRepository);
+
 

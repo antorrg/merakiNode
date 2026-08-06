@@ -7,6 +7,7 @@ import { HistoryEntryService } from '../history/HistoryEntryService.js';
 import { HistoryEntryRepository } from '../history/HistoryEntryRepository.js';
 import { VisitType } from '../history/HistoryEntry.js';
 import { PatientService } from '../patients/PatientService.js';
+import { PatientRepository } from '../patients/PatientRepository.js';
 import { UserService } from '../user/UserService.js';
 import { UserRepository } from '../user/UserRepository.js';
 
@@ -36,7 +37,7 @@ describe('TreatmentService (SQLite Integration)', () => {
     
     treatmentService = new TreatmentService(new TreatmentRepository());
     entryService = new HistoryEntryService(new HistoryEntryRepository());
-    patientService = new PatientService();
+    patientService = new PatientService(new PatientRepository());
     userService = new UserService(new UserRepository());
 
     // Setup: User -> Patient -> Entry -> Treatment

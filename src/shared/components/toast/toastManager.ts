@@ -25,13 +25,10 @@ class ToastManager {
     this.listeners.forEach(listener => listener([...this.toasts]));
   }
 
-  show(title: string, message: string, color: ToastType = 'info', delay = 3000) {
+  show(title: string, message: string, color: ToastType = 'info', delay = 3000, autohide = true) {
     const id = Math.random().toString(36).substring(2, 9);
-    this.toasts = [...this.toasts, { id, title, message, color, delay, autohide: true }];
+    this.toasts = [...this.toasts, { id, title, message, color, delay, autohide }];
     this.notify();
-    
-    // Auto remove logic is handled by the Toast onClose event in the UI, 
-    // but we can also have a backup timer here if needed.
   }
 
   remove(id: string) {

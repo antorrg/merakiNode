@@ -5,6 +5,7 @@ import { HistoryEntryService } from './HistoryEntryService.js';
 import { HistoryEntryRepository } from './HistoryEntryRepository.js';
 import { VisitType } from './HistoryEntry.js';
 import { PatientService } from '../patients/PatientService.js';
+import { PatientRepository } from '../patients/PatientRepository.js';
 import { UserService } from '../user/UserService.js';
 import { UserRepository } from '../user/UserRepository.js';
 
@@ -33,7 +34,7 @@ describe('HistoryEntryService (SQLite Integration)', () => {
     db.db.exec(entry_diagnoses.sql);
     
     entryService = new HistoryEntryService(new HistoryEntryRepository());
-    patientService = new PatientService();
+    patientService = new PatientService(new PatientRepository());
     userService = new UserService(new UserRepository());
 
     // Crear profesional
