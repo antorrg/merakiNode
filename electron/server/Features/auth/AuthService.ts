@@ -5,6 +5,8 @@ import { UserService } from '../user/UserService.js';
 import { Session, SessionData } from '../../Shared/Auth/Session.js';
 
 export class AuthService {
+  private activeSessionId: string | null = null;
+
   constructor(
     private sessionRepository: SessionRepository,
     private userService: UserService
@@ -40,6 +42,8 @@ export class AuthService {
     const saved = this.sessionRepository.saveSession(session);
     if (!saved) throwError('Could not save session', ErrorCode.INTERNAL_ERROR);
 
+    this.activeSessionId = session.id;
+
     return {
       user: user,
       session: session.toClient()
@@ -57,6 +61,9 @@ export class AuthService {
     const isValid = session!.verify();
     
     if (!isValid) {
+      if (this.activeSessionId === sessionId) {
+        this.activeSessionId = null;
+      }
       this.sessionRepository.deleteSession(sessionId);
       throwError('Session expired', ErrorCode.SESSION_EXPIRED);
     }
@@ -67,6 +74,7 @@ export class AuthService {
 
     // Si verify extendió el tiempo (por ser rolling), actualizamos DB/Caché
     this.sessionRepository.updateSession(session!);
+    this.activeSessionId = sessionId;
 
     return session!.toClient();
   }
@@ -80,7 +88,32 @@ export class AuthService {
       session.destroy();
       this.sessionRepository.deleteSession(sessionId);
     }
+    if (this.activeSessionId === sessionId) {
+      this.activeSessionId = null;
+    }
     return true;
+  }
+
+  /**
+   * Obtiene los datos de la sesión activa actual (si existe y es válida).
+   */
+  getActiveSession() {
+    if (!this.activeSessionId) return null;
+
+    const session = this.sessionRepository.findSession(this.activeSessionId);
+    if (!session) {
+      this.activeSessionId = null;
+      return null;
+    }
+
+    const isValid = session.verify();
+    if (!isValid) {
+      this.sessionRepository.deleteSession(this.activeSessionId);
+      this.activeSessionId = null;
+      return null;
+    }
+
+    return session.toClient();
   }
 }
 

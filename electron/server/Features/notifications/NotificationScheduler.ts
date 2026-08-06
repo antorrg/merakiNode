@@ -2,6 +2,8 @@ import { BrowserWindow, Notification } from 'electron';
 import dayjs from 'dayjs';
 import { AppointmentRepository } from '../appointments/AppointmentRepository.js';
 
+export type SessionGetter = () => { userId: string; role: string; userName?: string; sessionId?: string } | null;
+
 export interface NotificationPayload {
   type: 'START' | 'END';
   appointmentId: string;
@@ -16,10 +18,21 @@ export class NotificationScheduler {
   private intervalId: NodeJS.Timeout | null = null;
   private notifiedSet: Set<string> = new Set();
   private checkIntervalMs: number;
+  private getSession?: SessionGetter;
+  private lastCheckedDate: string | null = null;
 
-  constructor(repository: AppointmentRepository, checkIntervalMs: number = 30000) {
+  constructor(
+    repository: AppointmentRepository,
+    checkIntervalMs: number = 30000,
+    getSession?: SessionGetter
+  ) {
     this.repository = repository;
     this.checkIntervalMs = checkIntervalMs;
+    this.getSession = getSession;
+  }
+
+  public clearHistory(): void {
+    this.notifiedSet.clear();
   }
 
   public start(): void {
@@ -43,11 +56,31 @@ export class NotificationScheduler {
 
   public checkUpcomingAppointments(customNow?: dayjs.Dayjs): void {
     try {
+      const session = this.getSession ? this.getSession() : null;
+
+      // Fail-closed: si no hay sesión activa, no despachar notificaciones y limpiar memoria
+      if (!session) {
+        if (this.notifiedSet.size > 0) {
+          this.clearHistory();
+        }
+        return;
+      }
+
       const now = customNow || dayjs();
+      const currentDateStr = now.format('YYYY-MM-DD');
+
+      // Purga automática de memoria al cambiar de día
+      if (this.lastCheckedDate && this.lastCheckedDate !== currentDateStr) {
+        this.clearHistory();
+      }
+      this.lastCheckedDate = currentDateStr;
+
       const startOfDay = now.startOf('day').toISOString();
       const endOfDay = now.endOf('day').toISOString();
 
-      const appointments = this.repository.getByDateRange(startOfDay, endOfDay);
+      // Filtrar por professionalId si la sesión corresponde a un PROFESIONAL
+      const professionalId = session.role === 'PROFESIONAL' ? session.userId : undefined;
+      const appointments = this.repository.getByDateRange(startOfDay, endOfDay, professionalId);
 
       for (const app of appointments) {
         if (app.status === 'CANCELLED') continue;

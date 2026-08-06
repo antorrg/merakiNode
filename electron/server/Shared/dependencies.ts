@@ -36,7 +36,11 @@ export const treatmentService = new TreatmentService(treatmentRepository);
 export const patientService = new PatientService(patientRepository);
 export const historyService = new HistoryService(patientService, diagnosisService, historyEntryService, treatmentService, userService);
 export const appointmentService = new AppointmentService(appointmentRepository);
-export const notificationScheduler = new NotificationScheduler(appointmentRepository);
+export const notificationScheduler = new NotificationScheduler(
+  appointmentRepository,
+  30000,
+  () => authService.getActiveSession()
+);
 export const pdfExportService = new PdfExportService(pdfExportRepository);
 
 
