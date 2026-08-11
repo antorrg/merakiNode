@@ -58,8 +58,8 @@ export class PdfExportService {
       logoSrc = pdfConfig.logoUrl;
     } else {
       const possiblePaths = [
-        path.join(process.cwd(), 'public', 'merakifav.png'),
-        path.join(process.cwd(), 'dist', 'merakifav.png'),
+        path.join(process.cwd(), 'public', 'medicalLogo.png'),
+        path.join(process.cwd(), 'dist', 'medicalLogo.png'),
       ];
       for (const p of possiblePaths) {
         if (fs.existsSync(p)) {
@@ -107,7 +107,7 @@ export class PdfExportService {
 
             ${pdfConfig.showLinkedDiagnoses !== false && entry.linkedDiagnosesText ? `
               <div class="section-block">
-                <div class="section-title">Diagnósticos Asociados del Paciente:</div>
+                <div class="section-title">Diagnóstico/s del Paciente:</div>
                 <div class="section-content"><strong>${escapeHTML(entry.linkedDiagnosesText)}</strong></div>
               </div>
             ` : ''}
@@ -144,6 +144,27 @@ export class PdfExportService {
       `;
     }).join('');
 
+    const fontSizeMode = pdfConfig.fontSize || 'md';
+    let bodyFontSize = '14px';
+    let titleFontSize = '15px';
+    let subFontSize = '13px';
+    let badgeFontSize = '11px';
+    let clinicNameFontSize = '16px';
+
+    if (fontSizeMode === 'sm') {
+      bodyFontSize = '12px';
+      titleFontSize = '13px';
+      subFontSize = '11px';
+      badgeFontSize = '10px';
+      clinicNameFontSize = '14px';
+    } else if (fontSizeMode === 'lg') {
+      bodyFontSize = '16px';
+      titleFontSize = '17px';
+      subFontSize = '15px';
+      badgeFontSize = '12px';
+      clinicNameFontSize = '18px';
+    }
+
     return `
       <!DOCTYPE html>
       <html lang="es">
@@ -152,10 +173,13 @@ export class PdfExportService {
         <title>Historia Clínica - ${escapeHTML(patientData.firstName)} ${escapeHTML(patientData.lastName)}</title>
         <style>
           * { box-sizing: border-box; }
+          @media print {
+            body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+          }
           body {
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-            font-size: 12px;
-            color: #2b2b2b;
+            font-size: ${bodyFontSize};
+            color: #0f172a;
             line-height: 1.5;
             padding: 20px 30px;
             margin: 0;
@@ -164,7 +188,7 @@ export class PdfExportService {
             width: 100%;
             border-collapse: collapse;
             margin-bottom: 20px;
-            border-bottom: 2px solid #0d6efd;
+            border-bottom: 2.5px solid #0252ca;
             padding-bottom: 15px;
           }
           .header-table td {
@@ -179,85 +203,90 @@ export class PdfExportService {
             max-height: 70px;
           }
           .clinic-name {
-            font-size: 14px;
+            font-size: ${clinicNameFontSize};
             font-weight: bold;
-            color: #0d6efd;
+            color: #0252ca;
             margin-top: 5px;
             letter-spacing: 1px;
           }
           .info-box {
-            background-color: #f8f9fa;
-            border: 1px solid #e9ecef;
+            background-color: #f1f5f9;
+            border: 1.5px solid #94a3b8;
             border-radius: 6px;
             padding: 10px 14px;
-            font-size: 11px;
+            font-size: ${subFontSize};
+            color: #0f172a;
           }
           .info-title {
             font-weight: bold;
-            color: #0d6efd;
-            margin-bottom: 5px;
-            font-size: 12px;
-            border-bottom: 1px solid #dee2e6;
+            color: #0252ca;
+            margin-bottom: 6px;
+            font-size: ${titleFontSize};
+            border-bottom: 1.5px solid #94a3b8;
             padding-bottom: 3px;
           }
           .custom-notes {
-            background-color: #e7f1ff;
-            border-left: 4px solid #0d6efd;
-            padding: 8px 12px;
-            font-size: 11px;
+            background-color: #eff6ff;
+            border: 1.5px solid #93c5fd;
+            border-left: 5px solid #0252ca;
+            padding: 10px 14px;
+            font-size: ${subFontSize};
+            color: #1e3a8a;
             margin-bottom: 20px;
-            border-radius: 4px;
+            border-radius: 6px;
           }
           .visit-card {
-            border: 1px solid #dee2e6;
+            border: 1.5px solid #64748b;
             border-radius: 6px;
             margin-bottom: 18px;
             page-break-inside: avoid;
             background-color: #ffffff;
+            overflow: hidden;
           }
           .visit-header {
-            background-color: #f1f5f9;
-            padding: 8px 12px;
-            border-bottom: 1px solid #dee2e6;
+            background-color: #e2e8f0;
+            padding: 9px 14px;
+            border-bottom: 1.5px solid #64748b;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: bold;
+            color: #0f172a;
           }
           .visit-title {
-            color: #1e293b;
-            font-size: 12px;
+            color: #0f172a;
+            font-size: ${titleFontSize};
           }
           .badge {
             display: inline-block;
-            padding: 3px 8px;
-            font-size: 10px;
+            padding: 4px 10px;
+            font-size: ${badgeFontSize};
             font-weight: 600;
             border-radius: 4px;
             color: #ffffff;
-            background-color: #0d6efd;
+            background-color: #0252ca;
             float: right;
           }
           .visit-body {
-            padding: 12px;
+            padding: 14px;
           }
           .section-block {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
           }
           .section-block:last-child {
             margin-bottom: 0;
           }
           .section-title {
             font-weight: bold;
-            color: #475569;
-            font-size: 11px;
-            margin-bottom: 3px;
-            border-bottom: 1px dashed #cbd5e1;
-            padding-bottom: 2px;
+            color: #0f172a;
+            font-size: ${subFontSize};
+            margin-bottom: 4px;
+            border-bottom: 1.5px solid #cbd5e1;
+            padding-bottom: 3px;
           }
           .section-content {
-            font-size: 11px;
-            color: #1e293b;
+            font-size: ${bodyFontSize};
+            color: #0f172a;
           }
           .section-content p { margin: 0 0 4px 0; }
           .section-content ul, .section-content ol { padding-left: 18px; margin: 0 0 4px 0; }
@@ -269,7 +298,7 @@ export class PdfExportService {
           <tr>
             <td class="logo-cell">
               ${logoSrc ? `<img src="${logoSrc}" class="logo-img" alt="Logo" /><br/>` : ''}
-              <div class="clinic-name">MERAKI</div>
+              <div class="clinic-name">${escapeHTML(pdfConfig.institutionName || 'Centro medico')}</div>
             </td>
             <td>
               <table style="width: 100%; border-collapse: collapse;">
@@ -316,7 +345,7 @@ export class PdfExportService {
         </table>
 
         <!-- Emisión & Resumen -->
-        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #64748b; margin-bottom: 15px;">
+        <div style="display: flex; justify-content: space-between; font-size: 11px; color: #475569; font-weight: 600; margin-bottom: 15px;">
           <span>📅 <strong>Fecha de Emisión:</strong> ${todayDate}</span>
           <span>📌 <strong>Visitas registradas:</strong> ${draftEntries.length}</span>
         </div>
@@ -337,6 +366,14 @@ export class PdfExportService {
   async generatePdf(payload: GeneratePdfPayload, userId: string): Promise<{ success: boolean; filePath: string; userChosenPath?: string; exportRecord: PdfExportProps }> {
     const htmlContent = this.generateHtmlContent(payload);
 
+    const fontSizeMode = payload.pdfConfig?.fontSize || 'md';
+    let footerFontSize = '11px';
+    if (fontSizeMode === 'sm') {
+      footerFontSize = '9px';
+    } else if (fontSizeMode === 'lg') {
+      footerFontSize = '13px';
+    }
+
     // Crear ventana oculta para renderizar HTML y convertir a PDF
     const printWindow = new BrowserWindow({
       show: false,
@@ -353,7 +390,7 @@ export class PdfExportService {
       displayHeaderFooter: true,
       headerTemplate: '<div></div>',
       footerTemplate: `
-        <div style="font-size: 9px; font-family: Helvetica, Arial, sans-serif; text-align: center; width: 100%; color: #64748b; padding-bottom: 5px;">
+        <div style="font-size: ${footerFontSize}; font-family: Helvetica, Arial, sans-serif; text-align: center; width: 100%; color: #334155; font-weight: 600; padding-bottom: 5px;">
           Página <span class="pageNumber"></span> de <span class="totalPages"></span>
         </div>
       `,

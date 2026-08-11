@@ -80,6 +80,11 @@ export const PDF_EXPORT_CHANNELS = [
   'pdf:getByPatient',
 ] as const
 
+export const CONFIG_CHANNELS = [
+  'config:get',
+  'config:save',
+] as const
+
 // Lista blanca de canales permitidos para invocación (invoke)
 export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...AUTH_CHANNELS,
@@ -92,6 +97,7 @@ export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...LOGGER_CHANNELS,
   ...APPOINTMENT_CHANNELS,
   ...PDF_EXPORT_CHANNELS,
+  ...CONFIG_CHANNELS,
 ])
 
 // Lista blanca de canales permitidos para eventos de escucha (on)
@@ -112,6 +118,7 @@ export type AllowedInvokeChannel =
   | typeof LOGGER_CHANNELS[number]
   | typeof APPOINTMENT_CHANNELS[number]
   | typeof PDF_EXPORT_CHANNELS[number]
+  | typeof CONFIG_CHANNELS[number]
 
 export type AllowedListenChannel = 'main-process-message' | 'appointment:notification'
 

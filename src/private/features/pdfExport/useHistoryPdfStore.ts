@@ -25,6 +25,7 @@ export interface PdfConfig {
   fontSize: 'sm' | 'md' | 'lg';
   customHeaderNotes: string;
   logoUrl: string | null;
+  institutionName?: string;
 }
 
 export interface HistoryPdfState {
@@ -67,7 +68,8 @@ export const useHistoryPdfStore = create<HistoryPdfState>((set, get) => ({
     showRecommendations: true,
     fontSize: 'md',
     customHeaderNotes: '',
-    logoUrl: '/merakifav.png',
+    logoUrl: '/medicalLogo.png',
+    institutionName: 'Meraki Espacio Integral',
   },
 
   toggleSelectEntry: (entryId: string) => {

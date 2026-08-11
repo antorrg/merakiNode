@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Button, Form, Card, Row, Col, Badge, Accordion, Spinner } from 'react-bootstrap';
 import { useHistoryPdfStore } from './useHistoryPdfStore';
+import { useConfigStore } from '../configuration/useConfigStore';
 import { useAuth } from '../../../context/AuthContext';
 import { IPatient, VisitType } from '../../../types';
 import RichTextEditor from '../../../shared/components/RichTextEditor/RichTextEditor';
@@ -62,6 +63,17 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
   } = useHistoryPdfStore();
 
   const [isGenerating, setIsGenerating] = useState(false);
+
+  useEffect(() => {
+    if (isModalOpen) {
+      useConfigStore.getState().fetchConfig().then(() => {
+        const savedPdfConfig = useConfigStore.getState().config.pdf;
+        if (savedPdfConfig) {
+          updatePdfConfig(savedPdfConfig);
+        }
+      });
+    }
+  }, [isModalOpen, updatePdfConfig]);
 
   if (!isModalOpen) return null;
 
@@ -166,7 +178,7 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
                       className="img-fluid mb-1"
                       style={{ maxHeight: '75px', objectFit: 'contain' }}
                     />
-                    <div className="fw-bold text-primary small tracking-wider">MERAKI</div>
+                    <div className="fw-bold text-primary small tracking-wider">{pdfConfig.institutionName || 'Meraki Espacio Integral'}</div>
                   </div>
                 ) : (
                   <div
@@ -368,7 +380,7 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
                   {/* Diagnósticos del Paciente / Asociados si está activo */}
                   {pdfConfig.showLinkedDiagnoses && (
                     <Form.Group className="mb-3">
-                      <Form.Label className="fw-semibold text-secondary small mb-1">Diagnósticos Asociados del Paciente:</Form.Label>
+                      <Form.Label className="fw-semibold text-secondary small mb-1">Diagnóstico del Paciente:</Form.Label>
                       <Form.Control
                         type="text"
                         size="sm"

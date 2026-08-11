@@ -4,6 +4,7 @@ import Patient from "./features/patient/Patients";
 import Users from "./features/user/Users"
 import PatientWorkspace from "./features/workspace/PatientWorkspace";
 import GeneralCalendar from "./features/calendar/GeneralCalendar";
+import Configuration from "./features/configuration/Configuration";
 
 
 
@@ -28,6 +29,10 @@ export const privateRoutes:RouteObject[]=[
     {
         path:'calendar',
         element: <GeneralCalendar/>
+    },
+    {
+        path: 'config',
+        element: <Configuration/>
     }
   
 ]

@@ -1,4 +1,5 @@
 import React from 'react';
+import { useConfigStore } from '../../private/features/configuration/useConfigStore';
 
 interface WelcomeHeaderCardProps {
   greet: string;
@@ -7,6 +8,9 @@ interface WelcomeHeaderCardProps {
 }
 
 export const WelcomeHeaderCard: React.FC<WelcomeHeaderCardProps> = ({ greet, userRole, fecha }) => {
+  const config = useConfigStore((state) => state.config);
+  const appTitle = config.appName || config.pdf.institutionName || 'Meraki Espacio Integral';
+
   return (
     <div className="col-12">
       <div className="bg-white p-4 rounded shadow-sm border d-flex flex-column flex-md-row justify-content-between align-items-center gap-3">
@@ -14,7 +18,7 @@ export const WelcomeHeaderCard: React.FC<WelcomeHeaderCardProps> = ({ greet, use
           <span className="badge bg-success-subtle text-success border border-success-subtle px-3 py-1 mb-2 rounded-pill">
             ¡Sesión Iniciada!
           </span>
-          <h1 className="h2 fw-bold text-primary mb-1">Meraki Espacio Integral</h1>
+          <h1 className="h2 fw-bold text-primary mb-1">{appTitle}</h1>
           <h2 className="h5 text-secondary mb-0">
             ¡Hola <strong>{greet}</strong>! <span className="badge bg-secondary ms-1">{userRole}</span>
           </h2>

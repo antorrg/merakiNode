@@ -219,7 +219,8 @@ describe('PatientService (SQLite Integration)', () => {
       email: fullMinor.ownEmail,
       address: fullMinor.address,
       city: fullMinor.city,
-      postalCode: fullMinor.postalCode,
+      obra_social: fullMinor.obraSocial,
+      escolaridad: fullMinor.escolaridad ,
       guardians: [
         {
           relationId: fullMinor.guardians[0].relationId,
@@ -258,7 +259,8 @@ describe('PatientService (SQLite Integration)', () => {
       phone: '111222333',
       address: 'Calle 10',
       city: 'Ciudad',
-      postalCode: '1000'
+      obraSocial: 'OSDE',
+      escolaridad: 'Primaria' ,
     });
 
     const madre = service.registerPatient({
@@ -271,7 +273,8 @@ describe('PatientService (SQLite Integration)', () => {
       phone: '444555666',
       address: 'Calle 10',
       city: 'Ciudad',
-      postalCode: '1000'
+      obraSocial: 'OSDE',
+      escolaridad: 'Primaria' ,
     });
 
     const minorWithBoth = service.registerPatient({
@@ -284,7 +287,8 @@ describe('PatientService (SQLite Integration)', () => {
       phone: null,
       address: 'Calle 10',
       city: 'Ciudad',
-      postalCode: '1000',
+      obraSocial: 'OSDE',
+      escolaridad: 'Primaria' ,
       guardians: [
         {
           relationId: UuidHandler.idCreator(),

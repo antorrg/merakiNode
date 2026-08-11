@@ -32,6 +32,7 @@ export interface GeneratePdfPayload {
     role?: string;
   };
   pdfConfig: {
+    fontSize?: 'sm' | 'md' | 'lg';
     showLinkedDiagnoses?: boolean;
     showDiagnosisSummary: boolean;
     showObservations: boolean;
@@ -39,6 +40,7 @@ export interface GeneratePdfPayload {
     showRecommendations: boolean;
     customHeaderNotes?: string;
     logoUrl?: string | null;
+    institutionName?: string;
   };
   draftEntries: {
     entryId: string;

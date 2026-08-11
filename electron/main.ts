@@ -31,7 +31,7 @@ let tray: Tray | null = null
 let isQuitting:boolean = false
 
 function createWindow() {
-  const iconPath = path.join(process.env.VITE_PUBLIC, 'merakifav.png');
+  const iconPath = path.join(process.env.VITE_PUBLIC, 'medicalLogo.png');
   
   win = new BrowserWindow({
     icon: iconPath,
@@ -61,7 +61,7 @@ function createWindow() {
   tray = new Tray(iconPath)
   
   const contextMenu = Menu.buildFromTemplate([
-    { label: 'Abrir Meraki', click: () => {
+    { label: 'Abrir Aplicacion', click: () => {
       if (win && !win.isDestroyed()) {
           win.show()
           win.focus()
@@ -77,7 +77,7 @@ function createWindow() {
     }}
   ])
   
-  tray.setToolTip('Meraki')
+  tray.setToolTip('Medical App')
   tray.setContextMenu(contextMenu)
 
   // Opcional: Que un clic izquierdo en el icono de la bandeja abra/enfoque la app

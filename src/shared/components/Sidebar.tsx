@@ -11,9 +11,14 @@ import ProfileModal from '../../private/features/user/forms/ProfileModal';
 import { NavDropdown } from 'react-bootstrap';
 import { ErrorBoundary } from './ErrorBoundary';
 
+import { useConfigStore } from '../../private/features/configuration/useConfigStore';
+
 function Sidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
+  const config = useConfigStore((state) => state.config);
+  const appTitle = config.appName || config.pdf.institutionName || 'Meraki';
+  const logoUrl = config.pdf.logoUrl;
   const [show, setShow] = useState<boolean>(false);
   const [alert, setAlert] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
@@ -52,7 +57,16 @@ function Sidebar() {
         :
       <Offcanvas show={show} onHide={handleClose} placement="start" className='admin-offcanvas'>
         <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Meraki</Offcanvas.Title>
+          <Offcanvas.Title className="d-flex align-items-center gap-2">
+            {logoUrl && (
+              <img
+                src={logoUrl}
+                alt="Logo"
+                style={{ maxHeight: '28px', maxWidth: '35px', objectFit: 'contain' }}
+              />
+            )}
+            <span>{appTitle}</span>
+          </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body className="d-flex flex-column">
           <div className="mb-3 px-2 py-2 bg-light rounded text-center shadow-sm">
@@ -75,7 +89,7 @@ function Sidebar() {
               >
               <NavDropdown.Item as={Link} to="/dashboard/users" onClick={handleClose} className="text-primary">Usuarios</NavDropdown.Item>
                <NavDropdown.Item as={Link} to="/dashboard/admin" onClick={handleClose} className="text-secondary">Historia Clínica</NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/dashboard/admin" onClick={handleClose} className="text-success">Configuración</NavDropdown.Item>
+              <NavDropdown.Item as={Link} to="/dashboard/config" onClick={handleClose} className="text-success">Configuración</NavDropdown.Item>
               </NavDropdown>
             ):null}
             <Nav.Link as={Link} to="#" onClick={() => { handleClose(); setShowProfileModal(true); }} className="text-primary">Mi Perfil</Nav.Link>
