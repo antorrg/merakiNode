@@ -1,5 +1,5 @@
 import React from 'react';
-import { useConfigStore } from '../../private/features/configuration/useConfigStore';
+import { useBrand } from '../../context/BrandContext';
 
 interface WelcomeHeaderCardProps {
   greet: string;
@@ -8,8 +8,8 @@ interface WelcomeHeaderCardProps {
 }
 
 export const WelcomeHeaderCard: React.FC<WelcomeHeaderCardProps> = ({ greet, userRole, fecha }) => {
-  const config = useConfigStore((state) => state.config);
-  const appTitle = config.appName || config.pdf.institutionName || 'Meraki Espacio Integral';
+  const { brand } = useBrand();
+  const appTitle = brand.appName || 'Meraki Espacio Integral';
 
   return (
     <div className="col-12">

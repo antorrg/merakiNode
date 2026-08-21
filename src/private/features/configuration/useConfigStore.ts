@@ -15,11 +15,25 @@ export interface PdfConfig {
 
 export interface AppConfig {
   appName?: string;
+  shortName?: string;
+  legalName?: string;
+  logoUrl?: string | null;
+  phone?: string;
+  email?: string;
+  address?: string;
+  customHeaderNotes?: string;
   pdf: PdfConfig;
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
   appName: 'Meraki Espacio Integral',
+  shortName: 'Meraki',
+  legalName: 'Espacio Integral Meraki',
+  logoUrl: '/medicalLogo.png',
+  phone: '',
+  email: '',
+  address: '',
+  customHeaderNotes: '',
   pdf: {
     fontSize: 'md',
     showLinkedDiagnoses: true,

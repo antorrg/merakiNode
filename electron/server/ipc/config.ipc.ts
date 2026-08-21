@@ -19,6 +19,23 @@ export function configIpc() {
   );
 
   ipcMain.handle(
+    'brand:get',
+    wrapIpcHandler(async () => {
+      const cfg = configService.getConfig();
+      return {
+        appName: cfg.appName || cfg.pdf?.institutionName || 'Meraki Espacio Integral',
+        shortName: cfg.shortName || 'Meraki',
+        legalName: cfg.legalName || cfg.appName || 'Meraki Espacio Integral',
+        logoUrl: cfg.logoUrl || cfg.pdf?.logoUrl || '/medicalLogo.png',
+        phone: cfg.phone || '',
+        email: cfg.email || '',
+        address: cfg.address || '',
+        customHeaderNotes: cfg.customHeaderNotes || cfg.pdf?.customHeaderNotes || '',
+      };
+    }, 'brand:get')
+  );
+
+  ipcMain.handle(
     'config:save',
     wrapIpcHandler(
       IpcMiddlewares.withAuth(async (_event: unknown, data: SaveConfigPayload) => {

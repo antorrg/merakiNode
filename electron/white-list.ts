@@ -83,6 +83,7 @@ export const PDF_EXPORT_CHANNELS = [
 export const CONFIG_CHANNELS = [
   'config:get',
   'config:save',
+  'brand:get',
 ] as const
 
 // Lista blanca de canales permitidos para invocación (invoke)

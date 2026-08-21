@@ -13,12 +13,12 @@ export class PdfExportService {
     this.repository = repository;
   }
  // # = private js
- #generateHtmlContent(payload: GeneratePdfPayload): string {
+  public generateHtmlContent(payload: GeneratePdfPayload): string {
     return pdfTemplate(payload);
   }
 
   async generatePdf(payload: GeneratePdfPayload, userId: string): Promise<{ success: boolean; filePath: string; userChosenPath?: string; exportRecord: PdfExportProps }> {
-    const htmlContent = this.#generateHtmlContent(payload);
+    const htmlContent = this.generateHtmlContent(payload);
 
     const fontSizeMode = payload.pdfConfig?.fontSize || 'md';
     let footerFontSize = '11px';

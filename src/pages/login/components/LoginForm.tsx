@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
+import { useBrand } from '../../../context/BrandContext';
 import { loginValidator, ErrorLoginValue, InputLoginValue } from '../Validator';
 import PasswordViewer from '../../../shared/components/PasswordViewer';
 
@@ -10,6 +11,7 @@ interface LoginFormProps {
 
 const LoginForm: React.FC<LoginFormProps> = ({ closeLogin }) => {
     const { login } = useAuth();
+    const { brand } = useBrand();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
     
@@ -61,12 +63,15 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeLogin }) => {
             onSubmit={handleLoginSubmit}
             style={{ border: '1px solid #ccc', padding: '20px', borderRadius: '10px' }}
         >   
-            <div className="d-flex justify-content-between align-items-center"> 
-                <img className="mb-4" src="../vite.svg" alt="" width="40" height="auto"/>
+            <div className="d-flex justify-content-between align-items-center mb-3"> 
+                <div className="d-flex align-items-center gap-2">
+                    <img className="rounded" src={brand.logoUrl || "/medicalLogo.png"} alt={brand.shortName} width="36" height="36" style={{ objectFit: 'contain' }}/>
+                    <span className="fw-bold text-primary fs-6 mb-0">{brand.appName}</span>
+                </div>
                 <button type="button" onClick={closeLogin} className="btn-close" aria-label="Close"></button>
             </div>
             
-            <h1 className="h3 mb-3 fw-normal">Iniciar Sesión</h1>
+            <h1 className="h4 mb-3 fw-semibold">Iniciar Sesión</h1>
         
             <div className="form-floating mb-2">
                 <input 

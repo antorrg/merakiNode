@@ -3,6 +3,7 @@ import { Modal, Button, Form, Card, Row, Col, Badge, Accordion, Spinner } from '
 import { useHistoryPdfStore } from './useHistoryPdfStore';
 import { useConfigStore } from '../configuration/useConfigStore';
 import { useAuth } from '../../../context/AuthContext';
+import { useBrand } from '../../../context/BrandContext';
 import { IPatient, VisitType } from '../../../types';
 import RichTextEditor from '../../../shared/components/RichTextEditor/RichTextEditor';
 import { adminApi } from '../../../shared/api/api';
@@ -53,6 +54,7 @@ const getVisitTypeBadgeVariant = (type: string): string => {
 
 export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ patient }) => {
   const { user } = useAuth();
+  const { brand } = useBrand();
   const {
     isModalOpen,
     closeExportModal,
@@ -173,12 +175,12 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
                 {pdfConfig.logoUrl ? (
                   <div className="text-center p-2">
                     <img
-                      src={pdfConfig.logoUrl}
-                      alt="Logo Meraki"
+                      src={pdfConfig.logoUrl || brand.logoUrl || '/medicalLogo.png'}
+                      alt={`Logo ${brand.shortName || brand.appName}`}
                       className="img-fluid mb-1"
                       style={{ maxHeight: '75px', objectFit: 'contain' }}
                     />
-                    <div className="fw-bold text-primary small tracking-wider">{pdfConfig.institutionName || 'Meraki Espacio Integral'}</div>
+                    <div className="fw-bold text-primary small tracking-wider">{pdfConfig.institutionName || brand.appName}</div>
                   </div>
                 ) : (
                   <div

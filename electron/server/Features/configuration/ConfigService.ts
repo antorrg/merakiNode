@@ -41,12 +41,32 @@ export class ConfigService {
   public saveConfig(newConfig: Partial<AppConfig>): AppConfig {
     try {
       const current = fs.existsSync(this.configPath) ? this.getConfig() : DEFAULT_APP_CONFIG;
+      const updatedAppName = newConfig.appName !== undefined ? newConfig.appName : current.appName;
+      const updatedShortName = newConfig.shortName !== undefined ? newConfig.shortName : current.shortName;
+      const updatedLegalName = newConfig.legalName !== undefined ? newConfig.legalName : current.legalName;
+      const updatedLogoUrl = newConfig.logoUrl !== undefined ? newConfig.logoUrl : current.logoUrl;
+      const updatedPhone = newConfig.phone !== undefined ? newConfig.phone : current.phone;
+      const updatedEmail = newConfig.email !== undefined ? newConfig.email : current.email;
+      const updatedAddress = newConfig.address !== undefined ? newConfig.address : current.address;
+      const updatedCustomHeaderNotes = newConfig.customHeaderNotes !== undefined ? newConfig.customHeaderNotes : current.customHeaderNotes;
+
       const updated: AppConfig = {
         ...current,
         ...newConfig,
+        appName: updatedAppName,
+        shortName: updatedShortName,
+        legalName: updatedLegalName,
+        logoUrl: updatedLogoUrl,
+        phone: updatedPhone,
+        email: updatedEmail,
+        address: updatedAddress,
+        customHeaderNotes: updatedCustomHeaderNotes,
         pdf: {
           ...current.pdf,
           ...(newConfig.pdf || {}),
+          institutionName: newConfig.pdf?.institutionName || updatedAppName || current.pdf.institutionName,
+          logoUrl: newConfig.pdf?.logoUrl !== undefined ? newConfig.pdf.logoUrl : updatedLogoUrl,
+          customHeaderNotes: newConfig.pdf?.customHeaderNotes !== undefined ? newConfig.pdf.customHeaderNotes : updatedCustomHeaderNotes,
         },
       };
 

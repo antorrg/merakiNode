@@ -12,13 +12,14 @@ import { NavDropdown } from 'react-bootstrap';
 import { ErrorBoundary } from './ErrorBoundary';
 
 import { useConfigStore } from '../../private/features/configuration/useConfigStore';
+import { useBrand } from '../../context/BrandContext';
 
 function Sidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
-  const config = useConfigStore((state) => state.config);
-  const appTitle = config.appName || config.pdf.institutionName || 'Meraki';
-  const logoUrl = config.pdf.logoUrl;
+  const { brand } = useBrand();
+  const appTitle = brand.shortName || brand.appName || 'Medical';
+  const logoUrl = brand.logoUrl;
   const [show, setShow] = useState<boolean>(false);
   const [alert, setAlert] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
