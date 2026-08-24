@@ -31,11 +31,19 @@ const dbPath = envConfig.DatabasePath
 
 const db = new SqliteDb(dbPath, initialTables)
 
+import Database from 'better-sqlite3'
+
 async function startUp (syncing: boolean= false, reset: boolean = false){
   const messageRestart:string = `🔄 Restarting database "${nameOfDb()}" for testing...`
   const messageExec:string = '🧪  Database testing setup executed'
   const messageSuccess:string = `🟢 Database SQLite initialized successfully at ${nameOfDb()}!!`
   try {
+    if (!db.db || !db.db.open) {
+      db.db = new Database(dbPath)
+      db.db.pragma('foreign_keys = ON')
+      db.db.pragma('journal_mode = WAL')
+    }
+
     if(syncing=== true && reset === true){
       logger.info(messageRestart)
       console.log(messageRestart)

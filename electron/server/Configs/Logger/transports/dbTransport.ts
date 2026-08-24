@@ -34,8 +34,8 @@ function dbTransport () {
         ? JSON.parse(logObject)
         : logObject) as PinoLog
 
-      // Filtramos logs de error / fatal (>= 50)
-      if (obj?.level >= 50) {
+      // Guardamos logs de info, warn, error, fatal (>= 30)
+      if (obj?.level >= 30) {
         getRepo().create(normalizedLog(obj))
       }
     } catch (error) {

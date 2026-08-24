@@ -2,8 +2,15 @@ import { BaseRepository } from '../../Shared/Repositories/BaseRepository.js';
 import { db } from '../../Configs/database.js';
 import { CaseConverter } from '../../Shared/Utils/CaseConverter.js';
 import { AppointmentProps } from './Appointment.js';
+import type { Appointments } from '../../dbTypes/db.types.js';
 
-type AppointmentInsert = Record<string, any>;
+type AppointmentInsert = Partial<Appointments> & Record<string, unknown>;
+
+export interface RawAppointmentQueryResult extends Appointments {
+  patient_first_name?: string | null;
+  patient_last_name?: string | null;
+  professional_name?: string | null;
+}
 
 export interface AppointmentWithDetails extends AppointmentProps {
   patientFirstName?: string;
@@ -38,7 +45,7 @@ export class AppointmentRepository {
         AND start_time < ? 
         AND end_time > ?
     `;
-    const params: any[] = [professionalId, endTime, startTime];
+    const params: unknown[] = [professionalId, endTime, startTime];
 
     if (excludeId) {
       sql += ` AND appointment_id != ?`;
@@ -65,7 +72,7 @@ export class AppointmentRepository {
         AND a.end_time <= ?
     `;
 
-    const params: any[] = [startDate, endDate];
+    const params: unknown[] = [startDate, endDate];
 
     if (professionalId) {
       sql += ` AND a.professional_id = ?`;
@@ -75,15 +82,9 @@ export class AppointmentRepository {
     sql += ` ORDER BY a.start_time ASC`;
 
     const stmt = db.db.prepare(sql);
-    const rows = stmt.all(...params) as any[];
+    const rows = stmt.all(...params) as RawAppointmentQueryResult[];
 
-    return rows.map(row => {
-      const mapped = CaseConverter.mapKeysToCamelCase<AppointmentWithDetails>(row);
-      const firstName = row.patient_first_name || '';
-      const lastName = row.patient_last_name || '';
-      mapped.patientName = `${firstName} ${lastName}`.trim() || 'Paciente sin nombre';
-      return mapped;
-    });
+    return rows.map(row => this.mapRawRowToDetails(row));
   }
 
   getByPatientId(patientId: string): AppointmentWithDetails[] {
@@ -101,15 +102,9 @@ export class AppointmentRepository {
     `;
 
     const stmt = db.db.prepare(sql);
-    const rows = stmt.all(patientId) as any[];
+    const rows = stmt.all(patientId) as RawAppointmentQueryResult[];
 
-    return rows.map(row => {
-      const mapped = CaseConverter.mapKeysToCamelCase<AppointmentWithDetails>(row);
-      const firstName = row.patient_first_name || '';
-      const lastName = row.patient_last_name || '';
-      mapped.patientName = `${firstName} ${lastName}`.trim() || 'Paciente sin nombre';
-      return mapped;
-    });
+    return rows.map(row => this.mapRawRowToDetails(row));
   }
 
   getByProfessionalId(professionalId: string): AppointmentWithDetails[] {
@@ -127,15 +122,17 @@ export class AppointmentRepository {
     `;
 
     const stmt = db.db.prepare(sql);
-    const rows = stmt.all(professionalId) as any[];
+    const rows = stmt.all(professionalId) as RawAppointmentQueryResult[];
 
-    return rows.map(row => {
-      const mapped = CaseConverter.mapKeysToCamelCase<AppointmentWithDetails>(row);
-      const firstName = row.patient_first_name || '';
-      const lastName = row.patient_last_name || '';
-      mapped.patientName = `${firstName} ${lastName}`.trim() || 'Paciente sin nombre';
-      return mapped;
-    });
+    return rows.map(row => this.mapRawRowToDetails(row));
+  }
+
+  private mapRawRowToDetails(row: RawAppointmentQueryResult): AppointmentWithDetails {
+    const mapped = CaseConverter.mapKeysToCamelCase<AppointmentWithDetails>(row);
+    const firstName = row.patient_first_name || '';
+    const lastName = row.patient_last_name || '';
+    mapped.patientName = `${firstName} ${lastName}`.trim() || 'Paciente sin nombre';
+    return mapped;
   }
 
   update(id: string, data: Partial<AppointmentInsert>) {

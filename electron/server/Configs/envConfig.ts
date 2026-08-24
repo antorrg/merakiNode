@@ -24,7 +24,9 @@ const databaseDir =
 
 const envConfig = {
   Status,
-  DatabasePath: path.join(databaseDir, databaseName)
+  DatabasePath: path.join(databaseDir, databaseName),
+  SistemLogsDir: path.join(databaseDir, 'sistemLogs'),
+  BackupsDir: path.join(databaseDir, 'backups')
 }
 
 export default envConfig

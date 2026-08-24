@@ -13,6 +13,13 @@ export interface PdfConfig {
   institutionName?: string;
 }
 
+export interface BackupConfig {
+  enabled: boolean;
+  frequencyDays: number;
+  maxRetentionFiles: number;
+  lastBackupDate?: string | null;
+}
+
 export interface AppConfig {
   appName?: string;
   shortName?: string;
@@ -23,6 +30,7 @@ export interface AppConfig {
   address?: string;
   customHeaderNotes?: string;
   pdf: PdfConfig;
+  backup: BackupConfig;
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
@@ -45,22 +53,35 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     logoUrl: '/medicalLogo.png',
     institutionName: 'Meraki Espacio Integral',
   },
+  backup: {
+    enabled: true,
+    frequencyDays: 1,
+    maxRetentionFiles: 10,
+    lastBackupDate: null,
+  },
 };
 
 interface ConfigState {
   config: AppConfig;
   isLoading: boolean;
   isSaving: boolean;
+  isPerformingBackup: boolean;
+  isPerformingMaintenance: boolean;
   fetchConfig: () => Promise<void>;
   updateConfig: (newConfig: Partial<AppConfig>) => void;
   updatePdfConfig: (newPdfConfig: Partial<PdfConfig>) => void;
+  updateBackupConfig: (newBackupConfig: Partial<BackupConfig>) => void;
   saveConfig: () => Promise<boolean>;
+  triggerManualBackup: () => Promise<{ success: boolean; path?: string }>;
+  triggerMaintenance: () => Promise<{ success: boolean; logsDeleted?: number; vacuumExecuted?: boolean }>;
 }
 
 export const useConfigStore = create<ConfigState>((set, get) => ({
   config: DEFAULT_APP_CONFIG,
   isLoading: false,
   isSaving: false,
+  isPerformingBackup: false,
+  isPerformingMaintenance: false,
 
   fetchConfig: async () => {
     set({ isLoading: true });
@@ -76,6 +97,10 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
             pdf: {
               ...DEFAULT_APP_CONFIG.pdf,
               ...(res.pdf || {}),
+            },
+            backup: {
+              ...DEFAULT_APP_CONFIG.backup,
+              ...(res.backup || {}),
             },
           },
         });
@@ -108,6 +133,18 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
     }));
   },
 
+  updateBackupConfig: (newBackupConfig: Partial<BackupConfig>) => {
+    set((state) => ({
+      config: {
+        ...state.config,
+        backup: {
+          ...state.config.backup,
+          ...newBackupConfig,
+        },
+      },
+    }));
+  },
+
   saveConfig: async () => {
     set({ isSaving: true });
     try {
@@ -121,6 +158,40 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
       return false;
     } finally {
       set({ isSaving: false });
+    }
+  },
+
+  triggerManualBackup: async () => {
+    set({ isPerformingBackup: true });
+    try {
+      const res = await adminApi.execute<{ success: boolean; path?: string }>({
+        request: { channel: 'backup:createManual', payload: {} },
+      });
+      if (res && res.success) {
+        await get().fetchConfig(); // Refresca fecha de último backup
+        return res;
+      }
+      return { success: false };
+    } catch (err) {
+      console.error('Error al ejecutar backup manual:', err);
+      return { success: false };
+    } finally {
+      set({ isPerformingBackup: false });
+    }
+  },
+
+  triggerMaintenance: async () => {
+    set({ isPerformingMaintenance: true });
+    try {
+      const res = await adminApi.execute<{ success: boolean; logsDeleted?: number; vacuumExecuted?: boolean }>({
+        request: { channel: 'backup:runMaintenance', payload: {} },
+      });
+      return res || { success: false };
+    } catch (err) {
+      console.error('Error al ejecutar mantenimiento:', err);
+      return { success: false };
+    } finally {
+      set({ isPerformingMaintenance: false });
     }
   },
 }));

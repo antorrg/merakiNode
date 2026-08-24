@@ -10,6 +10,13 @@ export interface PdfConfig {
   institutionName?: string;
 }
 
+export interface BackupConfig {
+  enabled: boolean;
+  frequencyDays: number;
+  maxRetentionFiles: number;
+  lastBackupDate?: string | null;
+}
+
 export interface AppConfig {
   appName?: string;
   shortName?: string;
@@ -20,6 +27,7 @@ export interface AppConfig {
   address?: string;
   customHeaderNotes?: string;
   pdf: PdfConfig;
+  backup: BackupConfig;
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
@@ -42,6 +50,10 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     logoUrl: '/medicalLogo.png',
     institutionName: 'Meraki Espacio Integral',
   },
+  backup: {
+    enabled: true,
+    frequencyDays: 1,
+    maxRetentionFiles: 10,
+    lastBackupDate: null,
+  },
 };
-
-

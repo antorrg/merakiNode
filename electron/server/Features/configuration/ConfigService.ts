@@ -31,6 +31,10 @@ export class ConfigService {
           ...DEFAULT_APP_CONFIG.pdf,
           ...(parsed.pdf || {}),
         },
+        backup: {
+          ...DEFAULT_APP_CONFIG.backup,
+          ...(parsed.backup || {}),
+        },
       };
     } catch (error) {
       console.error('Error al leer config.json, usando valores por defecto:', error);
@@ -67,6 +71,10 @@ export class ConfigService {
           institutionName: newConfig.pdf?.institutionName || updatedAppName || current.pdf.institutionName,
           logoUrl: newConfig.pdf?.logoUrl !== undefined ? newConfig.pdf.logoUrl : updatedLogoUrl,
           customHeaderNotes: newConfig.pdf?.customHeaderNotes !== undefined ? newConfig.pdf.customHeaderNotes : updatedCustomHeaderNotes,
+        },
+        backup: {
+          ...current.backup,
+          ...(newConfig.backup || {}),
         },
       };
 

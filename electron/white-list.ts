@@ -86,6 +86,11 @@ export const CONFIG_CHANNELS = [
   'brand:get',
 ] as const
 
+export const BACKUP_CHANNELS = [
+  'backup:createManual',
+  'backup:runMaintenance',
+] as const
+
 // Lista blanca de canales permitidos para invocación (invoke)
 export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...AUTH_CHANNELS,
@@ -99,6 +104,7 @@ export const ALLOWED_INVOKE_CHANNELS = new Set<string>([
   ...APPOINTMENT_CHANNELS,
   ...PDF_EXPORT_CHANNELS,
   ...CONFIG_CHANNELS,
+  ...BACKUP_CHANNELS,
 ])
 
 // Lista blanca de canales permitidos para eventos de escucha (on)
@@ -120,6 +126,6 @@ export type AllowedInvokeChannel =
   | typeof APPOINTMENT_CHANNELS[number]
   | typeof PDF_EXPORT_CHANNELS[number]
   | typeof CONFIG_CHANNELS[number]
+  | typeof BACKUP_CHANNELS[number]
 
 export type AllowedListenChannel = 'main-process-message' | 'appointment:notification'
-

@@ -10,8 +10,7 @@ import { Role } from '../../types'
 import ProfileModal from '../../private/features/user/forms/ProfileModal';
 import { NavDropdown } from 'react-bootstrap';
 import { ErrorBoundary } from './ErrorBoundary';
-
-import { useConfigStore } from '../../private/features/configuration/useConfigStore';
+//import { useConfigStore } from '../../private/features/configuration/useConfigStore';
 import { useBrand } from '../../context/BrandContext';
 
 function Sidebar() {
