@@ -1,36 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import defaultLogo from '../assets/medicalLogo.svg';
-
-export interface BrandInfo {
-  appName: string;
-  shortName: string;
-  legalName?: string;
-  logoUrl?: string | null;
-  phone?: string;
-  email?: string;
-  address?: string;
-  customHeaderNotes?: string;
-}
-
-export const DEFAULT_BRAND: BrandInfo = {
-  appName: 'Espacio Medico Integral',
-  shortName: 'Medical',
-  legalName: 'Espacio Medico Integral',
-  logoUrl: defaultLogo,
-  phone: '',
-  email: '',
-  address: '',
-  customHeaderNotes: '',
-};
-
-export interface BrandContextType {
-  brand: BrandInfo;
-  loading: boolean;
-  updateBrand: (newBrand: Partial<BrandInfo>) => Promise<boolean>;
-  refreshBrand: () => Promise<void>;
-}
-
-const BrandContext = createContext<BrandContextType | undefined>(undefined);
+import React, { useState, useEffect, type ReactNode } from 'react';
+import { BrandContext, DEFAULT_BRAND, type BrandInfo } from './useBrand';
 
 export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [brand, setBrand] = useState<BrandInfo>(DEFAULT_BRAND);
@@ -38,9 +7,9 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
 
   const fetchBrand = async () => {
     try {
-      if (typeof window !== 'undefined' && (window as any).api?.invoke) {
-        const res = await (window as any).api.invoke('brand:get');
-        const rawData = res && typeof res === 'object' && 'data' in res ? (res as any).data : res;
+      if (typeof window !== 'undefined' && window.api?.invoke) {
+        const res = await window.api.invoke<{ data?: BrandInfo } | BrandInfo>('brand:get');
+        const rawData = res && typeof res === 'object' && 'data' in res ? res.data : res;
         if (rawData) {
           const loadedBrand: BrandInfo = {
             ...DEFAULT_BRAND,
@@ -71,8 +40,8 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
         document.title = updatedBrand.appName;
       }
 
-      if (typeof window !== 'undefined' && (window as any).api?.invoke) {
-        await (window as any).api.invoke('config:save', {
+      if (typeof window !== 'undefined' && window.api?.invoke) {
+        await window.api.invoke('config:save', {
           config: {
             appName: updatedBrand.appName,
             shortName: updatedBrand.shortName,
@@ -109,12 +78,4 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
       {children}
     </BrandContext.Provider>
   );
-};
-
-export const useBrand = (): BrandContextType => {
-  const context = useContext(BrandContext);
-  if (!context) {
-    throw new Error('useBrand debe usarse dentro de un BrandProvider');
-  }
-  return context;
 };

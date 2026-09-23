@@ -1,5 +1,6 @@
 import React from 'react';
-import { useBrand } from '../../context/BrandContext';
+import { useBrand } from '../../context/useBrand';
+import { DEFAULT_APP_CONFIG } from '../../../electron/config.types';
 
 interface WelcomeHeaderCardProps {
   greet: string;
@@ -9,7 +10,7 @@ interface WelcomeHeaderCardProps {
 
 export const WelcomeHeaderCard: React.FC<WelcomeHeaderCardProps> = ({ greet, userRole, fecha }) => {
   const { brand } = useBrand();
-  const appTitle = brand.appName || 'Meraki Espacio Integral';
+  const appTitle = brand.appName || DEFAULT_APP_CONFIG.appName || '';
 
   return (
     <div className="col-12">

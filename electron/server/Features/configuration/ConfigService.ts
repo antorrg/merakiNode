@@ -1,7 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { app } from 'electron';
-import { AppConfig, DEFAULT_APP_CONFIG } from './config.types.js';
+import { AppConfig, DEFAULT_APP_CONFIG } from '../../../config.types.js';
 
 export class ConfigService {
   private configPath: string;

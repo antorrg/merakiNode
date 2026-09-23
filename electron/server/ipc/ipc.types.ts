@@ -304,5 +304,5 @@ export interface AuthCreateInitialOwnerParams {
 // CONFIG IPC PAYLOAD TYPES
 // ==========================================
 export type GetConfigPayload = AuthenticatedPayload;
-export type SaveConfigPayload = AuthenticatedPayload<{ config: Partial<import('../Features/configuration/config.types.js').AppConfig> }>;
+export type SaveConfigPayload = AuthenticatedPayload<{ config: Partial<import('../../config.types.js').AppConfig> }>;
 

@@ -1,66 +1,14 @@
 import { create } from 'zustand';
 import { adminApi } from '../../../shared/api/api';
-import defaultLogo from '../../../assets/medicalLogo.svg';
+import {
+  type AppConfig,
+  type PdfConfig,
+  type BackupConfig,
+  DEFAULT_APP_CONFIG,
+} from '../../../../electron/config.types';
 
-export interface PdfConfig {
-  fontSize: 'sm' | 'md' | 'lg';
-  showLinkedDiagnoses: boolean;
-  showDiagnosisSummary: boolean;
-  showObservations: boolean;
-  showTreatmentPlan: boolean;
-  showRecommendations: boolean;
-  customHeaderNotes?: string;
-  logoUrl?: string | null;
-  institutionName?: string;
-}
-
-export interface BackupConfig {
-  enabled: boolean;
-  frequencyDays: number;
-  maxRetentionFiles: number;
-  lastBackupDate?: string | null;
-}
-
-export interface AppConfig {
-  appName?: string;
-  shortName?: string;
-  legalName?: string;
-  logoUrl?: string | null;
-  phone?: string;
-  email?: string;
-  address?: string;
-  customHeaderNotes?: string;
-  pdf: PdfConfig;
-  backup: BackupConfig;
-}
-
-export const DEFAULT_APP_CONFIG: AppConfig = {
-  appName: 'Meraki Espacio Integral',
-  shortName: 'Meraki',
-  legalName: 'Espacio Integral Meraki',
-  logoUrl: defaultLogo,
-  phone: '',
-  email: '',
-  address: '',
-  customHeaderNotes: '',
-  pdf: {
-    fontSize: 'md',
-    showLinkedDiagnoses: true,
-    showDiagnosisSummary: true,
-    showObservations: true,
-    showTreatmentPlan: true,
-    showRecommendations: true,
-    customHeaderNotes: '',
-    logoUrl: defaultLogo,
-    institutionName: 'Meraki Espacio Integral',
-  },
-  backup: {
-    enabled: true,
-    frequencyDays: 1,
-    maxRetentionFiles: 10,
-    lastBackupDate: null,
-  },
-};
+export type { AppConfig, PdfConfig, BackupConfig };
+export { DEFAULT_APP_CONFIG };
 
 interface ConfigState {
   config: AppConfig;

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../context/AuthContext';
-import { useBrand } from '../../../context/BrandContext';
+import { useBrand } from '../../../context/useBrand';
 import { loginValidator, ErrorLoginValue, InputLoginValue } from '../Validator';
 import PasswordViewer from '../../../shared/components/PasswordViewer';
 import defaultLogo from '../../../assets/medicalLogo.svg';

@@ -11,6 +11,7 @@ export function configIpc() {
   ipcMain.handle(
     'config:get',
     wrapIpcHandler(
+      //eslint-disable-next-line
       IpcMiddlewares.withAuth(async (_event: unknown, _data: GetConfigPayload) => {
         return configService.getConfig();
       }),

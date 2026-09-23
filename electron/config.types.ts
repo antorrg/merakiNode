@@ -31,9 +31,9 @@ export interface AppConfig {
 }
 
 export const DEFAULT_APP_CONFIG: AppConfig = {
-  appName: 'Meraki Espacio Integral',
-  shortName: 'Meraki',
-  legalName: 'Espacio Integral Meraki',
+  appName: 'Espacio Medico Integral',
+  shortName: 'Medical',
+  legalName: 'Espacio Medico Integral',
   logoUrl: '/medicalLogo.png',
   phone: '',
   email: '',
@@ -48,7 +48,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     showRecommendations: true,
     customHeaderNotes: '',
     logoUrl: '/medicalLogo.png',
-    institutionName: 'Meraki Espacio Integral',
+    institutionName: 'Espacio Medico Integral',
   },
   backup: {
     enabled: true,

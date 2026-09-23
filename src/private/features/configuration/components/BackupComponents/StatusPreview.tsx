@@ -1,16 +1,16 @@
-import { Col, Card, Badge } from 'react-bootstrap'
-import { type BrandInfo } from '../../../../../context/BrandContext';
-import { type AppConfig, BackupConfig  } from '../../useConfigStore';
+import { Col, Card, Badge } from 'react-bootstrap';
+import { type BrandInfo } from '../../../../../context/useBrand';
+import { DEFAULT_APP_CONFIG, type AppConfig, type BackupConfig } from '../../useConfigStore';
 
 type StatusProps = {
-    brand: BrandInfo,
-    config: AppConfig,
-    backup: BackupConfig 
-}
+  brand: BrandInfo;
+  config: AppConfig;
+  backup: BackupConfig;
+};
 
-const StatusPreview = ({brand, config, backup}:StatusProps) => {
-const institutionName = config.appName || brand.appName || 'Meraki Espacio Integral';
-  const shortName = config.shortName || brand.shortName || 'Meraki';
+const StatusPreview = ({ brand, config, backup }: StatusProps) => {
+  const institutionName = config.appName || brand.appName || DEFAULT_APP_CONFIG.appName || '';
+  const shortName = config.shortName || brand.shortName || DEFAULT_APP_CONFIG.shortName || '';
 
   const appSlugPreview = (shortName || institutionName)
     .normalize('NFD')

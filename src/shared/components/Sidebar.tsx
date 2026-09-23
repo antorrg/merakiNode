@@ -11,7 +11,7 @@ import ProfileModal from '../../private/features/user/forms/ProfileModal';
 import { NavDropdown } from 'react-bootstrap';
 import { ErrorBoundary } from './ErrorBoundary';
 //import { useConfigStore } from '../../private/features/configuration/useConfigStore';
-import { useBrand } from '../../context/BrandContext';
+import { useBrand } from '../../context/useBrand';
 import defaultLogo from '../../assets/medicalLogo.svg';
 
 function Sidebar() {

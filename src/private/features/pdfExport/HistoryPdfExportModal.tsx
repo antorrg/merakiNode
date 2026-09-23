@@ -3,7 +3,7 @@ import { Modal, Button, Form, Card, Row, Col, Badge, Accordion, Spinner } from '
 import { useHistoryPdfStore } from './useHistoryPdfStore';
 import { useConfigStore } from '../configuration/useConfigStore';
 import { useAuth } from '../../../context/AuthContext';
-import { useBrand } from '../../../context/BrandContext';
+import { useBrand } from '../../../context/useBrand';
 import { IPatient, VisitType } from '../../../types';
 import RichTextEditor from '../../../shared/components/RichTextEditor/RichTextEditor';
 import { adminApi } from '../../../shared/api/api';

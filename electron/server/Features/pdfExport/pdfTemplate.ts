@@ -6,6 +6,9 @@ import {
   DraftEntry,
   FontSizeMode,
 } from './PdfExport.js';
+import { DEFAULT_APP_CONFIG } from '../../../config.types.js';
+
+const AppConfig = DEFAULT_APP_CONFIG
 
 export interface FontSizes {
   bodyFontSize: string;
@@ -94,17 +97,17 @@ export function resolveLogoSrc(pdfConfig: PdfConfig, customLogoSrc?: string): st
     return pdfConfig.logoUrl;
   }
   const possiblePaths = [
-    path.join(process.cwd(), 'public', 'medicalLogo.png'),
-    path.join(process.cwd(), 'dist', 'medicalLogo.png'),
+    path.join(process.cwd(), 'public', AppConfig.logoUrl!),
+    path.join(process.cwd(), 'dist', AppConfig.logoUrl!),
     ...(process.resourcesPath
       ? [
-          path.join(process.resourcesPath, 'app.asar', 'dist', 'medicalLogo.png'),
-          path.join(process.resourcesPath, 'app.asar', 'public', 'medicalLogo.png'),
-          path.join(process.resourcesPath, 'medicalLogo.png'),
+          path.join(process.resourcesPath, 'app.asar', 'dist', AppConfig.logoUrl!),
+          path.join(process.resourcesPath, 'app.asar', 'public', AppConfig.logoUrl!),
+          path.join(process.resourcesPath, AppConfig.logoUrl!),
         ]
       : []),
-    path.resolve(__dirname, '..', '..', '..', 'dist', 'medicalLogo.png'),
-    path.resolve(__dirname, '..', '..', '..', 'public', 'medicalLogo.png'),
+    path.resolve(__dirname, '..', '..', '..', 'dist', AppConfig.logoUrl!),
+    path.resolve(__dirname, '..', '..', '..', 'public', AppConfig.logoUrl!),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {
@@ -150,7 +153,7 @@ export function renderDraftEntries(draftEntries: DraftEntry[], pdfConfig: PdfCon
 
             ${entry.evolution ? `
               <div class="section-block">
-                <div class="section-title">Evolución Médica:</div>
+                <div class="section-title">Evolución del Paciente:</div>
                 <div class="section-content">${entry.evolution}</div>
               </div>
             ` : ''}

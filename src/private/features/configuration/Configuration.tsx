@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Card, Form, Button, Spinner, Nav, Tab } from 'react-bootstrap';
 import { useConfigStore } from './useConfigStore';
-import { useBrand } from '../../../context/BrandContext';
+import { useBrand } from '../../../context/useBrand';
 import { toast } from '../../../shared/components/toast/toastManager';
 import  { tabsData } from './components/configComponents/tabsData';
 import ConfigurationLoader from './components/configComponents/ConfigurationLoader';

@@ -1,9 +1,9 @@
 import React from 'react';
 import { Card, Form, Row, Col, Button } from 'react-bootstrap';
 import { useConfigStore } from '../useConfigStore';
-import { useBrand } from '../../../../context/BrandContext';
+import { useBrand } from '../../../../context/useBrand';
 import { toast } from '../../../../shared/components/toast/toastManager';
-import defaultLogo from '../../../../assets/medicalLogo.svg';
+import { DEFAULT_APP_CONFIG } from '../../../../../electron/config.types';
 
 const IdentityTab: React.FC = () => {
   const { brand, updateBrand } = useBrand();
@@ -30,14 +30,15 @@ const IdentityTab: React.FC = () => {
   };
 
   const handleResetLogo = () => {
-    updateConfig({ logoUrl: defaultLogo });
-    updatePdfConfig({ logoUrl: defaultLogo });
-    updateBrand({ logoUrl: defaultLogo });
+    const defaultLogoUrl = DEFAULT_APP_CONFIG.logoUrl;
+    updateConfig({ logoUrl: defaultLogoUrl });
+    updatePdfConfig({ logoUrl: defaultLogoUrl });
+    updateBrand({ logoUrl: defaultLogoUrl });
   };
 
   const { pdf } = config;
-  const institutionName = config.appName || pdf.institutionName || brand.appName || 'Meraki Espacio Integral';
-  const shortName = config.shortName || brand.shortName || 'Meraki';
+  const institutionName = config.appName || pdf.institutionName || brand.appName || DEFAULT_APP_CONFIG.appName || '';
+  const shortName = config.shortName || brand.shortName || DEFAULT_APP_CONFIG.shortName || '';
   const legalName = config.legalName || brand.legalName || institutionName;
   const phone = config.phone || brand.phone || '';
   const email = config.email || brand.email || '';
@@ -69,7 +70,7 @@ const IdentityTab: React.FC = () => {
                   updatePdfConfig({ institutionName: val });
                   updateBrand({ appName: val });
                 }}
-                placeholder="Ej. Espacio Integral Meraki"
+                placeholder="Ej. Espacio Medico Integral"
                 className="border-primary-subtle"
               />
               <Form.Text className="text-muted">
@@ -91,7 +92,7 @@ const IdentityTab: React.FC = () => {
                       updateConfig({ shortName: val });
                       updateBrand({ shortName: val });
                     }}
-                    placeholder="Ej. Meraki"
+                    placeholder="Ej. Medical"
                     className="border-primary-subtle"
                   />
                 </Form.Group>
@@ -109,7 +110,7 @@ const IdentityTab: React.FC = () => {
                       updateConfig({ legalName: val });
                       updateBrand({ legalName: val });
                     }}
-                    placeholder="Ej. Meraki S.A."
+                    placeholder="Ej. Espacio Medico Integral S.A."
                     className="border-primary-subtle"
                   />
                 </Form.Group>
@@ -195,7 +196,7 @@ const IdentityTab: React.FC = () => {
               <div className="p-4 bg-white rounded border d-flex flex-column align-items-center justify-content-center gap-2 shadow-sm">
                 {pdf.logoUrl || brand.logoUrl ? (
                   <img
-                    src={pdf.logoUrl || brand.logoUrl || defaultLogo}
+                    src={pdf.logoUrl || brand.logoUrl || DEFAULT_APP_CONFIG.logoUrl!}
                     alt="Logo Institucional"
                     style={{ maxHeight: '75px', objectFit: 'contain' }}
                   />
@@ -206,7 +207,7 @@ const IdentityTab: React.FC = () => {
                 {phone && <div className="text-muted small">📞 {phone}</div>}
                 {email && <div className="text-muted small">✉️ {email}</div>}
               </div>
-              {(pdf.logoUrl !== defaultLogo || brand.logoUrl !== defaultLogo) && (
+              {(pdf.logoUrl !== DEFAULT_APP_CONFIG.logoUrl || brand.logoUrl !== DEFAULT_APP_CONFIG.logoUrl) && (
                 <Button
                   variant="outline-secondary"
                   size="sm"

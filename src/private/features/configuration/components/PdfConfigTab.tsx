@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card, Form, Row, Col } from 'react-bootstrap';
 import { useConfigStore } from '../useConfigStore';
-import { useBrand } from '../../../../context/BrandContext';
+import { useBrand } from '../../../../context/useBrand';
 
 
 const PdfConfigTab: React.FC = () => {
