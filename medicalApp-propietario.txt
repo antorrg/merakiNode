@@ -4,7 +4,7 @@ email: owner@meraki.com
 
 Nombre de usuario: adminOwner
 
-Contrasena: }r:xCxve/0%K
+Contrasena: 1ZV66}Q:!/bK
 
 Su rol es 'PROPIETARIO'
 

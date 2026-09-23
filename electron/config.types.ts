@@ -34,7 +34,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   appName: 'Espacio Medico Integral',
   shortName: 'Medical',
   legalName: 'Espacio Medico Integral',
-  logoUrl: '/medicalLogo.png',
+  logoUrl: null,
   phone: '',
   email: '',
   address: '',
@@ -47,7 +47,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     showTreatmentPlan: true,
     showRecommendations: true,
     customHeaderNotes: '',
-    logoUrl: '/medicalLogo.png',
+    logoUrl: null,
     institutionName: 'Espacio Medico Integral',
   },
   backup: {

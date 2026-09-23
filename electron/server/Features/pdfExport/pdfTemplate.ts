@@ -96,18 +96,21 @@ export function resolveLogoSrc(pdfConfig: PdfConfig, customLogoSrc?: string): st
   if (pdfConfig.logoUrl && pdfConfig.logoUrl.startsWith('data:image')) {
     return pdfConfig.logoUrl;
   }
+  const rawFileName = AppConfig.logoUrl || 'medicalLogo.png';
+  const cleanFileName = rawFileName.startsWith('/') ? rawFileName.slice(1) : rawFileName;
+
   const possiblePaths = [
-    path.join(process.cwd(), 'public', AppConfig.logoUrl!),
-    path.join(process.cwd(), 'dist', AppConfig.logoUrl!),
+    path.join(process.cwd(), 'public', cleanFileName),
+    path.join(process.cwd(), 'dist', cleanFileName),
     ...(process.resourcesPath
       ? [
-          path.join(process.resourcesPath, 'app.asar', 'dist', AppConfig.logoUrl!),
-          path.join(process.resourcesPath, 'app.asar', 'public', AppConfig.logoUrl!),
-          path.join(process.resourcesPath, AppConfig.logoUrl!),
+          path.join(process.resourcesPath, 'app.asar', 'dist', cleanFileName),
+          path.join(process.resourcesPath, 'app.asar', 'public', cleanFileName),
+          path.join(process.resourcesPath, cleanFileName),
         ]
       : []),
-    path.resolve(__dirname, '..', '..', '..', 'dist', AppConfig.logoUrl!),
-    path.resolve(__dirname, '..', '..', '..', 'public', AppConfig.logoUrl!),
+    path.resolve(__dirname, '..', '..', '..', 'dist', cleanFileName),
+    path.resolve(__dirname, '..', '..', '..', 'public', cleanFileName),
   ];
   for (const p of possiblePaths) {
     if (fs.existsSync(p)) {

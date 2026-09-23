@@ -12,14 +12,13 @@ import { NavDropdown } from 'react-bootstrap';
 import { ErrorBoundary } from './ErrorBoundary';
 //import { useConfigStore } from '../../private/features/configuration/useConfigStore';
 import { useBrand } from '../../context/useBrand';
-import defaultLogo from '../../assets/medicalLogo.svg';
 
 function Sidebar() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const { brand } = useBrand();
   const appTitle = brand.shortName || brand.appName || 'Medical';
-  const logoUrl = brand.logoUrl || defaultLogo;
+  const logoUrl = brand.logoUrl;
   const [show, setShow] = useState<boolean>(false);
   const [alert, setAlert] = useState<boolean>(false);
   const [showProfileModal, setShowProfileModal] = useState<boolean>(false);
@@ -63,10 +62,6 @@ function Sidebar() {
               <img
                 src={logoUrl}
                 alt="Logo"
-                onError={(event) => {
-                  event.currentTarget.onerror = null;
-                  event.currentTarget.src = defaultLogo;
-                }}
                 style={{ maxHeight: '50px', maxWidth: '50px', objectFit: 'contain' }}
               />
             )}

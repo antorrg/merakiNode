@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { IHistoryEntry } from '../../../types';
-import defaultLogo from '../../../assets/medicalLogo.svg';
 
 export interface DraftHistoryEntry {
   entryId: string;
@@ -69,7 +68,7 @@ export const useHistoryPdfStore = create<HistoryPdfState>((set, get) => ({
     showRecommendations: true,
     fontSize: 'md',
     customHeaderNotes: '',
-    logoUrl: defaultLogo,
+    logoUrl: null,
     institutionName: 'Espacio Medico Integral',
   },
 

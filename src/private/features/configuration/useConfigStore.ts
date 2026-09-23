@@ -39,13 +39,22 @@ export const useConfigStore = create<ConfigState>((set, get) => ({
         request: { channel: 'config:get', payload: {} },
       });
       if (res) {
+        const sanitizeLogo = (url?: string | null) => {
+          if (!url || url === '/medicalLogo.png' || url === 'medicalLogo.png') return null;
+          return url;
+        };
+        const logoUrl = sanitizeLogo(res.logoUrl);
+        const pdfLogoUrl = sanitizeLogo(res.pdf?.logoUrl ?? res.logoUrl);
+
         set({
           config: {
             ...DEFAULT_APP_CONFIG,
             ...res,
+            logoUrl,
             pdf: {
               ...DEFAULT_APP_CONFIG.pdf,
               ...(res.pdf || {}),
+              logoUrl: pdfLogoUrl,
             },
             backup: {
               ...DEFAULT_APP_CONFIG.backup,

@@ -8,7 +8,6 @@ import { IPatient, VisitType } from '../../../types';
 import RichTextEditor from '../../../shared/components/RichTextEditor/RichTextEditor';
 import { adminApi } from '../../../shared/api/api';
 import { toast } from '../../../shared/components/toast/toastManager';
-import defaultLogo from '../../../assets/medicalLogo.svg';
 import './HistoryPdfExportModal.scss';
 
 interface HistoryPdfExportModalProps {
@@ -173,10 +172,10 @@ export const HistoryPdfExportModal: React.FC<HistoryPdfExportModalProps> = ({ pa
             <Row className="align-items-start">
               {/* Sección Logo / Membrete */}
               <Col md={3} className="text-center border-end pe-3 mb-3 mb-md-0 d-flex flex-column align-items-center justify-content-center">
-                {pdfConfig.logoUrl ? (
+                {(pdfConfig.logoUrl || brand.logoUrl) ? (
                   <div className="text-center p-2">
                     <img
-                      src={pdfConfig.logoUrl || brand.logoUrl || defaultLogo}
+                      src={pdfConfig.logoUrl || brand.logoUrl}
                       alt={`Logo ${brand.shortName || brand.appName}`}
                       className="img-fluid mb-1"
                       style={{ maxHeight: '75px', objectFit: 'contain' }}

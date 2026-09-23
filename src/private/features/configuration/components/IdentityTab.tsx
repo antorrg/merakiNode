@@ -29,11 +29,11 @@ const IdentityTab: React.FC = () => {
     }
   };
 
-  const handleResetLogo = () => {
-    const defaultLogoUrl = DEFAULT_APP_CONFIG.logoUrl;
-    updateConfig({ logoUrl: defaultLogoUrl });
-    updatePdfConfig({ logoUrl: defaultLogoUrl });
-    updateBrand({ logoUrl: defaultLogoUrl });
+  const handleResetLogo = async () => {
+    updateConfig({ logoUrl: null });
+    updatePdfConfig({ logoUrl: null });
+    await updateBrand({ logoUrl: null });
+    await useConfigStore.getState().saveConfig();
   };
 
   const { pdf } = config;
@@ -43,6 +43,17 @@ const IdentityTab: React.FC = () => {
   const phone = config.phone || brand.phone || '';
   const email = config.email || brand.email || '';
   const address = config.address || brand.address || '';
+
+  const displayLogo = (pdf.logoUrl && pdf.logoUrl.startsWith('data:image'))
+    ? pdf.logoUrl
+    : (config.logoUrl && config.logoUrl.startsWith('data:image'))
+      ? config.logoUrl
+      : brand.logoUrl;
+
+  const hasCustomLogo = Boolean(
+    (config.logoUrl && config.logoUrl !== null && config.logoUrl !== '') ||
+    (pdf.logoUrl && pdf.logoUrl !== null && pdf.logoUrl !== '')
+  );
 
   return (
     <Card className="border-0 shadow-sm rounded-3">
@@ -194,9 +205,9 @@ const IdentityTab: React.FC = () => {
             <Card className="bg-light border-dashed p-4 text-center">
               <small className="text-muted fw-bold d-block mb-3">👁️ Vista Previa del Membrete e Identidad:</small>
               <div className="p-4 bg-white rounded border d-flex flex-column align-items-center justify-content-center gap-2 shadow-sm">
-                {pdf.logoUrl || brand.logoUrl ? (
+                {displayLogo ? (
                   <img
-                    src={pdf.logoUrl || brand.logoUrl || DEFAULT_APP_CONFIG.logoUrl!}
+                    src={displayLogo}
                     alt="Logo Institucional"
                     style={{ maxHeight: '75px', objectFit: 'contain' }}
                   />
@@ -207,7 +218,7 @@ const IdentityTab: React.FC = () => {
                 {phone && <div className="text-muted small">📞 {phone}</div>}
                 {email && <div className="text-muted small">✉️ {email}</div>}
               </div>
-              {(pdf.logoUrl !== DEFAULT_APP_CONFIG.logoUrl || brand.logoUrl !== DEFAULT_APP_CONFIG.logoUrl) && (
+              {hasCustomLogo && (
                 <Button
                   variant="outline-secondary"
                   size="sm"

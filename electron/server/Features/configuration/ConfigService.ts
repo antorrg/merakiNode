@@ -24,12 +24,23 @@ export class ConfigService {
       }
       const rawData = fs.readFileSync(this.configPath, 'utf-8');
       const parsed = JSON.parse(rawData);
+
+      const sanitizeLogo = (url?: string | null) => {
+        if (!url || url === '/medicalLogo.png' || url === 'medicalLogo.png') return null;
+        return url;
+      };
+
+      const logoUrl = sanitizeLogo(parsed.logoUrl);
+      const pdfLogoUrl = sanitizeLogo(parsed.pdf?.logoUrl ?? parsed.logoUrl);
+
       return {
         ...DEFAULT_APP_CONFIG,
         ...parsed,
+        logoUrl,
         pdf: {
           ...DEFAULT_APP_CONFIG.pdf,
           ...(parsed.pdf || {}),
+          logoUrl: pdfLogoUrl,
         },
         backup: {
           ...DEFAULT_APP_CONFIG.backup,

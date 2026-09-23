@@ -1,5 +1,5 @@
 import React, { useState, useEffect, type ReactNode } from 'react';
-import { BrandContext, DEFAULT_BRAND, type BrandInfo } from './useBrand';
+import { BrandContext, DEFAULT_BRAND, type BrandInfo, type UpdateBrandInput } from './useBrand';
 
 export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [brand, setBrand] = useState<BrandInfo>(DEFAULT_BRAND);
@@ -9,11 +9,12 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     try {
       if (typeof window !== 'undefined' && window.api?.invoke) {
         const res = await window.api.invoke<{ data?: BrandInfo } | BrandInfo>('brand:get');
-        const rawData = res && typeof res === 'object' && 'data' in res ? res.data : res;
+        const rawData = (res && typeof res === 'object' && 'data' in res ? res.data : res) as Partial<BrandInfo> | undefined;
         if (rawData) {
           const loadedBrand: BrandInfo = {
             ...DEFAULT_BRAND,
             ...rawData,
+            logoUrl: (rawData.logoUrl && rawData.logoUrl !== '/medicalLogo.png') ? rawData.logoUrl : DEFAULT_BRAND.logoUrl,
           };
           setBrand(loadedBrand);
           if (loadedBrand.appName) {
@@ -32,13 +33,24 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
     fetchBrand();
   }, []);
 
-  const updateBrand = async (newBrandData: Partial<BrandInfo>): Promise<boolean> => {
+  const updateBrand = async (newBrandData: UpdateBrandInput): Promise<boolean> => {
     try {
-      const updatedBrand = { ...brand, ...newBrandData };
+      const isResetLogo = newBrandData.logoUrl === null || newBrandData.logoUrl === '/medicalLogo.png';
+      const resolvedLogo = isResetLogo
+        ? DEFAULT_BRAND.logoUrl
+        : (newBrandData.logoUrl !== undefined ? newBrandData.logoUrl : brand.logoUrl);
+
+      const updatedBrand: BrandInfo = {
+        ...brand,
+        ...newBrandData,
+        logoUrl: resolvedLogo || DEFAULT_BRAND.logoUrl,
+      };
       setBrand(updatedBrand);
       if (updatedBrand.appName) {
         document.title = updatedBrand.appName;
       }
+
+      const logoToSave = isResetLogo ? null : (updatedBrand.logoUrl === DEFAULT_BRAND.logoUrl ? null : updatedBrand.logoUrl);
 
       if (typeof window !== 'undefined' && window.api?.invoke) {
         await window.api.invoke('config:save', {
@@ -46,14 +58,14 @@ export const BrandProvider: React.FC<{ children: ReactNode }> = ({ children }) =
             appName: updatedBrand.appName,
             shortName: updatedBrand.shortName,
             legalName: updatedBrand.legalName,
-            logoUrl: updatedBrand.logoUrl,
+            logoUrl: logoToSave,
             phone: updatedBrand.phone,
             email: updatedBrand.email,
             address: updatedBrand.address,
             customHeaderNotes: updatedBrand.customHeaderNotes,
             pdf: {
               institutionName: updatedBrand.appName,
-              logoUrl: updatedBrand.logoUrl,
+              logoUrl: logoToSave,
               customHeaderNotes: updatedBrand.customHeaderNotes,
             },
           },
