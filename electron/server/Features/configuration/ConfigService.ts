@@ -48,7 +48,20 @@ export class ConfigService {
       const updatedAppName = newConfig.appName !== undefined ? newConfig.appName : current.appName;
       const updatedShortName = newConfig.shortName !== undefined ? newConfig.shortName : current.shortName;
       const updatedLegalName = newConfig.legalName !== undefined ? newConfig.legalName : current.legalName;
-      const updatedLogoUrl = newConfig.logoUrl !== undefined ? newConfig.logoUrl : current.logoUrl;
+      let updatedLogoUrl = newConfig.logoUrl !== undefined ? newConfig.logoUrl : current.logoUrl;
+      let pdfLogoUrl = newConfig.pdf?.logoUrl !== undefined ? newConfig.pdf.logoUrl : (updatedLogoUrl || current.pdf.logoUrl);
+
+      const candidateBase64 = (newConfig.pdf?.logoUrl && newConfig.pdf.logoUrl.startsWith('data:image'))
+        ? newConfig.pdf.logoUrl
+        : (newConfig.logoUrl && newConfig.logoUrl.startsWith('data:image'))
+          ? newConfig.logoUrl
+          : null;
+
+      if (candidateBase64) {
+        updatedLogoUrl = candidateBase64;
+        pdfLogoUrl = candidateBase64;
+      }
+
       const updatedPhone = newConfig.phone !== undefined ? newConfig.phone : current.phone;
       const updatedEmail = newConfig.email !== undefined ? newConfig.email : current.email;
       const updatedAddress = newConfig.address !== undefined ? newConfig.address : current.address;
@@ -69,7 +82,7 @@ export class ConfigService {
           ...current.pdf,
           ...(newConfig.pdf || {}),
           institutionName: newConfig.pdf?.institutionName || updatedAppName || current.pdf.institutionName,
-          logoUrl: newConfig.pdf?.logoUrl !== undefined ? newConfig.pdf.logoUrl : updatedLogoUrl,
+          logoUrl: pdfLogoUrl,
           customHeaderNotes: newConfig.pdf?.customHeaderNotes !== undefined ? newConfig.pdf.customHeaderNotes : updatedCustomHeaderNotes,
         },
         backup: {

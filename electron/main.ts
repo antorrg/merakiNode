@@ -128,17 +128,31 @@ app.on('activate', () => {
   }
 })
 
-//app.whenReady().then(createWindow)
-async function bootstrap (){
+async function bootstrap() {
   try {
-    await startUp(true)
-    await app.whenReady()
-    registerAllIpc()
-    createWindow()
-    
+    await startUp(true);
+    await app.whenReady();
+    registerAllIpc();
+    createWindow();
   } catch (error) {
-    console.error(error)
-    app.quit()
+    console.error(error);
+    app.quit();
   }
 }
-bootstrap()
+
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    // Si se intenta ejecutar una segunda instancia, enfocar la ventana de la primera
+    if (win) {
+      if (win.isMinimized()) win.restore();
+      if (!win.isVisible()) win.show();
+      win.focus();
+    }
+  });
+
+  bootstrap();
+}

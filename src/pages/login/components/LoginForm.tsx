@@ -4,6 +4,7 @@ import { useAuth } from '../../../context/AuthContext';
 import { useBrand } from '../../../context/BrandContext';
 import { loginValidator, ErrorLoginValue, InputLoginValue } from '../Validator';
 import PasswordViewer from '../../../shared/components/PasswordViewer';
+import defaultLogo from '../../../assets/medicalLogo.svg';
 
 interface LoginFormProps {
     closeLogin: () => void;
@@ -65,7 +66,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ closeLogin }) => {
         >   
             <div className="d-flex justify-content-between align-items-center mb-3"> 
                 <div className="d-flex align-items-center gap-2">
-                    <img className="rounded" src={brand.logoUrl || "/medicalLogo.png"} alt={brand.shortName} width="36" height="36" style={{ objectFit: 'contain' }}/>
+                    <img className="rounded" src={brand.logoUrl || defaultLogo} alt={brand.shortName} width="36" height="36" style={{ objectFit: 'contain' }}/>
                     <span className="fw-bold text-primary fs-6 mb-0">{brand.appName}</span>
                 </div>
                 <button type="button" onClick={closeLogin} className="btn-close" aria-label="Close"></button>

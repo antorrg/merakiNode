@@ -3,6 +3,7 @@ import { Card, Form, Row, Col, Button } from 'react-bootstrap';
 import { useConfigStore } from '../useConfigStore';
 import { useBrand } from '../../../../context/BrandContext';
 import { toast } from '../../../../shared/components/toast/toastManager';
+import defaultLogo from '../../../../assets/medicalLogo.svg';
 
 const IdentityTab: React.FC = () => {
   const { brand, updateBrand } = useBrand();
@@ -19,6 +20,7 @@ const IdentityTab: React.FC = () => {
       reader.onload = (event) => {
         const base64 = event.target?.result as string;
         if (base64) {
+          updateConfig({ logoUrl: base64 });
           updatePdfConfig({ logoUrl: base64 });
           updateBrand({ logoUrl: base64 });
         }
@@ -28,8 +30,9 @@ const IdentityTab: React.FC = () => {
   };
 
   const handleResetLogo = () => {
-    updatePdfConfig({ logoUrl: '/medicalLogo.png' });
-    updateBrand({ logoUrl: '/medicalLogo.png' });
+    updateConfig({ logoUrl: defaultLogo });
+    updatePdfConfig({ logoUrl: defaultLogo });
+    updateBrand({ logoUrl: defaultLogo });
   };
 
   const { pdf } = config;
@@ -192,7 +195,7 @@ const IdentityTab: React.FC = () => {
               <div className="p-4 bg-white rounded border d-flex flex-column align-items-center justify-content-center gap-2 shadow-sm">
                 {pdf.logoUrl || brand.logoUrl ? (
                   <img
-                    src={pdf.logoUrl || brand.logoUrl || '/medicalLogo.png'}
+                    src={pdf.logoUrl || brand.logoUrl || defaultLogo}
                     alt="Logo Institucional"
                     style={{ maxHeight: '75px', objectFit: 'contain' }}
                   />
@@ -203,7 +206,7 @@ const IdentityTab: React.FC = () => {
                 {phone && <div className="text-muted small">📞 {phone}</div>}
                 {email && <div className="text-muted small">✉️ {email}</div>}
               </div>
-              {(pdf.logoUrl !== '/medicalLogo.png' || brand.logoUrl !== '/medicalLogo.png') && (
+              {(pdf.logoUrl !== defaultLogo || brand.logoUrl !== defaultLogo) && (
                 <Button
                   variant="outline-secondary"
                   size="sm"

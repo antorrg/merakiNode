@@ -2,7 +2,7 @@
   "name": "merakiapp",
   "private": true,
   "version": "0.0.0",
-  "description": "Sistema de gestión para Espacio Integral Meraki",
+  "description": "Sistema de gestión para Espacio Medico Integral",
   "author": "antorrg-software",
   "type": "module",
   "scripts": {

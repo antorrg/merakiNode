@@ -45,7 +45,7 @@ describe('InitialUser', () => {
   describe('writePassword', () => {
     it('should write the password to a text file in the documents folder', async () => {
       const testContent = 'secret_password_123';
-      const testFileName = 'meraki-propietario';
+      const testFileName = 'medicalApp-propietario';
 
       await InitialUser.writePassword(testContent, testFileName);
 

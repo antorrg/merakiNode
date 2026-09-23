@@ -51,7 +51,7 @@ export class UserService {
         role: 'PROPIETARIO'
       });
       await this.userRepository.create(newInitialUser.toPersistence());
-      await InitialUser.writePassword(userMsg, 'meraki-propietario')
+      await InitialUser.writePassword(userMsg, 'medicalApp-propietario')
       return newInitialUser.toDTO();
   }
 

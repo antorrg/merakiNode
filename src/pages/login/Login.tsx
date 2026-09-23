@@ -43,7 +43,7 @@ const Login = () => {
                 isOpen={isSuccessOpen}
                 onAccept={() => setIsSuccessOpen(false)}
                 title="Propietario Creado"
-                message="El usuario propietario ha sido creado. Revisa el archivo 'meraki-propietario.txt' en el directorio de la aplicación para ver tu contraseña generada."
+                message="El usuario propietario ha sido creado. Revisa el archivo 'medicalApp-propietario.txt' en el directorio de la aplicación para ver tu contraseña generada."
                 buttonText="Entendido"
             />
         </div>

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { adminApi } from '../../../shared/api/api';
+import defaultLogo from '../../../assets/medicalLogo.svg';
 
 export interface PdfConfig {
   fontSize: 'sm' | 'md' | 'lg';
@@ -37,7 +38,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
   appName: 'Meraki Espacio Integral',
   shortName: 'Meraki',
   legalName: 'Espacio Integral Meraki',
-  logoUrl: '/medicalLogo.png',
+  logoUrl: defaultLogo,
   phone: '',
   email: '',
   address: '',
@@ -50,7 +51,7 @@ export const DEFAULT_APP_CONFIG: AppConfig = {
     showTreatmentPlan: true,
     showRecommendations: true,
     customHeaderNotes: '',
-    logoUrl: '/medicalLogo.png',
+    logoUrl: defaultLogo,
     institutionName: 'Meraki Espacio Integral',
   },
   backup: {

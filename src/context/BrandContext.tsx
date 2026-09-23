@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import defaultLogo from '../assets/medicalLogo.svg';
 
 export interface BrandInfo {
   appName: string;
@@ -12,10 +13,10 @@ export interface BrandInfo {
 }
 
 export const DEFAULT_BRAND: BrandInfo = {
-  appName: 'Meraki Espacio Integral',
-  shortName: 'Meraki',
-  legalName: 'Espacio Integral Meraki',
-  logoUrl: '/medicalLogo.png',
+  appName: 'Espacio Medico Integral',
+  shortName: 'Medical',
+  legalName: 'Espacio Medico Integral',
+  logoUrl: defaultLogo,
   phone: '',
   email: '',
   address: '',

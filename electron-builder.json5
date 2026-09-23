@@ -37,7 +37,7 @@
     "deleteAppDataOnUninstall": false,
     createDesktopShortcut: true,
     createStartMenuShortcut: true,
-    shortcutName: "MerakiApp"
+    shortcutName: "MedicalApp"
   },
   "linux": {
     "target": [

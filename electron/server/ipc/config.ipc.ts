@@ -22,11 +22,21 @@ export function configIpc() {
     'brand:get',
     wrapIpcHandler(async () => {
       const cfg = configService.getConfig();
+      const logo = (cfg.logoUrl && cfg.logoUrl.startsWith('data:image'))
+        ? cfg.logoUrl
+        : (cfg.pdf?.logoUrl && cfg.pdf.logoUrl.startsWith('data:image'))
+          ? cfg.pdf.logoUrl
+          : (cfg.logoUrl && cfg.logoUrl !== '/medicalLogo.png'
+            ? cfg.logoUrl
+            : (cfg.pdf?.logoUrl && cfg.pdf.logoUrl !== '/medicalLogo.png'
+              ? cfg.pdf.logoUrl
+              : null));
+
       return {
-        appName: cfg.appName || cfg.pdf?.institutionName || 'Meraki Espacio Integral',
-        shortName: cfg.shortName || 'Meraki',
-        legalName: cfg.legalName || cfg.appName || 'Meraki Espacio Integral',
-        logoUrl: cfg.logoUrl || cfg.pdf?.logoUrl || '/medicalLogo.png',
+        appName: cfg.appName || cfg.pdf?.institutionName || 'Espacio Medico Integral',
+        shortName: cfg.shortName || 'Medical',
+        legalName: cfg.legalName || cfg.appName || 'Espacio Medico Integral ',
+        logoUrl: logo,
         phone: cfg.phone || '',
         email: cfg.email || '',
         address: cfg.address || '',
